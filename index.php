@@ -1,6 +1,7 @@
 <?php
 require_once 'lib/Twig/Autoloader.php';
 Twig_Autoloader::register();
+
 // define a root for the template directories
 $view_root_dir = $_SERVER['DOCUMENT_ROOT'] . '/studyplanner/views/';
 // add all template directories
