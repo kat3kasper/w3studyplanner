@@ -1,10 +1,15 @@
 <?php
 require_once 'lib/Twig/Autoloader.php';
 Twig_Autoloader::register();
-$views_dir = $_SERVER['DOCUMENT_ROOT'] . '/studyplanner/views/';
+// define a root for the template directories
+$view_root_dir = $_SERVER['DOCUMENT_ROOT'] . '/studyplanner/views/';
+// add all template directories
+$views_dirs = array($view_root_dir, 
+                    $view_root_dir . '/base',
+                    );
 
-$loader = new Twig_Loader_Filesystem($views_dir);
-$twig = new Twig_Environment($loader, array('cache' => $views_dir . '/cache','auto_reload' => true));
+$loader = new Twig_Loader_Filesystem($views_dirs);
+$twig = new Twig_Environment($loader, array('cache' => $view_root_dir . '/cache','auto_reload' => true));
 
 $username = "John Doe";
 $usertype = "student";
@@ -19,11 +24,9 @@ $tvars = array(
         "name" => "Home"
         ),
       array(
-        "location" => "#",
         "name" => "About"
         ),
       array(
-        "location" => "#",
         "name" => "Contact"
         )
       ),

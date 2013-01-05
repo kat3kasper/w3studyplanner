@@ -1,16 +1,14 @@
 {% extends 'base/base.html' %}
 
 {% block content %}
-<div class="container">
-  <p>Welcome, {{ username }}<br />
-    You are currently logged in as {{ usertype }}</p>
-  <p>Use the site as: </p>
+<p>Welcome, {{ username }}<br />
+  You are currently logged in as {{ usertype }}</p>
+<p>Use the site as: </p>
 
-  <p>
-  {% for lelem in listitems %}
-    <a href="{{lelem.location}}"><button class="btn{% if lelem.primary is defined %} btn-primary{% endif %}" type="button">{{lelem.name}}</button></a>
-  {% endfor %}
-  </p>
-  <p>You can also switch between the two from the navigation bar at the top.</p>
-</div>
+<p>
+{% for lelem in listitems %}
+  <a href="{{lelem.location}}"><button class="btn{% if lelem.primary is defined %} btn-primary{% endif %}" type="button">{{lelem.name}}</button></a>
+{% endfor %}
+</p>
+<p>You can also switch between the two from the navigation bar at the top.</p>
 {% endblock %}
