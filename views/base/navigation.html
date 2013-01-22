@@ -10,7 +10,7 @@
       <div class="nav-collapse collapse">
         <ul class="nav">
           {% for nelem in navitems %}
-          <li {% if nelem.active is defined %} class="active" {% endif %}>
+          <li {% if titlesub is defined %} {% if titlesub == nelem.name %} class="active" {% endif %} {% endif %}>
             <a href="{{nelem.location|default('#')}}">{{nelem.name}}</a>
           </li>
           {% endfor %}
