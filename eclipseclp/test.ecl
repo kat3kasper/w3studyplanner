@@ -1,4 +1,9 @@
+% base constraints -- clients should send additional constraints such as degree requirements with which to validate against. 
+
+% TODO: add a way to override base constraints when necessary
+
 :- lib(ic).
+% define course data structure
 :- local struct(course(code, name, credits, prereqs, coreqs)).
 
 getPrereqs(Course, Var) :-
@@ -8,6 +13,7 @@ hasPrereqs(Course) :-
   getPrereqs(Course, Prereqs),
   not(length(Prereqs,0)).
 
+% not sure if member or memberchk should be used
 courseTaken(Transcript, Course) :-
   once memberchk(Course, Transcript).
 
@@ -21,7 +27,8 @@ canTake(Transcript, Course) :-
     (length(PrereqsTaken,P) ->
       !
       ;
-      writeln('Cannot take course, missing requirements: '),
+      % TODO: write predicate that will list missing requirements for error reporting
+      writeln('Cannot take course, missing requirements'),
       fail
     )
     ;
