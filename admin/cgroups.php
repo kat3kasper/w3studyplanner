@@ -17,6 +17,7 @@
 				<li><a href="dprograms.php">Degree Programs</a></li>
 				<li><a href="courses.php">Courses</a></li>
 				<li class="active"><a href="cgroups.php">Course Groups</a></li>
+				<li><a href="requirements.php">Requirements</a></li>
 			</ul>
 			
 			<ul class="nav nav-pills">

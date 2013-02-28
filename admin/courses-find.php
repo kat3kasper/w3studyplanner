@@ -1,9 +1,9 @@
-<?php require("../includes/config.php"); ?>
 <!DOCTYPE html>
 <html>
 	<head>
 		<title>Stevens' Study Planner &raquo; Find Courses</title>
 		<?php require("../includes/styles.php"); ?>
+		<?php require("../includes/config.php"); ?>
 		
 		<script type="text/javascript">
 			//Sends value to main window
@@ -101,7 +101,7 @@
 				$oc = $row["on_campus_semesters"]; //$row[5];
 				$wc = $row["web_campus_semesters"]; //$row[6];
 				
-				echo "</p><b><a href=\"Javascript:SendValueToParent('" . $pre . $num . "');\">Edit this course</a></b><br/>\n";
+				echo "</p><b><a href=\"Javascript:SendValueToParent('" . $pre . $num . "');\">Select this course</a></b><br/>\n";
 				echo "Course prefix: " . $pre . "<br/>\n";
 				echo "Course number: " . $num . "<br/>\n";
 				echo "Credits: " . $cred . "<br/>\n";

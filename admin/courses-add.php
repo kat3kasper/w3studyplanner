@@ -1,9 +1,10 @@
-<?php require("../includes/config.php"); ?>
 <!DOCTYPE html>
 <html>
 	<head>
 		<title>Stevens' Study Planner &raquo; Add Course</title>
 		<?php require("../includes/styles.php"); ?>
+		<?php require("../includes/config.php"); ?>
+		<?php require("../includes/functions.php"); ?>
 	</head>
 	<body>
 		<?php require("../includes/navigation.php"); ?>
@@ -18,6 +19,7 @@
 				<li><a href="dprograms.php">Degree Programs</a></li>
 				<li class="active"><a href="courses.php">Courses</a></li>
 				<li><a href="cgroups.php">Course Groups</a></li>
+				<li><a href="requirements.php">Requirements</a></li>
 			</ul>
 			
 			<ul class="nav nav-pills">
@@ -29,7 +31,7 @@
 			<hr/>
 			
 <?php
-	//If form is submitted
+	//If add form is submitted
 	if(isset($_POST["submit"]) && (!empty($_POST["courseprefix"]) && !empty($_POST["coursenumber"])))
 	{
 		//Setup database
@@ -39,18 +41,24 @@
 		$pass = DB_PASS;
 		
 		$dbh = new PDO("mysql:host=" . $host . ";dbname=" . $dbname, $user, $pass);
+		$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		
-		//$db = new database();
-		//$db->setup("w3_studyplanner", "QcRo2mEC", "db0.stevens.edu", "w3_studyplanner");
+		//TODO: count required input
 		
 		//Sanitize & extract values
-		$pre = strtolower(addslashes(strip_tags($_POST["courseprefix"])));
-		$num = strtolower(addslashes(strip_tags($_POST["coursenumber"])));
-		$cred = strtolower(addslashes(strip_tags($_POST["credits"])));
-		$name = addslashes(strip_tags($_POST["coursename"]));
-		$dept = strtolower(addslashes(strip_tags($_POST["department"])));
-		$ocarr = $_POST["oncampus"];
-		$wcarr = $_POST["webcampus"];
+		$pre = strtoupper(s_string($_POST["courseprefix"]));
+		$num = s_int($_POST["coursenumber"]);
+		$cred = s_int($_POST["credits"]);
+		$name = s_string($_POST["coursename"]);
+		$dept = strtolower(s_string($_POST["department"]));
+		$prereq = strtoupper(s_string($_POST["prerequisites"]));
+		$coreq = strtoupper(s_string($_POST["corequisites"]));
+		
+		if(isset($_POST["oncampus"]))
+			$ocarr = $_POST["oncampus"];
+		if(isset($_POST["webcampus"]))
+			$wcarr = $_POST["webcampus"];
 		
 		$oc = "";
 		$wc = "";
@@ -61,7 +69,7 @@
 				if(!empty($oc))
 					$oc .= ",";
 				
-				$oc .= strtolower(addslashes(strip_tags($sem)));
+				$oc .= strtolower(s_string($sem));
 			}
 		
 		if(!empty($wcarr))
@@ -70,28 +78,121 @@
 				if(!empty($wc))
 					$wc .= ",";
 				
-				$wc .= strtolower(addslashes(strip_tags($sem)));
+				$wc .= strtolower(s_string($sem));
 			}
 		
-		//Insert to database
-		$sql = "INSERT INTO course(prefix, number, no_of_credits, course_name, department, on_campus_semesters, web_campus_semesters) VALUES (:pre, :num, :cred, :name, :dept, :oc, :wc)";
+		//Check for duplicates
+		$sql = "SELECT * FROM course WHERE CONCAT(prefix, number) = :cid";
 		
 		$sth = $dbh->prepare($sql);
 		
-		$sth->bindParam(":pre", $pre);
-		$sth->bindParam(":num", $num);
-		$sth->bindParam(":cred", $cred);
-		$sth->bindParam(":name", $name);
-		$sth->bindParam(":dept", $dept);	
-		$sth->bindParam(":oc", $oc);
-		$sth->bindParam(":wc", $wc);
-			
+		$cid = $pre . $num;
+		$sth->bindParam(":cid", $cid);
 		$sth->execute();
 		
-		//$sql = "INSERT INTO course(prefix, number, no_of_credits, course_name, department, on_campus_semesters, web_campus_semesters) VALUES ('" . $pre . "', " . $num . ", " . $cred . ", '" . $name . "', '" . $dept . "', '" . $oc . "', '" . $wc . "')";
-		//$db->send_sql($sql);
+		$rownum = $sth->rowCount();
+		
+		if($rownum)
+			echo "Course already exists in database.<br/>\n";
+		else
+		{
+			//Insert to course
+			$sql = "INSERT INTO course(prefix, number, no_of_credits, course_name, department, on_campus_semesters, web_campus_semesters) VALUES (:pre, :num, :cred, :name, :dept, :oc, :wc)";
+			
+			$sth = $dbh->prepare($sql);
+			
+			$sth->bindParam(":pre", $pre);
+			$sth->bindParam(":num", $num);
+			$sth->bindParam(":cred", $cred);
+			$sth->bindParam(":name", $name);
+			$sth->bindParam(":dept", $dept);	
+			$sth->bindParam(":oc", $oc);
+			$sth->bindParam(":wc", $wc);
 				
-		echo "Course successfully added.<br/>\n";
+			$sth->execute();
+			
+			//Insert into course prerequisites
+			if(!empty($prereq))
+			{
+				$sql = "INSERT INTO course_prerequisites(parent_course_id, and_course_id, or_course_id) VALUES (:cid, :acid, :ocid)";
+				
+				$sth = $dbh->prepare($sql);
+				
+				$and_list = "";
+				$or_list = "";
+				
+				//Parse AND
+				$prereq_arr = explode("\n", $prereq);
+				foreach($prereq_arr as $value)
+				{
+					//Parse OR
+					if(strpos($value, " OR ") > 0)
+					{
+						//Delimiter for each group of OR
+						if($or_list !== "")
+							$or_list .= ",";
+						
+						$or_list .= implode("|", explode(" OR ", $value));
+					}
+					else
+					{
+						if($and_list !== "")
+							$and_list .= ",";
+						
+						$and_list .= $value;
+					}
+				}
+				
+				$cid = $pre . $num;
+				$sth->bindParam(":cid", $cid);
+				$sth->bindParam(":acid", $and_list);
+				$sth->bindParam(":ocid", $or_list);
+			
+				$sth->execute();
+			}
+			
+			//Insert into course corequisites
+			if(!empty($coreq))
+			{
+				$sql = "INSERT INTO course_corequisites(parent_course_id, and_course_id, or_course_id) VALUES (:cid, :acid, :ocid)";
+				
+				$sth = $dbh->prepare($sql);
+				
+				$and_list = "";
+				$or_list = "";
+				
+				//Parse AND
+				$coreq_arr = explode("\n", $coreq);
+				foreach($coreq_arr as $value)
+				{
+					//Parse OR
+					if(strpos($value, " OR ") > 0)
+					{
+						//Delimiter for each group of OR
+						if($or_list !== "")
+							$or_list .= ",";
+						
+						$or_list .= implode("|", explode(" OR ", $value));
+					}
+					else
+					{
+						if($and_list !== "")
+							$and_list .= ",";
+						
+						$and_list .= $value;
+					}
+				}
+				
+				$cid = $pre . $num;
+				$sth->bindParam(":cid", $cid);
+				$sth->bindParam(":acid", $and_list);
+				$sth->bindParam(":ocid", $or_list);
+			
+				$sth->execute();
+			}
+					
+			echo "Course successfully added.<br/>\n";
+		}
 	}
 	else
 	{
@@ -128,7 +229,7 @@
 				<div class="control-group">
 					<label class="control-label" for="Department">Department</label>
 					<div class="controls">
-						<select name="department">
+						<select name="department" id="Department">
 							<option value="arts">Arts and Letters</option>
 							<option value="business">Business and Technology</option>
 							<option value="chemical">Chemical Engineering & Materials Science</option>
@@ -147,13 +248,13 @@
 				<div class="control-group">
 					<label class="control-label">Prerequisites</label>
 					<div class="controls">
-						<a href="#"><button type="button" class="btn">Select Prerequisites</button></a>
+						<textarea name="prerequisites" id="Prerequisites"></textarea>
 					</div>
 				</div>
 				<div class="control-group">
 					<label class="control-label">Corequisites</label>
 					<div class="controls">
-						<a href="#"><button type="button" class="btn">Select Corequisites</button></a>
+						<textarea name="corequisites" id="Corequisites"></textarea> 
 					</div>
 				</div>
 				<div class="control-group">

@@ -1,34 +1,42 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Stevens' Study Planner &raquo; Courses</title>
+		<title>Stevens' Study Planner &raquo; Edit Requirement</title>
 		<?php require("../includes/styles.php"); ?>
+		<?php require("../includes/config.php"); ?>
+		<?php require("../includes/functions.php"); ?>
+		
+
 	</head>
 	<body>
 		<?php require("../includes/navigation.php"); ?>
-		
+
+			
 		<div class="container">
 			<?php
 				echo "<p>Welcome, " . $_ENV["REDIRECT_displayName"] . "</p>";
 			?>
 			
+			
 			<ul class="nav nav-tabs">
 				<li><a href="/studyplanner/admin">Admin Home</a></li>
 				<li><a href="dprograms.php">Degree Programs</a></li>
-				<li class="active"><a href="courses.php">Courses</a></li>
+				<li><a href="courses.php">Courses</a></li>
 				<li><a href="cgroups.php">Course Groups</a></li>
-				<li><a href="requirements.php">Requirements</a></li>
+				<li class="active"><a href="requirements.php">Requirements</a></li>
 			</ul>
 			
 			<ul class="nav nav-pills">
-				<li><a href="courses-add.php">Add Course</a></li>
-				<li><a href="courses-edit.php">Edit Course</a></li>
-				<li><a href="courses-delete.php">Delete Course</a></li>
+				<li><a href="requirements-add.php">Add Requirement</a></li>
+				<li class="active"><a href="requirements-edit.php">Edit Requirement</a></li>
+				<li><a href="requirements-delete.php">Delete Requirement</a></li>
 			</ul>
+			
+			<hr/>
 
 			<footer>
 				<p>© Study Planner 2013</p>
-			</footer>	
+			</footer>
 		</div>
 		
 		<?php require("../includes/scripts.php"); ?>

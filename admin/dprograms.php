@@ -17,28 +17,18 @@
 				<li class="active"><a href="dprograms.php">Degree Programs</a></li>
 				<li><a href="courses.php">Courses</a></li>
 				<li><a href="cgroups.php">Course Groups</a></li>
+				<li><a href="requirements.php">Requirements</a></li>
 			</ul>
 			
-			<h4>Degree Programs</h4>
-			<p>Please enter the degree program name and click <em>"Submit"</em> button.</p>
-			
-			<form class="form-horizontal">
-				<div class="control-group">
-					<label class="control-label" for="DegreePrograms">Name of Degree Program</label>
-					<div class="controls">
-						<input type="text" id="DegreePrograms" class="input-xlarge" placeholder="e.g. CS_2011.START_WITH_CS105" />
-					</div>
-				</div>
-				<div class="control-group">
-					<div class="controls">
-						<button type="submit" class="btn btn-primary">Add Degree Program</button>
-					</div>
-				</div>
-			</form>
-			
+			<ul class="nav nav-pills">
+				<li><a href="dprograms-add.php">Add Degree Program</a></li>
+				<li><a href="dprograms-edit.php">Edit Degree Program</a></li>
+				<li><a href="dprograms-delete.php">Delete Degree Program</a></li>
+			</ul>
+
 			<footer>
 				<p>© Study Planner 2013</p>
-			</footer>
+			</footer>	
 		</div>
 		
 		<?php require("../includes/scripts.php"); ?>
