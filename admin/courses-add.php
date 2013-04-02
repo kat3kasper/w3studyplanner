@@ -31,8 +31,8 @@
 			<hr/>
 			
 <?php
-	//If add form is submitted
-	if(isset($_POST["submit"]) && (!empty($_POST["courseprefix"]) && !empty($_POST["coursenumber"])))
+	//If add form is submitted with required fields
+	if(isset($_POST["submit"]) && !(empty($_POST["courseprefix"]) || empty($_POST["coursenumber"]) || empty($_POST["credits"]) || empty($_POST["coursename"]) || empty($_POST["department"]) || (!isset($_POST["oncampus"]) && !isset($_POST["webcampus"]))))
 	{
 		//Setup database
 		$host = DB_HOST;
@@ -96,26 +96,14 @@
 			echo "Course already exists in database.<br/>\n";
 		else
 		{
-			//Insert to course
-			$sql = "INSERT INTO course(prefix, number, no_of_credits, course_name, department, on_campus_semesters, web_campus_semesters) VALUES (:pre, :num, :cred, :name, :dept, :oc, :wc)";
-			
-			$sth = $dbh->prepare($sql);
-			
-			$sth->bindParam(":pre", $pre);
-			$sth->bindParam(":num", $num);
-			$sth->bindParam(":cred", $cred);
-			$sth->bindParam(":name", $name);
-			$sth->bindParam(":dept", $dept);	
-			$sth->bindParam(":oc", $oc);
-			$sth->bindParam(":wc", $wc);
-				
-			$sth->execute();
+			$prereq_status = 1;
+			$coreq_status = 1;
 			
 			//Insert into course prerequisites
 			if(!empty($prereq))
 			{
-				$sql = "INSERT INTO course_prerequisites(parent_course_id, and_course_id, or_course_id) VALUES (:cid, :acid, :ocid)";
-				
+				$sql = "SELECT * FROM course WHERE CONCAT(prefix, number) = :cid";
+		
 				$sth = $dbh->prepare($sql);
 				
 				$and_list = "";
@@ -128,34 +116,67 @@
 					//Parse OR
 					if(strpos($value, " OR ") > 0)
 					{
-						//Delimiter for each group of OR
-						if($or_list !== "")
-							$or_list .= ",";
+						$exploded = explode(" OR ", $value);
+						foreach($exploded as $c)
+						{
+							$sth->bindParam(":cid", $c);
+							$sth->execute();
+							
+							$rownum = $sth->rowCount();
+							
+							if(!$rownum)
+								$prereq_status = 0;
+						}
 						
-						$or_list .= implode("|", explode(" OR ", $value));
+						if($prereq_status)
+						{
+							//Delimiter for each group of OR
+							if($or_list !== "")
+								$or_list .= ",";
+							
+							$or_list .= implode("|", explode(" OR ", $value));
+						}
 					}
 					else
 					{
-						if($and_list !== "")
-							$and_list .= ",";
+						$sth->bindParam(":cid", $value);
+						$sth->execute();
 						
-						$and_list .= $value;
+						$rownum = $sth->rowCount();
+						
+						if(!$rownum)
+							$prereq_status = 0;
+						
+						if($prereq_status)
+						{
+							if($and_list !== "")
+								$and_list .= ",";
+							
+							$and_list .= $value;
+						}
 					}
 				}
 				
-				$cid = $pre . $num;
-				$sth->bindParam(":cid", $cid);
-				$sth->bindParam(":acid", $and_list);
-				$sth->bindParam(":ocid", $or_list);
-			
-				$sth->execute();
+				if($prereq_status)
+				{
+					$sql = "INSERT INTO course_prerequisites(parent_course_id, and_course_id, or_course_id) VALUES (:cid, :acid, :ocid)";
+					
+					$sth = $dbh->prepare($sql);
+					
+					$cid = $pre . $num;
+					$sth->bindParam(":cid", $cid);
+					$sth->bindParam(":acid", $and_list);
+					$sth->bindParam(":ocid", $or_list);
+				
+					$sth->execute();
+				}
 			}
 			
 			//Insert into course corequisites
 			if(!empty($coreq))
 			{
-				$sql = "INSERT INTO course_corequisites(parent_course_id, and_course_id, or_course_id) VALUES (:cid, :acid, :ocid)";
-				
+				$sql = "SELECT * FROM course WHERE CONCAT(prefix, number) = :cid";
+		
 				$sth = $dbh->prepare($sql);
 				
 				$and_list = "";
@@ -168,66 +189,124 @@
 					//Parse OR
 					if(strpos($value, " OR ") > 0)
 					{
-						//Delimiter for each group of OR
-						if($or_list !== "")
-							$or_list .= ",";
+						$exploded = explode(" OR ", $value);
+						foreach($exploded as $c)
+						{
+							$sth->bindParam(":cid", $c);
+							$sth->execute();
+							
+							$rownum = $sth->rowCount();
+							
+							if(!$rownum)
+								$coreq_status = 0;
+						}
 						
-						$or_list .= implode("|", explode(" OR ", $value));
+						if($coreq_status)
+						{
+							//Delimiter for each group of OR
+							if($or_list !== "")
+								$or_list .= ",";
+							
+							$or_list .= implode("|", explode(" OR ", $value));
+						}
 					}
 					else
 					{
-						if($and_list !== "")
-							$and_list .= ",";
+						$sth->bindParam(":cid", $value);
+						$sth->execute();
 						
-						$and_list .= $value;
+						$rownum = $sth->rowCount();
+						
+						if(!$rownum)
+							$coreq_status = 0;
+						
+						if($coreq_status)
+						{
+							if($and_list !== "")
+								$and_list .= ",";
+							
+							$and_list .= $value;
+						}
 					}
 				}
 				
-				$cid = $pre . $num;
-				$sth->bindParam(":cid", $cid);
-				$sth->bindParam(":acid", $and_list);
-				$sth->bindParam(":ocid", $or_list);
-			
-				$sth->execute();
-			}
+				if($coreq_status)
+				{				
+					$sql = "INSERT INTO course_corequisites(parent_course_id, and_course_id, or_course_id) VALUES (:cid, :acid, :ocid)";
 					
-			echo "Course successfully added.<br/>\n";
+					$sth = $dbh->prepare($sql);
+					
+					$cid = $pre . $num;
+					$sth->bindParam(":cid", $cid);
+					$sth->bindParam(":acid", $and_list);
+					$sth->bindParam(":ocid", $or_list);
+				
+					$sth->execute();
+				}
+			}
+			
+			if($prereq_status && $coreq_status)
+			{
+				//Insert to course
+				$sql = "INSERT INTO course(prefix, number, no_of_credits, course_name, department, on_campus_semesters, web_campus_semesters) VALUES (:pre, :num, :cred, :name, :dept, :oc, :wc)";
+				
+				$sth = $dbh->prepare($sql);
+				
+				$sth->bindParam(":pre", $pre);
+				$sth->bindParam(":num", $num);
+				$sth->bindParam(":cred", $cred);
+				$sth->bindParam(":name", $name);
+				$sth->bindParam(":dept", $dept);	
+				$sth->bindParam(":oc", $oc);
+				$sth->bindParam(":wc", $wc);
+					
+				$sth->execute();
+						
+				echo "Course successfully added.<br/>\n";
+			}
+			else
+				echo "Course cannot be added. Make sure the prerequisites or corequisites are added first.<br/>\n";
 		}
+	}
+	//Required fields are not filled in
+	else if(isset($_POST["submit"]))
+	{
+		echo "Make sure to fill in the required fields.<br/>\n";
 	}
 	else
 	{
 ?>
 			
 			<h4>Add Course</h4>
-			<p>Please fill the required fields and click on <em>"Add Course"</em> button.</p>
+			<p>Please fill in the required fields (*) and click on <em>"Add Course"</em> button.</p>
 			
 			<form class="form-horizontal" action="courses-add.php" method="POST">
 				<div class="control-group">
-					<label class="control-label" for="CoursePrefix">Course Prefix</label>
+					<label class="control-label" for="CoursePrefix">Course Prefix*</label>
 					<div class="controls">
 						<input type="text" name="courseprefix" id="CoursePrefix" class="input-small" placeholder="e.g. CS" /> 
 					</div>
 				</div>				
 				<div class="control-group">
-					<label class="control-label" for="CourseNumber">Course Number</label>
+					<label class="control-label" for="CourseNumber">Course Number*</label>
 					<div class="controls">
 						<input type="text" name="coursenumber" id="CourseNumber" class="input-small" placeholder="e.g. 101" /> 
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label" for="Credits">Credits</label>
+					<label class="control-label" for="Credits">Credits*</label>
 					<div class="controls">
 						<input type="text" name="credits" id="Credits" class="input-small" /> 
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label" for="CourseName">Course Name</label>
+					<label class="control-label" for="CourseName">Course Name*</label>
 					<div class="controls">
 						<input type="text" name="coursename" id="CourseName"> 
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label" for="Department">Department</label>
+					<label class="control-label" for="Department">Department*</label>
 					<div class="controls">
 						<select name="department" id="Department">
 							<option value="arts">Arts and Letters</option>
@@ -258,7 +337,7 @@
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label">Term Offered</label>
+					<label class="control-label">Term Offered*</label>
 					<div class="controls">
 						<div class="control-group">
 							<label class="control-label">On Campus</label>

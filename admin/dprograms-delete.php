@@ -6,7 +6,15 @@
 		<?php require("../includes/config.php"); ?>
 		<?php require("../includes/functions.php"); ?>
 		
-
+	<script>
+		function ConfirmDelete(delUrl) 
+		{
+			if(confirm("Are you sure you want to delete this degree program?"))
+			{
+				document.location = delUrl;
+			}
+		}
+	</script>
 	</head>
 	<body>
 		<?php require("../includes/navigation.php"); ?>
@@ -73,7 +81,7 @@
 				
 				$sth->execute();
 				
-				echo "Degree has been deleted.";
+				echo $degree . " has been deleted.";
 			}
 				
 		}
@@ -114,7 +122,7 @@
 				</div>
 				<div class="control-group">
 					<div class="controls">
-						<button name="submit" type="submit" class="btn btn-primary">Delete Degree Program</button>
+						<a href="dprograms-delete.php" onclick="return confirm('Are you sure you want to delete this degree program?')"><button name="submit" type="submit" class="btn btn-primary">Delete Degree Program</button></a>
 					</div>
 				</div>
 			</form>

@@ -90,10 +90,11 @@
 		$odn = strtoupper(s_string($_POST["olddegreename"]));
 		
 		//Check for duplicates
-		$sql = "SELECT * FROM degree WHERE degree_name = :dn";
-		
+		$sql = "SELECT * FROM degree WHERE degree_name = :dn AND degree_name != :odn";
+	
 		$sth = $dbh->prepare($sql);
 		$sth->bindParam(":dn", $dn);
+		$sth->bindParam(":odn", $odn);
 		$sth->execute();
 		
 		$rownum = $sth->rowCount();

@@ -6,6 +6,15 @@
 		<?php require("../includes/config.php"); ?>	
 		<?php require("../includes/functions.php"); ?>
 		
+		<script>
+			function ConfirmDelete(delUrl) 
+			{
+				if(confirm("Are you sure you want to delete this course group?"))
+				{
+					document.location = delUrl;
+				}
+			}
+		</script>
 	</head>
 	<body>
 		<?php require("../includes/navigation.php"); ?>
@@ -72,7 +81,7 @@
 				
 				$sth->execute();
 				
-				echo "Course group has been deleted.";
+				echo  $cgroup . " has been deleted.";
 			}
 				
 		}
@@ -113,7 +122,7 @@
 				</div>
 				<div class="control-group">
 					<div class="controls">
-						<button name="submit" type="submit" class="btn btn-primary">Delete Course Group</button>
+						<a href="cgroups-delete.php" onclick="return confirm('Are you sure you want to delete this course group?')"><button name="submit" type="submit" class="btn btn-primary">Delete Course Group</button></a>
 					</div>
 				</div>
 			</form>

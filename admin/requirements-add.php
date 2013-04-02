@@ -6,7 +6,118 @@
 		<?php require("../includes/config.php"); ?>
 		<?php require("../includes/functions.php"); ?>
 		
+		<script type="text/javascript">
+		//Add constraint
+		function addNumCourses()
+		{
+			var e1 = document.getElementById('NumberOfCourses');
+			var e2=document.getElementById('constraints');
+			var o=document.createElement('option');
+			o.value=e1.value.concat(' FROM');
+			o.text=e1.value.concat(' FROM');
+			
+			if (e1.value==null || e1.value=="")//check for empty form
+			{
+			  alert("Please input number of courses!");
+			  return false;
+			}
+			else if(/[^0-9]+/i.test(e1.value))//check for non numeric characters
+			{
+				alert("Please check for non-numeric characters!\n\ne.g. @#$Abc are not allowed!");
+				return false;
+			}
+			else 
+			{
+				
+				/*var from = document.createElement("option");
+				from.text = "FROM";
+				from.value = "from";
+				var select = document.getElementById("constraints");*/
+				e2.options.add(o);
+				//select.appendChild(from);
+			}
 
+		}
+		
+		function addCourseGroup()
+		{
+			var e1 = document.getElementById('cgroup');
+			var e2=document.getElementById('constraints');
+			var o=document.createElement('option');
+			o.value=e1.value;
+			o.text=e1.value;
+			
+			if (e1.value==null || e1.value=="")//check for empty form
+			{
+			  alert("Please select a course group first");
+			  return false;
+			}
+			else 
+			{
+				e2.options.add(o);
+				//select.appendChild(from);
+			}
+
+		}
+		
+		function addOperator()
+		{
+			var e1 = document.getElementById('operator');
+			var e2=document.getElementById('constraints');
+			var o=document.createElement('option');
+			o.value=e1.value;
+			o.text=e1.value;
+			
+			if (e1.value==null || e1.value=="")//check for empty form
+			{
+			  alert("Please select an operator first");
+			  return false;
+			}
+			else 
+			{
+				e2.options.add(o);
+				//select.appendChild(from);
+			}
+
+		}
+		
+		//Remove a constraint from the list
+		function removeConstraint()
+		{
+			var e2=document.getElementById('constraints');
+			var o=document.createElement('option');
+			//o.value=e1.value;
+			//o.text=e1.value;
+			
+			if (e2.value==null || e2.value=="")//check for empty form
+			{
+			  alert("Please select a constraint from the list above first");
+			  return false;
+			}
+			
+			var ce=confirm("Are you sure you want to remove the constraint from the requirements?");
+			if(ce===true)
+			{
+				e2.remove(e2.selectedIndex);
+			}
+			else
+			{
+				return false;
+			}
+			
+		}
+		
+		//select all courses in the list to be stored in database
+		function selectAllConstraints()
+		{
+			var x=document.getElementById("constraints");
+			for (var i=0; i<x.length; i++) 
+			{
+				x.options[i].selected = true;
+			}
+		}
+	
+		</script>
 	</head>
 	<body>
 		<?php require("../includes/navigation.php"); ?>
@@ -36,7 +147,7 @@
 			
 <?php
 	//If add degree program form is submitted
-	if(isset($_POST["submit"]) && !empty($_POST["requirements"]))
+	if(isset($_POST["submit"]) && (!empty($_POST["reqname"]) && !empty($_POST["constraints"])) )
 	{
 		//Setup database
 		$host = DB_HOST;
@@ -49,8 +160,8 @@
 		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		
 		//Sanitiza & extract values
-		$reqname = strtolower(s_string($_POST["reqname"]));
-		$constraints = s_string(implode(",", $_POST["constraints"]));
+		$reqname = strtoupper(s_string($_POST["reqname"]));
+		$constraints = s_string(implode("|", $_POST["constraints"]));
 		
 		//Check for duplicates
 		$sql = "SELECT * FROM requirements WHERE requirement_name = :reqname";
@@ -111,7 +222,7 @@
 			
 			<h4>Add Requirement</h4>
 			
-			<form class="form-horizontal" action="requirements-add.php" method="post">
+			<form class="form-horizontal" action="requirements-add.php" method="POST">
 				<div class="control-group">
 					<label class="control-label" for="RequirementName">Requirement Name</label>
 					<div class="controls">
@@ -123,10 +234,13 @@
 				<div class="control-group">
 					<label class="control-label" for="NumberOfCourses">Number of Courses</label>
 					<div class="controls">
-						<input type="text" name="numcourse" id="NumberOfCourses" class="input-small"/>
+						<input type="text" id="NumberOfCourses" class="input-large"/>
+						<button type="button" class="btn btn-info" onclick="addNumCourses()">Add</button>
 					</div>
 				</div>
-				<p>from</p>
+				<div class="control-group">
+					<label class="control-label" for="From">FROM</label>
+				</div>
 				<div class="control-group">
 					<label class="control-label" for="CourseGroup">Select Course Group</label>
 					<div class="controls">
@@ -138,7 +252,7 @@
 							}
 						?>
 						</select>
-						<button name="cgroup-add" type="button" class="btn btn-info">Add</button>
+						<button name="cgroup-add" type="button" class="btn btn-info" onclick="addCourseGroup()">Add</button>
 					</div>					
 				</div>
 				<div class="control-group">
@@ -153,17 +267,25 @@
 							<option>+ (Set Addition)</option>
 							<option>- (Set Substraction)</option>
 						</select>
-						<button name="operator-add" type="button" class="btn btn-info">Add</button>
+						<button name="operator-add" type="button" class="btn btn-info" onclick="addOperator()">Add</button>
 					</div>
 				</div>
 				<div class="control-group">
 					<div class="controls">
-						<textarea name="constraints" rows="4"></textarea>
+						
+						<select multiple="multiple" name="constraints[]" id="constraints" class="input-xlarge" size="6">
+						</select>
+					
 					</div>
 				</div>
 				<div class="control-group">
 					<div class="controls">
-						<button type="submit" name="submit" class="btn btn-primary">Save</button>
+						<a class="btn btn-small btn-danger" id="remove-btn" rel="tooltip" data-placement="right" data-trigger="hover" title="Select a constraint from the list above" onclick="removeConstraint()" value="Remove constraint">Remove Constraint</a>
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="controls">
+						<button type="submit" name="submit" class="btn btn-primary" onclick="selectAllConstraints()">Add Requirement</button>
 					</div>
 				</div>
 				
@@ -180,5 +302,10 @@
 		</div>
 		
 		<?php require("../includes/scripts.php"); ?>
+		<script>
+		$(function ()
+		{ $('#remove-btn').tooltip();
+		});
+		</script>
 	</body>
 </html>

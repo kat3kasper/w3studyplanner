@@ -4,6 +4,7 @@
 		<title>Stevens' Study Planner &raquo; Find Courses</title>
 		<?php require("../includes/styles.php"); ?>
 		<?php require("../includes/config.php"); ?>
+		<?php require("../includes/functions.php"); ?>
 		
 		<script type="text/javascript">
 			//Sends value to main window
@@ -32,14 +33,16 @@
 		$pass = DB_PASS;
 		
 		$dbh = new PDO("mysql:host=" . $host . ";dbname=" . $dbname, $user, $pass);
+		$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		
 		//$db = new database();
 		//$db->setup("w3_studyplanner", "QcRo2mEC", "localhost", "w3_studyplanner");
 		
 		//Sanitize & extract values		
-		$course = strtolower(addslashes(strip_tags($_POST["course"])));
-		$name = addslashes(strip_tags($_POST["coursename"]));
-		$dept = strtolower(addslashes(strip_tags($_POST["department"])));
+		$course = strtoupper(s_string($_POST["course"]));
+		$name = s_string($_POST["coursename"]);
+		$dept = strtolower(s_string($_POST["department"]));
 		
 		//Check with database
 		$sql = "SELECT * FROM course WHERE ";
@@ -54,7 +57,7 @@
 			if(!empty($course))
 				$sql .= " AND ";
 			
-			$sql .= "course_name LIKE %:name%";
+			$sql .= "course_name LIKE :name";
 			//$sql .= "course_name LIKE '%" . $name . "%'";
 		}
 		
@@ -73,7 +76,10 @@
 		if(!empty($course))
 			$sth->bindParam(":course", $course);
 		if(!empty($name))
+		{
+			$name = "%" . $name . "%";
 			$sth->bindParam(":name", $name);
+		}
 		if(!empty($dept))
 			$sth->bindParam(":dept", $dept);
 		
@@ -139,6 +145,8 @@
 					<div class="controls">
 						<select name="department">
 							<option value="" selected>Select a department..</option>
+							<option value="arts">Arts and Letters</option>
+							<option value="business">Business and Technology</option>
 							<option value="chemical">Chemical Engineering & Materials Science</option>
 							<option value="chemistry">Chemistry, Biology & Biomedical Engineering</option>
 							<option value="civil">Civil, Environmental & Ocean Engineering</option>
@@ -147,10 +155,8 @@
 							<option value="mathematical">Mathematical Science</option>
 							<option value="mechanical">Mechanical Engineering</option>
 							<option value="physics">Physics & Engineering Physics</option>
-							<option value="systems">Systems & Enterprises</option>
-							<option value="business">Business and Technology</option>
 							<option value="quantitative">Quantitative Finance</option>
-							<option value="arts">Arts and Letters</option>
+							<option value="systems">Systems & Enterprises</option>
 						</select>
 					</div>
 				</div>

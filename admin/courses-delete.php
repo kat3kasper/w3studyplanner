@@ -18,6 +18,14 @@
 			{
 				document.getElementById('CourseId').value = course;
 			}
+			
+			function ConfirmDelete(delUrl) 
+			{
+				if(confirm("Are you sure you want to delete this course?"))
+				{
+					document.location = delUrl;
+				}
+			}
 		</script>
 	</head>
 	<body>
@@ -140,7 +148,7 @@
 				</div>
 				<div class="control-group">
 					<div class="controls">
-						<button type="submit" name="submit" class="btn btn-primary">Delete Course</button>
+						<a href="courses-delete.php" onclick="return confirm('Are you sure you want to delete this course?')"><button type="submit" name="submit" class="btn btn-primary">Delete Course</button></a>
 					</div>
 				</div>
 			</form>

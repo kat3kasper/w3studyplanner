@@ -97,12 +97,13 @@
 			}
 		
 		//Check for conflicting course
-		$sql = "SELECT * FROM course WHERE CONCAT(prefix, number) = :ncid";
+		$sql = "SELECT * FROM course WHERE CONCAT(prefix, number) = :ncid AND CONCAT(prefix, number) != :cid";
 		
 		$sth = $dbh->prepare($sql);
 		
 		$ncid = $pre . $num;
 		$sth->bindParam(":ncid", $ncid);
+		$sth->bindParam(":cid", $cid);
 		
 		$sth->execute();
 		$rownum = $sth->rowCount();

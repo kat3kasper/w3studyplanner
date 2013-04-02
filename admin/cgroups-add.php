@@ -46,14 +46,21 @@
 				{
 					e2.options.add(o);
 				}
-			
 			}
 			
 			//Remove course from the list
 			function removeCourse()
 			{
 				var x=document.getElementById("courses");
-				x.remove(x.selectedIndex);
+				var ce=confirm("Are you sure you want to remove the course from the course group?");
+				if(ce===true)
+				{
+					x.remove(x.selectedIndex);
+				}
+				else
+				{
+					return false;
+				}
 			}
 			
 			//select all courses in the list to be stored in database
@@ -151,27 +158,33 @@
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label" for="Courses">Courses</label>
+					<label class="control-label" for="course">Add Course to The List</label>
+					<div class="controls">
+						<input type="text" name="course" id="course" class="input-small" placeholder="e.g. CS101" />
+						<a href="Javascript:newPopup('courses-find.php');"><button type="button" class="btn btn-info">Find</button></a>	
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="controls">
+						<button class="btn btn-small" type="button" value="Add to List" onclick="addCourse()">Add Course to Course Group</button>
+					</div>
+				</div>
+				<div class="control-group">
+					<label class="control-label" for="Courses">Courses in the Course Group</label>
 					<div class="controls">
 						<p>
 						<select multiple="multiple" name="course_id[]" id="courses" class="input-xlarge">
 						</select>
 						</p>
-						
-						<p>
-						<button class="btn btn-link" type="button" onclick="removeCourse()" value="Remove course">Remove Course</button>
-						</p>
-						
-						<p>
-						<div class="input-prepend">
-						  <button class="btn" type="button" onclick="Javascript:newPopup('courses-find.php');">Find Course</button>
-						  <button class="btn" type="button" value="Add to List" onclick="addCourse()">Add Course</button>
-						  <input class="span1"  type="text" name="course" id="course" placeholder="HUM103">
-						</div>
-						</p>
-						
 					</div>
 				</div>
+
+				<div class="control-group">
+					<div class="controls">
+						<button class="btn btn-small" type="button" onclick="removeCourse()" value="Remove course">Remove Course from Course Group</button>
+					</div>
+				</div>
+				
 				<div class="control-group">
 					<div class="controls">
 						<button type="submit" name="submit" class="btn btn-primary" onclick="selectAllCourses()">Add Course Group</button>
