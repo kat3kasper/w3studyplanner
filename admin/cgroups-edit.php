@@ -82,7 +82,7 @@
 		
 		<div class="container">
 			<?php
-				echo "<p>Welcome, " . $_ENV["REDIRECT_displayName"] . "</p>";
+				echo "<p>Welcome, " . $_SERVER["REDIRECT_displayName"] . "</p>";
 			?>
 			
 			<ul class="nav nav-tabs">
@@ -197,7 +197,7 @@
 				</div>
 				
 				<div class="control-group">
-					<label class="control-label" for="course">Add Course to The List</label>
+					<label class="control-label" for="course">Add Course to C. Group</label>
 					<div class="controls">
 						<input type="text" name="course" id="course" class="input-small" placeholder="e.g. CS101" />
 						<a href="Javascript:newPopup('courses-find.php');"><button type="button" class="btn btn-info">Find</button></a>	
@@ -206,14 +206,13 @@
 				
 				<div class="control-group">
 					<div class="controls">
-						<button class="btn btn-small" type="button" value="Add to List" onclick="addCourse()">Add Course to Course Group</button>
+						<button class="btn btn-info" type="button" value="Add to List" onclick="addCourse()">Add</button>
 					</div>
 				</div>
 				
 				<div class="control-group">
-					<label class="control-label" for="Courses">Courses in the Course Group</label>
+					<label class="control-label" for="Courses">Courses in Course Group</label>
 					<div class="controls">
-						<p>
 						<select multiple="multiple" name="course_id[]" id="courses" class="input-xlarge">
 						<?php
 							foreach ($courses as $course_id) 
@@ -223,13 +222,12 @@
 									
 						?>
 						</select>
-						</p>
 					</div>
 				</div>
 				
 				<div class="control-group">
 					<div class="controls">
-						<button class="btn btn-small" type="button" onclick="removeCourse()" value="Remove course">Remove Course from Course Group</button>
+						<button class="btn btn-small btn-danger" type="button" onclick="removeCourse()" value="Remove Course">Remove Course</button>
 					</div>
 				</div>
 				
@@ -284,7 +282,8 @@
 		<?php
 			foreach ($rowarray as $row) 
 			{
-				echo "<option value=\"$row[name]\">" .$row[name]. "</option>\n";
+				$cgname = $row['name'];
+				echo "<option value=\"$cgname\">" .$cgname. "</option>\n";
 			}
 					
 		?>

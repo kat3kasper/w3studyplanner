@@ -31,8 +31,23 @@
 			//Remove course from the list
 			function removeRequirement()
 			{
-				var x = document.getElementById("Requirements");
-				x.remove(x.selectedIndex);
+				var e2 = document.getElementById("Requirements");
+				//x.remove(x.selectedIndex);
+				if (e2.value==null || e2.value=="")//check for empty form
+				{
+				  alert("Please select a requirement from the list above first");
+				  return false;
+				}
+				
+				var ce=confirm("Are you sure you want to remove the selected requirement?");
+				if(ce===true)
+				{
+					e2.remove(e2.selectedIndex);
+				}
+				else
+				{
+					return false;
+				}
 			}
 			
 			//select all courses in the list to be stored in database
@@ -49,7 +64,7 @@
 		
 		<div class="container">
 			<?php
-				echo "<p>Welcome, " . $_ENV["REDIRECT_displayName"] . "</p>";
+				echo "<p>Welcome, " . $_SERVER["REDIRECT_displayName"] . "</p>";
 			?>
 			
 			<ul class="nav nav-tabs">
@@ -161,7 +176,7 @@
 				<div class="control-group">
 					<label class="control-label" for="Department">Department</label>
 					<div class="controls">
-						<select name="department" id="Department">
+						<select name="department" id="Department" class="input-xlarge">
 							<option value="arts">Arts and Letters</option>
 							<option value="business">Business and Technology</option>
 							<option value="chemical">Chemical Engineering & Materials Science</option>
@@ -180,16 +195,7 @@
 				<div class="control-group">
 					<label class="control-label" for="Requirements">Requirements</label>
 					<div class="controls">
-						<p>
-						<select multiple="multiple" name="requirements[]" id="Requirements" class="input-xlarge">
-						</select>
-						</p>
-						
-						<p>
-						<button class="btn btn-link" type="button" onclick="removeRequirement()">Remove Requirement</button>
-						</p>
-						
-						<p>
+			
 						<select name="requirement" id="Requirement">
 							
 <?php
@@ -200,7 +206,20 @@
 ?>
 							
 						</select>
-						<button class="btn" type="button" onclick="addRequirement();">+</button>
+						<button class="btn btn-info" type="button" onclick="addRequirement();">Add</button>
+
+					</div>
+					</div>
+				<div class="control-group">
+					<label class="control-label" for="Degree Requirements">Degree Requirements</label>
+					<div class="controls">
+						<p>
+						<select multiple="multiple" name="requirements[]" id="Requirements" class="input-xlarge">
+						</select>
+						</p>
+						
+						<p>
+						<button class="btn btn-danger btn-small" type="button" onclick="removeRequirement()">Remove Requirement</button>
 						</p>
 						
 					</div>

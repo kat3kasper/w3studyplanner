@@ -125,7 +125,7 @@
 			
 		<div class="container">
 			<?php
-				echo "<p>Welcome, " . $_ENV["REDIRECT_displayName"] . "</p>";
+				echo "<p>Welcome, " . $_SERVER["REDIRECT_displayName"] . "</p>";
 			?>
 			
 			
@@ -248,7 +248,8 @@
 						<?php
 							foreach ($cgroup_arr as $row) 
 							{
-								echo "<option value=\"$row[name]\">" .$row[name]. "</option>\n";
+								$cgname = $row['name'];
+								echo "<option value=\"$cgname\">" .$cgname. "</option>\n";
 							}
 						?>
 						</select>

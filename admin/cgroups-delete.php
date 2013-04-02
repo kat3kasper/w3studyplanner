@@ -22,7 +22,7 @@
 		<div class="container">
 	
 			<?php
-				echo "<p>Welcome, " . $_ENV["REDIRECT_displayName"] . "</p>";
+				echo "<p>Welcome, " . $_SERVER["REDIRECT_displayName"] . "</p>";
 			?>
 			
 			<ul class="nav nav-tabs">

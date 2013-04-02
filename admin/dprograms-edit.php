@@ -31,8 +31,23 @@
 			//Remove course from the list
 			function removeRequirement()
 			{
-				var x = document.getElementById("Requirements");
-				x.remove(x.selectedIndex);
+				var e2 = document.getElementById("Requirements");
+				//x.remove(x.selectedIndex);
+				if (e2.value==null || e2.value=="")//check for empty form
+				{
+				  alert("Please select a requirement from the list above first");
+				  return false;
+				}
+				
+				var ce=confirm("Are you sure you want to remove the selected requirement?");
+				if(ce===true)
+				{
+					e2.remove(e2.selectedIndex);
+				}
+				else
+				{
+					return false;
+				}
 			}
 			
 			//select all courses in the list to be stored in database
@@ -49,7 +64,7 @@
 		
 		<div class="container">
 			<?php
-				echo "<p>Welcome, " . $_ENV["REDIRECT_displayName"] . "</p>";
+				echo "<p>Welcome, " . $_SERVER["REDIRECT_displayName"] . "</p>";
 			?>
 			
 			<ul class="nav nav-tabs">
@@ -174,7 +189,7 @@
 				<div class="control-group">
 					<label class="control-label" for="Department">Department</label>
 					<div class="controls">
-						<select name="department" id="Department">
+						<select name="department" id="Department" class="input-xlarge">
 							<option value="" <?php if(isset($dept) && $dept == "") echo "selected"; ?>>Select a department..</option>
 							<option value="chemical" <?php if(isset($dept) && $dept == "chemical") echo "selected"; ?>>Chemical Engineering & Materials Science</option>
 							<option value="chemistry" <?php if(isset($dept) && $dept == "chemistry") echo "selected"; ?>>Chemistry, Biology & Biomedical Engineering</option>
@@ -193,11 +208,43 @@
 				</div>
 				<div class="control-group">
 					<label class="control-label" for="Requirements">Requirements</label>
-					<div class="controls">
-						<p>
-						<select multiple="multiple" name="requirements[]" id="Requirements" class="input-xlarge">
-						
+					<div class="controls">	
 <?php
+			//Get requirement list
+			$sql = "SELECT requirement_id, requirement_name FROM requirements";
+			
+			$sth = $dbh->prepare($sql);
+			$sth->execute();
+			$rownum = $sth->rowCount();
+			
+			if(!$rownum)
+				echo "There are no requirements to add to program.<br/>\n";
+			else
+			{
+?>	
+			    <select name="requirement" id="Requirement">	
+<?php
+				$req_arr = $sth->fetchAll(PDO::FETCH_ASSOC);
+				foreach($req_arr as $inner_arr)
+				{
+					echo "<option value=\"" . $inner_arr["requirement_id"] . "\">" . ucwords($inner_arr["requirement_name"]) . "</option>\n";
+				}
+?>	
+				</select>
+				<button class="btn btn-info" type="button" onclick="addRequirement();">Add</button>	
+<?php
+			}
+?>
+					</div>
+				</div>
+				
+				<div class="control-group">
+					<div class="controls">
+					<p>
+					<select multiple="multiple" name="requirements[]" id="Requirements" class="input-xlarge">
+<?php
+
+
 			//Get requirement associated with degree program
 			if(!empty($rid_list))
 			{
@@ -219,55 +266,20 @@
 				}
 			}
 ?>
-						
 						</select>
 						</p>
 						
 						<p>
-						<button class="btn btn-link" type="button" onclick="removeRequirement()">Remove Requirement</button>
+						<button class="btn btn-danger btn-small" type="button" onclick="removeRequirement()">Remove Requirement</button>
 						</p>
-						
-						<p>
-						
-<?php
-			//Get requirement list
-			$sql = "SELECT requirement_id, requirement_name FROM requirements";
-			
-			$sth = $dbh->prepare($sql);
-			$sth->execute();
-			$rownum = $sth->rowCount();
-			
-			if(!$rownum)
-				echo "There are no requirements to add to program.<br/>\n";
-			else
-			{
-?>
-						
-						<select name="requirement" id="Requirement">
-						
-<?php
-				$req_arr = $sth->fetchAll(PDO::FETCH_ASSOC);
-				foreach($req_arr as $inner_arr)
-				{
-					echo "<option value=\"" . $inner_arr["requirement_id"] . "\">" . ucwords($inner_arr["requirement_name"]) . "</option>\n";
-				}
-?>
-						
-						</select>
-						<button class="btn" type="button" onclick="addRequirement();">+</button>
-						
-<?php
-			}
-?>
-						
-						</p>
-						
-					</div>
 				</div>
+			</div>				
+
 				<div class="control-group">
 					<div class="controls">
-						<input type="hidden" name="olddegreename" value="<?php echo $dn; ?>">
-						<button class="btn btn-primary" type="submit" name="submit" onclick="selectAllRequirements()" >Edit Degree Program</button>
+						<input type="hidden" name="olddegreename" value="<?php echo $dn; ?>"/>
+						<button class="btn btn-primary" type="submit" name="submit" onclick="selectAllRequirements()" >Save Changes</button>
+						<button type="submit" name="cancel" class="btn" onclick="/dprograms-edit.php">Cancel</button>
 					</div>
 				</div>
 			</form>
@@ -310,6 +322,7 @@
 					<label class="control-label" for="DegreeName">Degree Program Name</label>
 					<div class="controls">
 						<select name="degreename" id="DegreeName">
+							<option value="">--Degree Programs--</option>
 							
 <?php
 			foreach($deg_arr as $value)

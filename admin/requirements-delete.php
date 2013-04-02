@@ -14,7 +14,7 @@
 			
 		<div class="container">
 			<?php
-				echo "<p>Welcome, " . $_ENV["REDIRECT_displayName"] . "</p>";
+				echo "<p>Welcome, " . $_SERVER["REDIRECT_displayName"] . "</p>";
 			?>
 			
 			
@@ -105,7 +105,8 @@
 <?php
 				foreach ($rowarray as $row) 
 				{
-					echo "<option value=\"$row[requirement_name]\">" .$row[requirement_name]. "</option>\n";
+					$reqname = $row['requirement_name'];
+					echo "<option value=\"$reqname\">" .$reqname. "</option>\n";
 				}
 				
 ?>

@@ -27,6 +27,16 @@
 				var o=document.createElement('option');
 				o.value=e1.value;
 				o.text=e1.value;
+				
+				for(var i = 0; i < e2.length; i++)
+				{
+					if(e2.options[i].value === o.value)
+					{
+						alert("That course is already added.");
+						return false;
+					}
+				}
+				
 				if (e1.value==null || e1.value=="")//check for empty form
 				{
 				  alert("Please input course id!");
@@ -46,21 +56,34 @@
 				{
 					e2.options.add(o);
 				}
+
 			}
 			
 			//Remove course from the list
 			function removeCourse()
 			{
-				var x=document.getElementById("courses");
+				var e1=document.getElementById('course');
+				var e2=document.getElementById('courses');
+				var o=document.createElement('option');
+				o.value=e1.value;
+				o.text=e1.value;
+				
+				if (e2.value==null || e2.value=="")//check for empty form
+				{
+				  alert("Please select a course from the list above first");
+				  return false;
+				}
+				
 				var ce=confirm("Are you sure you want to remove the course from the course group?");
 				if(ce===true)
 				{
-					x.remove(x.selectedIndex);
+					e2.remove(e2.selectedIndex);
 				}
 				else
 				{
 					return false;
 				}
+				
 			}
 			
 			//select all courses in the list to be stored in database
@@ -72,6 +95,7 @@
 					x.options[i].selected = true;
 				}
 			}
+			
 		</script>
 	</head>
 	<body>
@@ -79,7 +103,7 @@
 		
 		<div class="container">
 			<?php
-				echo "<p>Welcome, " . $_ENV["REDIRECT_displayName"] . "</p>";
+				echo "<p>Welcome, " . $_SERVER["REDIRECT_displayName"] . "</p>";
 			?>
 			
 			<ul class="nav nav-tabs">
@@ -158,30 +182,30 @@
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label" for="course">Add Course to The List</label>
+					<label class="control-label" for="course">Add Course to C. Group</label>
 					<div class="controls">
 						<input type="text" name="course" id="course" class="input-small" placeholder="e.g. CS101" />
-						<a href="Javascript:newPopup('courses-find.php');"><button type="button" class="btn btn-info">Find</button></a>	
+						<a href="Javascript:newPopup('courses-find.php');"><button type="button" class="btn btn-info">Find</button></a>				
 					</div>
 				</div>
+				
 				<div class="control-group">
 					<div class="controls">
-						<button class="btn btn-small" type="button" value="Add to List" onclick="addCourse()">Add Course to Course Group</button>
+						<button class="btn btn-info" type="button" value="Add to List" onclick="addCourse()">Add</button>
 					</div>
 				</div>
+				
 				<div class="control-group">
-					<label class="control-label" for="Courses">Courses in the Course Group</label>
+					<label class="control-label" for="Courses">Courses in Course Group</label>
 					<div class="controls">
-						<p>
 						<select multiple="multiple" name="course_id[]" id="courses" class="input-xlarge">
 						</select>
-						</p>
 					</div>
 				</div>
 
 				<div class="control-group">
 					<div class="controls">
-						<button class="btn btn-small" type="button" onclick="removeCourse()" value="Remove course">Remove Course from Course Group</button>
+						<a class="btn btn-small btn-danger" id="remove-btn" rel="tooltip" data-placement="right" data-trigger="hover" title="Select a course from the list above" onclick="removeCourse()" value="Remove course">Remove Course</a>
 					</div>
 				</div>
 				
@@ -200,5 +224,11 @@
 		</div>
 		
 		<?php require("../includes/scripts.php"); ?>
+		<script>
+		$(function ()
+		{ $('#remove-btn').tooltip();
+		});
+		</script>
+		
 	</body>
 </html>
