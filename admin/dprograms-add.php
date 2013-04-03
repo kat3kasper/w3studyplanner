@@ -156,27 +156,35 @@
 		{
 			$req_arr = $sth->fetchAll(PDO::FETCH_ASSOC);
 ?>
-			
+			<div class="well">
 			<h4>Add Degree Program</h4>
 			<p>Please fill the required fields and click <em>"Add Degree Program"</em> button.</p>
-			
 			<form class="form-horizontal" action="dprograms-add.php" method="POST">
+				
+			
 				<div class="control-group">
 					<label class="control-label" for="DegreeName">Degree Program Name</label>
 					<div class="controls">
-						<input type="text" name="degreename" id="DegreeName" class="input-xlarge" placeholder="e.g. CS_2011.START_WITH_CS105" />
+						<input type="text" name="degreename" id="DegreeName" class="span4" placeholder="e.g. CS_2011.START_WITH_CS105">		
+					<!--
+					<label for="Year">Year</label>
+						<input type="text" name="year" id="Year" class="span1">
+					-->
 					</div>
 				</div>
+				
 				<div class="control-group">
 					<label class="control-label" for="Year">Year</label>
 					<div class="controls">
-						<input type="text" name="year" id="Year" class="input-small" />
+						<input type="text" name="year" id="Year" class="span1" />
 					</div>
 				</div>
+					
+					
 				<div class="control-group">
 					<label class="control-label" for="Department">Department</label>
 					<div class="controls">
-						<select name="department" id="Department" class="input-xlarge">
+						<select name="department" id="Department" class="span4">
 							<option value="arts">Arts and Letters</option>
 							<option value="business">Business and Technology</option>
 							<option value="chemical">Chemical Engineering & Materials Science</option>
@@ -192,11 +200,12 @@
 						</select>
 					</div>
 				</div>
+				
 				<div class="control-group">
 					<label class="control-label" for="Requirements">Requirements</label>
 					<div class="controls">
 			
-						<select name="requirement" id="Requirement">
+						<select name="requirement" id="Requirement" class="span4">
 							
 <?php
 			foreach($req_arr as $inner_arr)
@@ -206,31 +215,41 @@
 ?>
 							
 						</select>
-						<button class="btn btn-info" type="button" onclick="addRequirement();">Add</button>
+						<button class="btn btn-info" type="button" onclick="addRequirement()" id="add-btn" rel="tooltip" data-placement="right" data-trigger="hover" title="Add Requirement to the list"><i class="icon-plus"></i></button>
 
 					</div>
-					</div>
+				</div>
+					
 				<div class="control-group">
 					<label class="control-label" for="Degree Requirements">Degree Requirements</label>
 					<div class="controls">
-						<p>
-						<select multiple="multiple" name="requirements[]" id="Requirements" class="input-xlarge">
-						</select>
-						</p>
 						
-						<p>
-						<button class="btn btn-danger btn-small" type="button" onclick="removeRequirement()">Remove Requirement</button>
-						</p>
+						<select multiple="multiple" name="requirements[]" id="Requirements" class="span4" size="5">
+						</select>
+					
+						<div class="btn-group btn-group-vertical">
+						  <button type="button" name="sort" class="btn" value="Up" id="moveup-btn" rel="tooltip" data-placement="right" data-trigger="hover" title="Move Up"><i class="icon-arrow-up"></i></button>
+						  <button type="button" name="sort" class="btn" value="Down" id="movedown-btn" rel="tooltip" data-placement="right" data-trigger="hover" title="Move Down"><i class="icon-arrow-down"></i></button>
+						  <button type="button" class="btn btn-danger" onclick="removeRequirement()" id="remove-btn" rel="tooltip" data-placement="right" data-trigger="hover" title="Remove selected requirement" ><i class="icon-remove"></i></button>
+						</div>
+					
 						
 					</div>
 				</div>
+				
+				<div class="form-actions">
+				  <button type="submit" name="submit" class="btn btn-primary" onclick="selectAllRequirements()" >Add Degree Program</button>
+				  <button type="submit" class="btn" onclick="/dprograms-add.php">Cancel</button>
+				</div>
+				<!--
 				<div class="control-group">
 					<div class="controls">
 						<button class="btn btn-primary" type="submit" name="submit" onclick="selectAllRequirements()" >Add Degree Program</button>
 					</div>
 				</div>
+				-->
 			</form>
-			
+			</div>
 <?php
 		}
 	}
@@ -240,7 +259,30 @@
 				<p>© Study Planner 2013</p>
 			</footer>
 		</div>
-		
 		<?php require("../includes/scripts.php"); ?>
+		<script>
+		$(document).ready(function()
+		{ $('button[name="sort"]').click(function()
+			{
+				var $op = $('#Requirements option:selected'),
+					$this = $(this);
+				if($op.length)
+				{
+					($this.val() == 'Up') ? 
+						$op.first().prev().before($op) : 
+						$op.last().next().after($op);
+				}
+			});
+		});
+		
+		$(document).ready(function()
+		{ $('#remove-btn').tooltip();
+			$('#moveup-btn').tooltip();
+			$('#movedown-btn').tooltip();
+			$('#add-btn').tooltip();
+		});
+		
+		
+		</script>
 	</body>
 </html>
