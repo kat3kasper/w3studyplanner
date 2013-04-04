@@ -5,8 +5,48 @@
 		<?php require("../includes/styles.php"); ?>
 		<?php require("../includes/config.php"); ?>	
 		<?php require("../includes/functions.php"); ?>
+		<?php require("../includes/scripts.php"); ?>
 		
 		<script type="text/javascript">
+			//Validates form inputs
+			function validateForm1()
+			{
+				var w = document.getElementById("cgroup");
+				//Check for empty fields
+				if (w.value==null || w.value=="")
+				{
+					alert("Please select a Course Group from the list!");
+					return false;
+				}
+			}
+			
+			//Validates form inputs
+			function validateForm2()
+			{
+				var inputs = ["CGName"];//required fields
+		
+				for(var i = 0; i < inputs.length; i++)
+				{
+					var x = document.getElementById(inputs[i]).value;
+					
+					//Check for empty fields
+					if(x == null || x == "")
+					{
+						alert("Please fill in all required fields");
+						return false;
+					}
+					else
+					{
+						var x=document.getElementById("courses");
+						for (var i=0; i<x.length; i++) 
+						{
+							x.options[i].selected = true;
+						}
+					}
+				}
+				
+			}
+			
 			//Popup window code
 			function newPopup(url)
 			{
@@ -59,22 +99,47 @@
 			
 			}
 			
+			
 			//Remove course from the list
 			function removeCourse()
 			{
-				var x=document.getElementById("courses");
-				x.remove(x.selectedIndex);
-			}
-			
-			//select all courses in the list to be stored in database
-			function selectAllCourses()
-			{
-				var x=document.getElementById("courses");
-				for (var i=0; i<x.length; i++) 
+				var e1=document.getElementById('course');
+				var e2=document.getElementById('courses');
+				var o=document.createElement('option');
+				o.value=e1.value;
+				o.text=e1.value;
+				
+				if (e2.value==null || e2.value=="")//check for empty form
 				{
-					x.options[i].selected = true;
+				  alert("Please select a course from the list above first");
+				  return false;
+				}
+				
+				var ce=confirm("Are you sure you want to remove the course from the course group?");
+				if(ce===true)
+				{
+					e2.remove(e2.selectedIndex);
+				}
+				else
+				{
+					return false;
 				}
 			}
+			
+			$(document).ready(function()
+			{ $('button[name="sort"]').click(function()
+				{
+					var $op = $('#courses option:selected'),
+						$this = $(this);
+					if($op.length)
+					{
+						($this.val() == 'Up') ? 
+							$op.first().prev().before($op) : 
+							$op.last().next().after($op);
+					}
+				});
+			});
+			
 		</script>
 	</head>
 	<body>
@@ -103,7 +168,7 @@
 			
 <?php		
 	//If edited form of course group is submitted
-	if(isset($_POST["submit"]) && (!empty($_POST["cgname"]) && !empty($_POST["course_id"])))
+	if(isset($_POST["submit2"]))
 	{
 		//Setup database
 		$host = DB_HOST;
@@ -118,9 +183,26 @@
 		//TODO: count required input
 		
 		//Sanitize & extract values
+		if(isset($_POST["course_id"])&& !empty($_POST["course_id"]))
+		{
+			$course_id = s_string(implode(",", $_POST["course_id"])); //comma separate courses before storing into db
+		}
+		else
+		{
+			$course_id = "";
+		}
+			
+		//Sanitize & extract values
+		if(isset($_POST["course_id"])&& !empty($_POST["course_id"]))
+		{
+			$ocgname = strtoupper(s_string($_POST["oldcgname"]));
+		}
+		else
+		{
+			$ocgname = "";
+		}
+			
 		$cgname = strtoupper(s_string($_POST["cgname"]));
-		$ocgname = strtoupper(s_string($_POST["oldcgname"]));
-		$course_id = implode(",", $_POST["course_id"]); //comma separate courses before storing into db
 		
 		
 		//Check for duplicates
@@ -134,24 +216,76 @@
 		$rownum = $sth->rowCount();
 		
 		if($rownum)
-			echo "Course group with that name already exists in database. Please be sure to name your course group uniquely. <br/>\n";
+		{
+			?>
+			<div class="alert alert-error alert-block">
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<h4>Oh Snap!</h4>
+				<p><?php echo $cgname; ?> already exists in database...</p>
+				<p>Make sure a course group is named <b>uniquely</b></p>
+			</div>
+<?php
+		}
 		else
 		{
-			//Update course
-			$sql = "UPDATE course_group SET name= :cgname, course_id = :course_id WHERE name= :ocgname";
+			$valid_courses = 1;
+			$invalid_list = "<ul>";
 			
-			$sth = $dbh->prepare($sql);
+			//Check if courses exist in database
+			if(isset($_POST["course_id"]))
+				foreach($_POST["course_id"] as $c)
+				{
+					$sql = "SELECT * FROM course WHERE CONCAT(prefix, number) = :c";
 			
-			$sth->bindParam(":cgname", $cgname);
-			$sth->bindParam(":course_id", $course_id);	
-			$sth->bindParam(":ocgname", $ocgname);
-			$sth->execute();
+					$sth = $dbh->prepare($sql);
+					$sth->bindParam(":c", $c);
+					$sth->execute();
 					
-			echo "Changes saved successfully.<br/>\n";
+					$rownum = $sth->rowCount();
+					
+					if(!$rownum)
+					{
+						$valid_courses = 0;
+						$invalid_list .= "<li>" . $c . "</li>";
+					}
+				}
+			$invalid_list .= "</ul>";
+			
+			if($valid_courses)
+			{
+				//Update course
+				$sql = "UPDATE course_group SET name= :cgname, course_id = :course_id WHERE name= :ocgname";
+				
+				$sth = $dbh->prepare($sql);
+				
+				$sth->bindParam(":cgname", $cgname);
+				$sth->bindParam(":course_id", $course_id);	
+				$sth->bindParam(":ocgname", $ocgname);
+				$sth->execute();
+						
+	?>
+				<div class="alert alert-success alert-block">
+					<button type="button" class="close" data-dismiss="alert"></button>
+					<h4>Success!</h4>
+					<p>Changes saved successfully</p>
+				</div>
+<?php
+			}
+			else
+			{
+?>
+			<div class="alert alert-error alert-block">
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<h4>Oh Snap!</h4>
+				<p>The following courses doesn't exist in the database:<?php echo $invalid_list; ?></p>
+				<p>Please only enter courses that have been added to the database first</p>
+			</div>
+<?php
+			}
 		}
 		
 	}
-	else if(isset($_POST["submit"]) && !empty($_POST["cgroup"])) //if edit course group form is submitted
+	else if(isset($_POST["submit1"])) //if edit course group form is submitted
 	{
 		//Setup database
 		$host = DB_HOST;
@@ -185,61 +319,60 @@
 			$cgname = $row["name"];
 			$courses = explode(",",$row["course_id"]);
 			
-			echo "Replace the details below with new values:<br/><br/>\n";
 ?>
-			
-			<form class="form-horizontal" action="cgroups-edit.php" method="POST">
+			<div class="well">
+			<h4>Edit Course Group</h4>
+			<div class="alert alert-info">
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<p>Don't forget to hit <em>"Save Changes"</em> once you're done!</p>
+			</div>
+			<form class="form-horizontal" action="cgroups-edit.php" method="POST" onsubmit="return validateForm2()">
 				<div class="control-group">
-					<label class="control-label" for="CGName">Course Group Name</label>
+					<label class="control-label" for="CGName">Course Group Name*</label>
 					<div class="controls">
-						<input type="text" name="cgname" id="CGName" placeholder="CS_Group_A_Literature/Philosophy" class="input-xlarge" value="<?php if(isset($cgname)) echo $cgname; ?>"> 
+						<input type="text" name="cgname" id="CGName" placeholder="CS_Group_A_Literature/Philosophy" class="span4" value="<?php if(isset($cgname)) echo $cgname; ?>"> 
 					</div>
 				</div>
 				
 				<div class="control-group">
-					<label class="control-label" for="course">Add Course to C. Group</label>
+					<label class="control-label" for="course">Find or Add Course</label>
 					<div class="controls">
 						<input type="text" name="course" id="course" class="input-small" placeholder="e.g. CS101" />
-						<a href="Javascript:newPopup('courses-find.php');"><button type="button" class="btn btn-info">Find</button></a>	
-					</div>
-				</div>
-				
-				<div class="control-group">
-					<div class="controls">
-						<button class="btn btn-info" type="button" value="Add to List" onclick="addCourse()">Add</button>
+						<button type="button" class="btn btn-info" onclick="Javascript:newPopup('courses-find.php');" title="Find Course"><i class="icon-search"></i></button>
+						</a>
+						<button class="btn btn-success" type="button" onclick="addCourse()" id="add-btn" title="Add Course to the list" value="Add to List" ><i class="icon-plus"></i></button>	
 					</div>
 				</div>
 				
 				<div class="control-group">
 					<label class="control-label" for="Courses">Courses in Course Group</label>
 					<div class="controls">
-						<select multiple="multiple" name="course_id[]" id="courses" class="input-xlarge">
+						<select multiple="multiple" name="course_id[]" id="courses" class="span4" size="5">
 						<?php
 							foreach ($courses as $course_id) 
 							{
 								echo "<option value=\"$course_id\">" .$course_id. "</option>\n";
-							}
-									
+							}		
 						?>
 						</select>
+						<div class="btn-group btn-group-vertical">
+						  <button type="button" name="sort" class="btn" value="Up" id="moveup-btn" data-placement="right"title="Move Up"><i class="icon-arrow-up"></i></button>
+						  <button type="button" name="sort" class="btn" value="Down" id="movedown-btn"  data-placement="right" title="Move Down"><i class="icon-arrow-down"></i></button>
+						  <button type="button" class="btn btn-danger" onclick="removeCourse()" id="remove-btn" data-placement="right"title="Remove selected course" ><i class="icon-remove"></i></button>
+						</div>
+						
 					</div>
 				</div>
 				
-				<div class="control-group">
-					<div class="controls">
-						<button class="btn btn-small btn-danger" type="button" onclick="removeCourse()" value="Remove Course">Remove Course</button>
-					</div>
-				</div>
+	
 				
-				<div class="control-group">
-					<div class="controls">
-						<input type="hidden" name="oldcgname" value="<?php echo $cgname; ?>">
-						<button type="submit" name="submit" class="btn btn-primary" onclick="selectAllCourses()">Save Changes</button>
-						<button type="submit" name="submit" class="btn" onclick="/cgroups-edit.php">Cancel</button>
-					</div>
+				<div class="form-actions">
+					<input type="hidden" name="oldcgname" value="<?php echo $cgname; ?>">
+					<button type="submit" name="submit2" class="btn btn-primary">Save Changes</button>
 				</div>
 				
 			</form>
+			</div>
 <?php
 		}	
 	}
@@ -268,15 +401,18 @@
 		else
 		{
 ?>
-			
+			<div class="well">
 			<h4>Edit Course Group</h4>
-			<p>Please select course group and click <em>"Edit Course Group"</em> button.</p>
+			<div class="alert alert-info">
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<p>Please select course group and click <em>"Edit Course Group"</em> button.</p>
+			</div>
 			
-			<form class="form-horizontal" method="post" action="cgroups-edit.php">
+			<form class="form-horizontal" method="post" action="cgroups-edit.php" onsubmit="return validateForm1()">
 				<div class="control-group">
 					<label class="control-label" for="CourseGroup">Select Course Group</label>
 					<div class="controls">
-						<select name="cgroup" id="cgroup" >
+						<select name="cgroup" id="cgroup" class="span4">
 							<option value="">--Course Groups--</option>
 							
 		<?php
@@ -290,12 +426,13 @@
 						</select>
 					</div>
 				</div>
-					<div class="control-group">
-						<div class="controls">
-							<button name="submit" type="submit" class="btn btn-primary">Edit Course Group</button>
-						</div>
-					</div>
-				</form>
+					
+				<div class="form-actions">
+					<button name="submit1" type="submit" class="btn btn-primary">Edit Course Group</button>
+				</div>
+				
+			</form>
+			</div>
 <?php
 		}
 	}
@@ -305,7 +442,5 @@
 				<p>© Study Planner 2013</p>
 			</footer>
 		</div>
-		
-		<?php require("../includes/scripts.php"); ?>
 	</body>
 </html>

@@ -5,16 +5,26 @@
 		<?php require("../includes/styles.php"); ?>
 		<?php require("../includes/config.php"); ?>
 		<?php require("../includes/functions.php"); ?>
+		<?php require("../includes/scripts.php"); ?>
 		
-	<script>
-		function ConfirmDelete(delUrl) 
-		{
-			if(confirm("Are you sure you want to delete this degree program?"))
+		<script type="text/javascript">
+			//Validates form inputs
+			function validateForm()
 			{
-				document.location = delUrl;
+				var w = document.getElementById("Degree");
+				//Check for empty fields
+				if (w.value==null || w.value=="")
+				{
+					alert("Please select a Degree Program from the list!");
+					return false;
+				}
+				else
+				{
+					confirm("Are you sure you want to delete the selected Degree Program?");
+				}
 			}
-		}
-	</script>
+		</script>
+		
 	</head>
 	<body>
 		<?php require("../includes/navigation.php"); ?>
@@ -54,11 +64,10 @@
 		
 		
 		//If form is submitted & course group is not empty
-		if(isset($_POST["submit"]) && !empty($_POST["degree"]))
+		if(isset($_POST["submit"]))
 		{
-			
 			//Extract values
-			$degree = strtolower(addslashes(strip_tags($_POST["degree"])));
+			$degree = strtoupper(addslashes(strip_tags($_POST["degree"])));
 		
 			//Check with database
 			$sql = "SELECT * FROM degree WHERE degree_name = :degree";
@@ -80,8 +89,13 @@
 				$sth->bindParam(":degree", $degree);
 				
 				$sth->execute();
-				
-				echo $degree . " has been deleted.";
+?>
+			<div class="alert alert-success alert-block">
+				 <button type="button" class="close" data-dismiss="alert"></button>
+				 <h4>There She Goes...</h4>
+				<p><?php echo $degree ?> has been deleted</p>
+			</div>
+<?php				
 			}
 				
 		}
@@ -100,14 +114,18 @@
 			else
 			{
 ?>
+			<div class="well">
 			<h4>Delete Degree Program</h4>
-			<p>Please select a degree program and click <em>"Delete Degree Program"</em> button.</p>
+			<div class="alert alert-info">
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<p>Please select a degree program and click <em>"Delete Degree Program"</em> button.</p>
+			</div>
 			
-			<form class="form-horizontal" method="post" action="dprograms-delete.php">
+			<form class="form-horizontal" method="post" action="dprograms-delete.php" onsubmit="return validateForm()">
 				<div class="control-group">
 					<label class="control-label" for="Degree">Select degree program</label>
 					<div class="controls">
-						<select name="degree" id="degree" >
+						<select name="degree" id="Degree" class="span4">
 							<option value="">-- Degree Program --</option>
 						
 <?php
@@ -120,12 +138,12 @@
 						</select>
 					</div>
 				</div>
-				<div class="control-group">
-					<div class="controls">
-						<a href="dprograms-delete.php" onclick="return confirm('Are you sure you want to delete this degree program?')"><button name="submit" type="submit" class="btn btn-primary">Delete Degree Program</button></a>
-					</div>
+				
+				<div class="form-actions">
+				 <a href="dprograms-delete.php"><button name="submit" type="submit" class="btn btn-primary">Delete Degree Program</button></a>
 				</div>
 			</form>
+			</div>
 <?php
 			}
 		}	

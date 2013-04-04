@@ -5,13 +5,22 @@
 		<?php require("../includes/styles.php"); ?>
 		<?php require("../includes/config.php"); ?>	
 		<?php require("../includes/functions.php"); ?>
+		<?php require("../includes/scripts.php"); ?>
 		
 		<script>
-			function ConfirmDelete(delUrl) 
+			//Validates form inputs
+			function validateForm()
 			{
-				if(confirm("Are you sure you want to delete this course group?"))
+				var w = document.getElementById("cgroup");
+				//Check for empty fields
+				if (w.value==null || w.value=="")
 				{
-					document.location = delUrl;
+					alert("Please select a Course Group from the list!");
+					return false;
+				}
+				else
+				{
+					confirm("Are you sure you want to delete the selected Course Group?");
 				}
 			}
 		</script>
@@ -54,11 +63,11 @@
 		
 		
 		//If form is submitted & course group is not empty
-		if(isset($_POST["submit"]) && !empty($_POST["cgroup"]))
+		if(isset($_POST["submit"]))
 		{
 			
 			//Extract values
-			$cgroup = strtolower(s_string($_POST["cgroup"]));
+			$cgroup = strtoupper(s_string($_POST["cgroup"]));
 		
 			//Check with database
 			$sql = "SELECT * FROM course_group WHERE name = :cgroup";
@@ -69,7 +78,6 @@
 			
 			$sth->execute();
 			$rownum = $sth->rowCount();
-			echo "Results: " . $rownum . " courses.<br/>\n";
 			
 			if(!$rownum)
 				echo "There is no course group available.<br/>\n";
@@ -81,7 +89,13 @@
 				
 				$sth->execute();
 				
-				echo  $cgroup . " has been deleted.";
+?>
+			<div class="alert alert-success alert-block">
+				 <button type="button" class="close" data-dismiss="alert"></button>
+				 <h4>There She Goes...</h4>
+				<p><?php echo $cgroup ?> has been deleted</p>
+			</div>
+<?php				
 			}
 				
 		}
@@ -100,14 +114,18 @@
 			else
 			{
 ?>
+			<div class="well">
 			<h4>Delete Course Group</h4>
-			<p>Please select course group and click <em>"Delete Course Group"</em> button.</p>
+			<div class="alert alert-info">
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<p>Please select course group and click <em>"Delete Course Group"</em> button.</p>
+			</div>
 			
-			<form class="form-horizontal" method="post" action="cgroups-delete.php">
+			<form class="form-horizontal" method="post" action="cgroups-delete.php" onsubmit="return validateForm()">
 				<div class="control-group">
 					<label class="control-label" for="CourseGroup">Select Course Group</label>
 					<div class="controls">
-						<select name="cgroup" id="cgroup" >
+						<select name="cgroup" id="cgroup" class="span4">
 							<option value="">--Course Group--</option>
 						
 <?php
@@ -120,22 +138,19 @@
 						</select>
 					</div>
 				</div>
-				<div class="control-group">
-					<div class="controls">
-						<a href="cgroups-delete.php" onclick="return confirm('Are you sure you want to delete this course group?')"><button name="submit" type="submit" class="btn btn-primary">Delete Course Group</button></a>
-					</div>
+		
+				<div class="form-actions">
+				 <a href="dprograms-delete.php"><button name="submit" type="submit" class="btn btn-primary">Delete Course Group</button></a>
 				</div>
 			</form>
+			</div>
 <?php
 			}
 		}	
 ?>
-			
 			<footer>
 				<p>© Study Planner 2013</p>
 			</footer>
-		</div>
-		
-		<?php require("../includes/scripts.php"); ?>	
+		</div>	
 	</body>
 </html>

@@ -16,15 +16,23 @@
 			//Get value from child window
 			function GetValueFromChild(course)
 			{
-				document.getElementById('CourseId').value = course;
+				document.getElementById('courseId').value = course;
 			}
 			
-			function ConfirmDelete(delUrl) 
+			//Validates form inputs
+			function validateForm()
 			{
-				if(confirm("Are you sure you want to delete this course?"))
+				var x = document.getElementById("courseId").value;
+					
+				//Check for empty fields
+				if(x == null || x == "")
 				{
-					document.location = delUrl;
+					alert("Please fill in the required field");
+					return false;
 				}
+				
+				//Ask for user confirmation
+				return confirm("Are you sure you want to delete this course?");
 			}
 		</script>
 	</head>
@@ -56,7 +64,7 @@
 			
 <?php
 	//If delete form is submitted & course is not empty
-	if(isset($_POST["submit"]) && !empty($_POST["courseid"]))
+	if(isset($_POST["submit"]) && !empty($_POST["courseId"]))
 	{
 		
 		//Setup database
@@ -70,7 +78,7 @@
 		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		//Sanitize & extract values
-		$cid = strtoupper(s_string($_POST["courseid"]));
+		$cid = strtoupper(s_string($_POST["courseId"]));
 		
 		//Check if course exists
 		$sql = "SELECT * FROM course WHERE CONCAT(prefix, number) = :cid";
@@ -82,7 +90,15 @@
 		$rownum = $sth->rowCount();
 		
 		if(!$rownum)
-			echo "Course " . $cid . " does not exist in database.<br/>\n";
+		{
+		?>
+			<div class="alert alert-block">
+				 <button type="button" class="close" data-dismiss="alert"></button>
+				 <h4>Wait!</h4>
+				<p><?php echo "Course " . $cid . " does not exist in database.<br/>\n"; ?></p>
+			</div>
+	<?php
+		}
 		else
 		{
 			$sql = "DELETE FROM course WHERE CONCAT(prefix, number) = :cid";
@@ -130,28 +146,39 @@
 			}
 			
 			echo "Course " . $cid . " has been deleted.";
+			?>
+			<div class="alert alert-success alert-block">
+				 <button type="button" class="close" data-dismiss="alert"></button>
+				 <h4>There She Goes...</h4>
+				<p><?php echo "Course " . $cid . " has been deleted."; ?></p>
+			</div>
+<?php			
 		}
 	}	
 	else
 	{
 ?>
+			<div class="well">
 			<h4>Delete Course</h4>
-			<p>Please enter the course number and click <em>"Delete Course"</em> button.</p>
+			<div class="alert alert-info">
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<p>Please enter the course number and click <em>"Delete Course"</em> button.</p>
+			</div>
 		
-			<form class="form-horizontal" action="courses-delete.php" method="POST">
+			<form class="form-horizontal" action="courses-delete.php" method="post" onsubmit="return validateForm()">
 				<div class="control-group">
-					<label class="control-label" for="CourseId">Course</label>
+					<label class="control-label" for="courseId">Course</label>
 					<div class="controls">
-						<input type="text" name="courseid" id="CourseId" class="input-small" placeholder="e.g. CS101" />
-						<a href="Javascript:newPopup('courses-find.php');"><button type="button" class="btn btn-info">Find</button></a>
+						<input type="text" name="courseId" id="courseId" class="input-small" placeholder="e.g. CS101" />
+						<button type="button" class="btn btn-info" onclick="Javascript:newPopup('courses-find.php');" title="Find Course"><i class="icon-search"></i></button>
 					</div>
 				</div>
-				<div class="control-group">
-					<div class="controls">
-						<a href="courses-delete.php" onclick="return confirm('Are you sure you want to delete this course?')"><button type="submit" name="submit" class="btn btn-primary">Delete Course</button></a>
-					</div>
+
+				<div class="form-actions">
+				  <button type="submit" name="submit" class="btn btn-primary">Delete Course</button>
 				</div>
 			</form>
+			</div>
 <?php
 	}
 ?>

@@ -16,7 +16,52 @@
 			//Get value from child window
 			function GetValueFromChild(course)
 			{
-				document.getElementById('CourseId').value = course;
+				document.getElementById('courseId').value = course;
+			}
+			
+			//Validates form inputs
+			function validateForm()
+			{
+				var inputs = ["coursePrefix", "courseNumber", "credits", "courseName", "department"];
+				
+				for(var i = 0; i < inputs.length; i++)
+				{
+					var x = document.getElementById(inputs[i]).value;
+					
+					//Check for empty fields
+					if(x == null || x == "")
+					{
+						alert("Please fill in all required fields");
+						return false;
+					}
+					
+					//Check numeric inputs
+					else if(inputs[i] == "courseNumber" || inputs[i] == "credits")
+						if(isNaN(x))
+						{
+							alert("Please fill in Course Number and Credits with numeric inputs only");
+							return false;
+						}
+				}
+				
+				var ocChecked = false;
+				var wcChecked = false;
+				var y = document.getElementsByName("onCampus[]");
+				var z = document.getElementsByName("webCampus[]");
+				
+				//Check if at least one checkbox is checked
+				for(var j = 0; j < y.length; j++)
+				{
+					if(y[j].checked)
+						ocChecked = true;
+					if(z[j].checked)
+						wcChecked = true;
+				}
+				if(!ocChecked && !wcChecked)
+				{
+					alert("Please tick at least one checkbox for Term Offered");
+					return false;
+				}
 			}
 		</script>
 	</head>
@@ -45,8 +90,8 @@
 			<hr/>
 			
 <?php
-	//If newly edited details form is submitted
-	if(isset($_POST["submit"]) && (!empty($_POST["courseprefix"]) && !empty($_POST["coursenumber"])))
+	//If edited form is submitted
+	if(isset($_POST["submitEdited"]))
 	{
 		//Setup database
 		$host = DB_HOST;
@@ -58,22 +103,20 @@
 		$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		
-		//TODO: count required input
-		
 		//Sanitize & extract values
-		$cid = strtoupper(s_string($_POST["courseid"]));
-		$pre = strtoupper(s_string($_POST["courseprefix"]));
-		$num = s_int($_POST["coursenumber"]);
+		$cid = strtoupper(s_string($_POST["courseId"]));
+		$pre = strtoupper(s_string($_POST["coursePrefix"]));
+		$num = s_int($_POST["courseNumber"]);
 		$cred = s_int($_POST["credits"]);
-		$name = s_string($_POST["coursename"]);
+		$name = s_string($_POST["courseName"]);
 		$dept = strtolower(s_string($_POST["department"]));
 		$prereq = strtoupper(s_string($_POST["prerequisites"]));
 		$coreq = strtoupper(s_string($_POST["corequisites"]));
 		
-		if(isset($_POST["oncampus"]))
-			$ocarr = $_POST["oncampus"];
-		if(isset($_POST["webcampus"]))
-			$wcarr = $_POST["webcampus"];
+		if(isset($_POST["onCampus"]))
+			$ocarr = $_POST["onCampus"];
+		if(isset($_POST["webCampus"]))
+			$wcarr = $_POST["webCampus"];
 		
 		$oc = "";
 		$wc = "";
@@ -243,8 +286,8 @@
 		
 		echo "Course successfully edited.<br/>\n";
 	}
-	//If edit form is submitted & course is not empty
-	else if(isset($_POST["submit"]) && !empty($_POST["courseid"]))
+	//If default edit form is submitted
+	else if(isset($_POST["submit"]))
 	{
 		//Setup database
 		$host = DB_HOST;
@@ -257,7 +300,7 @@
 		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		
 		//Sanitize & extract values
-		$cid = strtoupper(s_string($_POST["courseid"]));
+		$cid = strtoupper(s_string($_POST["courseId"]));
 		
 		//Check if course exists
 		$sql = "SELECT * FROM course WHERE CONCAT(prefix, number) = :cid";
@@ -334,35 +377,35 @@
 			echo "Replace the details below with new values:<br/><br/>\n";
 ?>
 			
-			<form class="form-horizontal" action="courses-edit.php" method="POST">
+			<form class="form-horizontal" action="courses-edit.php" method="post" onsubmit="return validateForm()">
 				<div class="control-group">
-					<label class="control-label" for="CoursePrefix">Course Prefix</label>
+					<label class="control-label" for="coursePrefix">Course Prefix</label>
 					<div class="controls">
-						<input type="text" name="courseprefix" id="CoursePrefix" class="input-small" placeholder="e.g. CS" value="<?php if(isset($pre)) echo $pre; ?>" /> 
+						<input type="text" name="coursePrefix" id="coursePrefix" class="input-small" placeholder="e.g. CS" value="<?php if(isset($pre)) echo $pre; ?>" /> 
 					</div>
 				</div>				
 				<div class="control-group">
-					<label class="control-label" for="CourseNumber">Course Number</label>
+					<label class="control-label" for="courseNumber">Course Number</label>
 					<div class="controls">
-						<input type="text" name="coursenumber" id="CourseNumber" class="input-small" placeholder="e.g. 101" value="<?php if(isset($num)) echo $num; ?>" /> 
+						<input type="text" name="courseNumber" id="courseNumber" class="input-small" placeholder="e.g. 101" value="<?php if(isset($num)) echo $num; ?>" /> 
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label" for="Credits">Credits</label>
+					<label class="control-label" for="credits">Credits</label>
 					<div class="controls">
-						<input type="text" name="credits" id="Credits" class="input-small" value="<?php if(isset($cred)) echo $cred; ?>" /> 
+						<input type="text" name="credits" id="credits" class="input-small" value="<?php if(isset($cred)) echo $cred; ?>" /> 
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label" for="CourseName">Course Name</label>
+					<label class="control-label" for="courseName">Course Name</label>
 					<div class="controls">
-						<input type="text" name="coursename" id="CourseName" value="<?php if(isset($name)) echo $name; ?>" /> 
+						<input type="text" name="courseName" id="courseName" value="<?php if(isset($name)) echo $name; ?>" /> 
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label" for="Department">Department</label>
+					<label class="control-label" for="department">Department</label>
 					<div class="controls">
-						<select name="department" id="Department">
+						<select name="department" id="department">
 							<option value="" <?php if(isset($dept) && $dept == "") echo "selected"; ?>>Select a department..</option>
 							<option value="chemical" <?php if(isset($dept) && $dept == "chemical") echo "selected"; ?>>Chemical Engineering & Materials Science</option>
 							<option value="chemistry" <?php if(isset($dept) && $dept == "chemistry") echo "selected"; ?>>Chemistry, Biology & Biomedical Engineering</option>
@@ -380,15 +423,15 @@
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label">Prerequisites</label>
+					<label class="control-label" for="prerequisites">Prerequisites</label>
 					<div class="controls">
-						<textarea name="prerequisites" id="Prerequisites"><?php if(isset($prereq)) echo $prereq; ?></textarea>
+						<textarea name="prerequisites" id="prerequisites" placeholder="e.g. CS115 OR CS180                   CS284"><?php if(isset($prereq)) echo $prereq; ?></textarea>
 					</div>
 				</div>
 				<div class="control-group">
-					<label class="control-label">Corequisites</label>
+					<label class="control-label" for="corequisites">Corequisites</label>
 					<div class="controls">
-						<textarea name="corequisites" id="Corequisites"><?php if(isset($coreq)) echo $coreq; ?></textarea> 
+						<textarea name="corequisites" id="corequisites" placeholder="e.g. CS115 OR CS180                   CS284"><?php if(isset($coreq)) echo $coreq; ?></textarea> 
 					</div>
 				</div>
 				<div class="control-group">
@@ -398,16 +441,16 @@
 							<label class="control-label">On Campus</label>
 							<div class="controls">
 								<label class="checkbox inline">
-									Fall<input type="checkbox" name="oncampus[]" id="Fall" value="fall" <?php if(isset($oc) && strpos($oc, "fall") !== FALSE) echo "checked"; ?> />
+									Fall<input type="checkbox" name="onCampus[]" id="fall" value="fall" <?php if(isset($oc) && strpos($oc, "fall") !== FALSE) echo "checked"; ?> />
 								</label>
 								<label class="checkbox inline">
-									Spring<input type="checkbox" name="oncampus[]" id="Spring" value="spring" <?php if(isset($oc) && strpos($oc, "spring") !== FALSE) echo "checked"; ?> />
+									Spring<input type="checkbox" name="onCampus[]" id="spring" value="spring" <?php if(isset($oc) && strpos($oc, "spring") !== FALSE) echo "checked"; ?> />
 								</label>
 								<label class="checkbox inline">
-									Summer 1<input type="checkbox" name="oncampus[]" id="Summer1" value="summer1" <?php if(isset($oc) && strpos($oc, "summer1") !== FALSE) echo "checked"; ?> />
+									Summer 1<input type="checkbox" name="onCampus[]" id="summer1" value="summer1" <?php if(isset($oc) && strpos($oc, "summer1") !== FALSE) echo "checked"; ?> />
 								</label>
 								<label class="checkbox inline">
-									Summer 2<input type="checkbox" name="oncampus[]" id="Summer2" value="summer2" <?php if(isset($oc) && strpos($oc, "summer2") !== FALSE) echo "checked"; ?> />
+									Summer 2<input type="checkbox" name="onCampus[]" id="summer2" value="summer2" <?php if(isset($oc) && strpos($oc, "summer2") !== FALSE) echo "checked"; ?> />
 								</label>
 							</div>
 						</div>
@@ -417,16 +460,16 @@
 							<label class="control-label">Web Campus</label>
 							<div class="controls">
 								<label class="checkbox inline">
-									Fall<input type="checkbox" name="webcampus[]" id="Fall" value="fall" <?php if(isset($wc) && strpos($wc, "fall") !== FALSE) echo "checked"; ?> />
+									Fall<input type="checkbox" name="webCampus[]" id="fall" value="fall" <?php if(isset($wc) && strpos($wc, "fall") !== FALSE) echo "checked"; ?> />
 								</label>
 								<label class="checkbox inline">
-									Spring<input type="checkbox" name="webcampus[]" id="Spring" value="spring" <?php if(isset($wc) && strpos($wc, "spring") !== FALSE) echo "checked"; ?> />
+									Spring<input type="checkbox" name="webCampus[]" id="spring" value="spring" <?php if(isset($wc) && strpos($wc, "spring") !== FALSE) echo "checked"; ?> />
 								</label>
 								<label class="checkbox inline">
-									Summer 1<input type="checkbox" name="webcampus[]" id="Summer1" value="summer1" <?php if(isset($wc) && strpos($wc, "summer1") !== FALSE) echo "checked"; ?> />
+									Summer 1<input type="checkbox" name="webCampus[]" id="summer1" value="summer1" <?php if(isset($wc) && strpos($wc, "summer1") !== FALSE) echo "checked"; ?> />
 								</label>
 								<label class="checkbox inline">
-									Summer 2<input type="checkbox" name="webcampus[]" id="Summer2" value="summer2" <?php if(isset($wc) && strpos($wc, "summer2") !== FALSE) echo "checked"; ?> />
+									Summer 2<input type="checkbox" name="webCampus[]" id="summer2" value="summer2" <?php if(isset($wc) && strpos($wc, "summer2") !== FALSE) echo "checked"; ?> />
 								</label>
 							</div>
 						</div>
@@ -434,8 +477,8 @@
 				</div>
 				<div class="control-group">
 					<div class="controls">
-						<input type="hidden" name="courseid" value="<?php echo $cid; ?>">
-						<button type="submit" name="submit" class="btn btn-primary">Edit Course</button>
+						<input type="hidden" name="courseId" value="<?php echo $cid; ?>">
+						<button type="submit" name="submitEdited" class="btn btn-primary">Edit Course</button>
 					</div>
 				</div>
 			</form>
@@ -443,27 +486,32 @@
 <?php
 		}
 	}
+	//Default page
 	else
 	{
 ?>
-			
+			<div class="well">
 			<h4>Edit Course</h4>
-			<p>Please enter the course prefix & number and click <em>"Edit Course"</em> button.</p>
+			<div class="alert alert-info">
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<p>Please enter the course prefix & number and click <em>"Edit Course"</em> button.</p>
+			</div>
 			
-			<form class="form-horizontal" action="courses-edit.php" method="POST">
+			<form class="form-horizontal" action="courses-edit.php" method="post">
 				<div class="control-group">
-					<label class="control-label" for="CourseId">Course</label>
+					<label class="control-label" for="courseId">Course</label>
 					<div class="controls">
-						<input type="text" name="courseid" id="CourseId" class="input-small" placeholder="e.g. CS101" />
-						<a href="Javascript:newPopup('courses-find.php');"><button type="button" class="btn btn-info">Find</button></a>
+						<input type="text" name="courseId" id="courseId" class="input-small" placeholder="e.g. CS101" />
+						<button type="button" class="btn btn-info" onclick="Javascript:newPopup('courses-find.php');" title="Find Course"><i class="icon-search"></i></button>
 					</div>
 				</div>
-				<div class="control-group">
-					<div class="controls">
-						<button type="submit" name="submit" class="btn btn-primary">Edit Course</button>
-					</div>
+			
+				
+				<div class="form-actions">
+				  <button type="submit" name="submit" class="btn btn-primary">Edit Course</button>
 				</div>
 			</form>
+			</div>
 			
 <?php
 	}
