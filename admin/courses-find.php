@@ -127,7 +127,7 @@
 				<div class="well">
 				<table class="table table-bordered table-condensed">		
 					<tbody>
-						<tr class="success">
+						<tr class="info">
 							<td colspan="2">
 							<?php echo "<h4>".$pre." ".$num."</h4>"; ?>
 							</td>
