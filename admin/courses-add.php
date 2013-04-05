@@ -341,7 +341,7 @@
 	{
 ?>
 			
-			<div id="wrapper" class="container-fluid">
+			<div id="wrapper" class="fluid">
 			<div class="row-fluid">
 			<form id="frmOptions" class="well form-inline span12" action="courses-add.php" method="post" onsubmit="return validateForm()">
 				<h4>Add Course</h4>
