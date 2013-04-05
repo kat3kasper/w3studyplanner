@@ -20,6 +20,19 @@
 			}
 			
 			//Validates form inputs
+			function validateForm1()
+			{
+				var x = document.getElementById("courseId").value;
+					
+				//Check for empty fields
+				if(x == null || x == "")
+				{
+					alert("Please fill in the required field");
+					return false;
+				}
+			}
+			
+			//Validates form inputs
 			function validateForm()
 			{
 				var inputs = ["coursePrefix", "courseNumber", "credits", "courseName", "department"];
@@ -152,7 +165,15 @@
 		$rownum = $sth->rowCount();
 		
 		if($rownum)
-			echo "Course with that prefix & number already exist in database.<br/>\n";
+			{
+?>
+				<div class="alert alert-block">
+				 <button type="button" class="close" data-dismiss="alert"></button>
+				 <h4>Wait!</h4>
+				<p>Course with that prefix & number already exist in database.</p>
+				</div>
+<?php
+			}
 		else
 		{
 			//Update course
@@ -282,9 +303,16 @@
 			
 				$sth->execute();
 			}
-		}
 		
-		echo "Course successfully edited.<br/>\n";
+		
+		?>		
+				<div class="alert alert-success alert-block">
+				 <button type="button" class="close" data-dismiss="alert"></button>
+				 <h4>Success!</h4>
+				<p>Changes successfully saved.</p>
+				</div>
+		<?php
+		}
 	}
 	//If default edit form is submitted
 	else if(isset($_POST["submit"]))
@@ -312,7 +340,15 @@
 		$rownum = $sth->rowCount();
 		
 		if(!$rownum)
-			echo "Course doesn't exist in database.<br/>\n";
+			{
+?>
+			<div class="alert alert-error alert-block">
+			 <button type="button" class="close" data-dismiss="alert"></button>
+			 <h4>Oh Snap!</h4>
+			<p><?php echo $cid ?> does not exists in database...</p>
+			</div>
+<?php
+		}
 		else
 		{
 			//Get course details
@@ -374,114 +410,156 @@
 					$coreq .= implode(" OR ", explode("|", $value));
 			}
 			
-			echo "Replace the details below with new values:<br/><br/>\n";
 ?>
+
+			<div id="wrapper" class="fluid">
+			<div class="row-fluid">
+			<form id="frmOptions" class="well form-inline span12" action="courses-edit.php" method="post" onsubmit="return validateForm()">
+				<h4>Edit Course</h4>
+				<div class="alert alert-info">
+					<button type="button" class="close" data-dismiss="alert"></button>
+					<p>Don't forget to hit <em>"Save Changes"</em> button once you're done.</p>
+				</div>
+				<br>
+				<div class="row-fluid">   
+					<div id="formLeft" class="span2">
+						<div class="control-group">
+							<label class="control-label" for="coursePrefix">Course Prefix</label>
+							<div class="controls">
+								<input type="text" name="coursePrefix" id="coursePrefix" class="input-medium" placeholder="e.g. CS" value="<?php if(isset($pre)) echo $pre; ?>" /> 
+							</div>
+						</div>
+					</div>
+					
+					  <div id="formCenter" class="span2">
+							<div class="control-group">
+								<label class="control-label" for="courseNumber">Course Number</label>
+								<div class="controls">
+									<input type="text" name="courseNumber" id="courseNumber" class="input-medium" placeholder="e.g. 101" value="<?php if(isset($num)) echo $num; ?>" /> 
+								</div>
+							</div>
+					  </div>
+					  
+					    <div id="formRight" class="span2">
+							<div class="control-group">
+								<label class="control-label" for="credits">Credits</label>
+								<div class="controls">
+									<input type="text" name="credits" id="credits" class="input-medium" value="<?php if(isset($cred)) echo $cred; ?>" /> 
+								</div>
+							</div>
+						</div>
+				</div>
+				<br>
+				<div class="row-fluid">  
+					<div id="formLeft" class="span3">
+						<div class="control-group">
+							<label class="control-label" for="courseName">Course Name</label>
+							<div class="controls">
+								<input type="text" name="courseName" id="courseName" value="<?php if(isset($name)) echo $name; ?>" /> 
+							</div>
+						</div>
+					</div>
+					
+					<div id="formCenter" class="span7">
+						<div class="control-group">
+							<label class="control-label" for="department">Department</label>
+							<div class="controls">
+								<select name="department" id="department" class="span5">
+									<option value="" <?php if(isset($dept) && $dept == "") echo "selected"; ?>>Select a department..</option>
+									<option value="chemical" <?php if(isset($dept) && $dept == "chemical") echo "selected"; ?>>Chemical Engineering & Materials Science</option>
+									<option value="chemistry" <?php if(isset($dept) && $dept == "chemistry") echo "selected"; ?>>Chemistry, Biology & Biomedical Engineering</option>
+									<option value="civil" <?php if(isset($dept) && $dept == "civil") echo "selected"; ?>>Civil, Environmental & Ocean Engineering</option>
+									<option value="computer" <?php if(isset($dept) && $dept == "computer") echo "selected"; ?>>Computer Science</option>
+									<option value="electrical" <?php if(isset($dept) && $dept == "electrical") echo "selected"; ?>>Electrical & Computer Engineering</option>
+									<option value="mathematical" <?php if(isset($dept) && $dept == "mathematical") echo "selected"; ?>>Mathematical Science</option>
+									<option value="mechanical" <?php if(isset($dept) && $dept == "mechanical") echo "selected"; ?>>Mechanical Engineering</option>
+									<option value="physics" <?php if(isset($dept) && $dept == "physics") echo "selected"; ?>>Physics & Engineering Physics</option>
+									<option value="systems" <?php if(isset($dept) && $dept == "systems") echo "selected"; ?>>Systems & Enterprises</option>
+									<option value="business" <?php if(isset($dept) && $dept == "business") echo "selected"; ?>>Business and Technology</option>
+									<option value="quantitative" <?php if(isset($dept) && $dept == "quantitative") echo "selected"; ?>>Quantitative Finance</option>
+									<option value="arts" <?php if(isset($dept) && $dept == "arts") echo "selected"; ?>>Arts and Letters</option>
+								</select>
+							</div>
+						</div>
+					</div>
+					
+				</div>
+				<br>
+				<div class="row-fluid">  
+					<div id="formLeft" class="span3">
+						<div class="control-group">
+							<label class="control-label" for="prerequisites">Prerequisites</label>
+							<div class="controls">
+								<textarea name="prerequisites" id="prerequisites" placeholder="e.g. CS115 OR CS180                   CS284"><?php if(isset($prereq)) echo $prereq; ?></textarea>
+							</div>
+						</div>
+					</div>
+					
+					<div id="formCenter" class="span7">
+						<div class="control-group">
+							<label class="control-label" for="corequisites">Corequisites</label>
+							<div class="controls">
+								<textarea name="corequisites" id="corequisites" class="span5" placeholder="e.g. CS115 OR CS180                   CS284"><?php if(isset($coreq)) echo $coreq; ?></textarea> 
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<br>
+				<div class="row-fluid">  
+					<div id="formCenter" class="span12">
+						<div class="control-group">
+							<label class="control-label">Term Offered*</label>
+							<div class="controls">
+								<div class="control-group">
+									<label class="control-label"><br>On Campus</label>
+									<div class="controls">
+										<label class="checkbox inline">
+											Fall<input type="checkbox" name="onCampus[]" id="fall" value="fall" <?php if(isset($oc) && strpos($oc, "fall") !== FALSE) echo "checked"; ?> />
+										</label>
+										<label class="checkbox inline">
+											Spring<input type="checkbox" name="onCampus[]" id="spring" value="spring" <?php if(isset($oc) && strpos($oc, "spring") !== FALSE) echo "checked"; ?> />
+										</label>
+										<label class="checkbox inline">
+											Summer 1<input type="checkbox" name="onCampus[]" id="summer1" value="summer1" <?php if(isset($oc) && strpos($oc, "summer1") !== FALSE) echo "checked"; ?> />
+										</label>
+										<label class="checkbox inline">
+											Summer 2<input type="checkbox" name="onCampus[]" id="summer2" value="summer2" <?php if(isset($oc) && strpos($oc, "summer2") !== FALSE) echo "checked"; ?> />
+										</label>
+									</div>
+								</div>
+							</div>
+							<div class="controls">
+								<div class="control-group">
+									<label class="control-label"><br>Web Campus</label>
+									<div class="controls">
+										<label class="checkbox inline">
+											Fall<input type="checkbox" name="webCampus[]" id="fall" value="fall" <?php if(isset($wc) && strpos($wc, "fall") !== FALSE) echo "checked"; ?> />
+										</label>
+										<label class="checkbox inline">
+											Spring<input type="checkbox" name="webCampus[]" id="spring" value="spring" <?php if(isset($wc) && strpos($wc, "spring") !== FALSE) echo "checked"; ?> />
+										</label>
+										<label class="checkbox inline">
+											Summer 1<input type="checkbox" name="webCampus[]" id="summer1" value="summer1" <?php if(isset($wc) && strpos($wc, "summer1") !== FALSE) echo "checked"; ?> />
+										</label>
+										<label class="checkbox inline">
+											Summer 2<input type="checkbox" name="webCampus[]" id="summer2" value="summer2" <?php if(isset($wc) && strpos($wc, "summer2") !== FALSE) echo "checked"; ?> />
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="form-actions">
+					<input type="hidden" name="courseId" value="<?php echo $cid; ?>">
+					<button type="submit" name="submitEdited" class="btn btn-primary">Save Changes</button>
+				</div>
 			
-			<form class="form-horizontal" action="courses-edit.php" method="post" onsubmit="return validateForm()">
-				<div class="control-group">
-					<label class="control-label" for="coursePrefix">Course Prefix</label>
-					<div class="controls">
-						<input type="text" name="coursePrefix" id="coursePrefix" class="input-small" placeholder="e.g. CS" value="<?php if(isset($pre)) echo $pre; ?>" /> 
-					</div>
-				</div>				
-				<div class="control-group">
-					<label class="control-label" for="courseNumber">Course Number</label>
-					<div class="controls">
-						<input type="text" name="courseNumber" id="courseNumber" class="input-small" placeholder="e.g. 101" value="<?php if(isset($num)) echo $num; ?>" /> 
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label" for="credits">Credits</label>
-					<div class="controls">
-						<input type="text" name="credits" id="credits" class="input-small" value="<?php if(isset($cred)) echo $cred; ?>" /> 
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label" for="courseName">Course Name</label>
-					<div class="controls">
-						<input type="text" name="courseName" id="courseName" value="<?php if(isset($name)) echo $name; ?>" /> 
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label" for="department">Department</label>
-					<div class="controls">
-						<select name="department" id="department">
-							<option value="" <?php if(isset($dept) && $dept == "") echo "selected"; ?>>Select a department..</option>
-							<option value="chemical" <?php if(isset($dept) && $dept == "chemical") echo "selected"; ?>>Chemical Engineering & Materials Science</option>
-							<option value="chemistry" <?php if(isset($dept) && $dept == "chemistry") echo "selected"; ?>>Chemistry, Biology & Biomedical Engineering</option>
-							<option value="civil" <?php if(isset($dept) && $dept == "civil") echo "selected"; ?>>Civil, Environmental & Ocean Engineering</option>
-							<option value="computer" <?php if(isset($dept) && $dept == "computer") echo "selected"; ?>>Computer Science</option>
-							<option value="electrical" <?php if(isset($dept) && $dept == "electrical") echo "selected"; ?>>Electrical & Computer Engineering</option>
-							<option value="mathematical" <?php if(isset($dept) && $dept == "mathematical") echo "selected"; ?>>Mathematical Science</option>
-							<option value="mechanical" <?php if(isset($dept) && $dept == "mechanical") echo "selected"; ?>>Mechanical Engineering</option>
-							<option value="physics" <?php if(isset($dept) && $dept == "physics") echo "selected"; ?>>Physics & Engineering Physics</option>
-							<option value="systems" <?php if(isset($dept) && $dept == "systems") echo "selected"; ?>>Systems & Enterprises</option>
-							<option value="business" <?php if(isset($dept) && $dept == "business") echo "selected"; ?>>Business and Technology</option>
-							<option value="quantitative" <?php if(isset($dept) && $dept == "quantitative") echo "selected"; ?>>Quantitative Finance</option>
-							<option value="arts" <?php if(isset($dept) && $dept == "arts") echo "selected"; ?>>Arts and Letters</option>
-						</select>
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label" for="prerequisites">Prerequisites</label>
-					<div class="controls">
-						<textarea name="prerequisites" id="prerequisites" placeholder="e.g. CS115 OR CS180                   CS284"><?php if(isset($prereq)) echo $prereq; ?></textarea>
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label" for="corequisites">Corequisites</label>
-					<div class="controls">
-						<textarea name="corequisites" id="corequisites" placeholder="e.g. CS115 OR CS180                   CS284"><?php if(isset($coreq)) echo $coreq; ?></textarea> 
-					</div>
-				</div>
-				<div class="control-group">
-					<label class="control-label">Term Offered</label>
-					<div class="controls">
-						<div class="control-group">
-							<label class="control-label">On Campus</label>
-							<div class="controls">
-								<label class="checkbox inline">
-									Fall<input type="checkbox" name="onCampus[]" id="fall" value="fall" <?php if(isset($oc) && strpos($oc, "fall") !== FALSE) echo "checked"; ?> />
-								</label>
-								<label class="checkbox inline">
-									Spring<input type="checkbox" name="onCampus[]" id="spring" value="spring" <?php if(isset($oc) && strpos($oc, "spring") !== FALSE) echo "checked"; ?> />
-								</label>
-								<label class="checkbox inline">
-									Summer 1<input type="checkbox" name="onCampus[]" id="summer1" value="summer1" <?php if(isset($oc) && strpos($oc, "summer1") !== FALSE) echo "checked"; ?> />
-								</label>
-								<label class="checkbox inline">
-									Summer 2<input type="checkbox" name="onCampus[]" id="summer2" value="summer2" <?php if(isset($oc) && strpos($oc, "summer2") !== FALSE) echo "checked"; ?> />
-								</label>
-							</div>
-						</div>
-					</div>
-					<div class="controls">
-						<div class="control-group">
-							<label class="control-label">Web Campus</label>
-							<div class="controls">
-								<label class="checkbox inline">
-									Fall<input type="checkbox" name="webCampus[]" id="fall" value="fall" <?php if(isset($wc) && strpos($wc, "fall") !== FALSE) echo "checked"; ?> />
-								</label>
-								<label class="checkbox inline">
-									Spring<input type="checkbox" name="webCampus[]" id="spring" value="spring" <?php if(isset($wc) && strpos($wc, "spring") !== FALSE) echo "checked"; ?> />
-								</label>
-								<label class="checkbox inline">
-									Summer 1<input type="checkbox" name="webCampus[]" id="summer1" value="summer1" <?php if(isset($wc) && strpos($wc, "summer1") !== FALSE) echo "checked"; ?> />
-								</label>
-								<label class="checkbox inline">
-									Summer 2<input type="checkbox" name="webCampus[]" id="summer2" value="summer2" <?php if(isset($wc) && strpos($wc, "summer2") !== FALSE) echo "checked"; ?> />
-								</label>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="control-group">
-					<div class="controls">
-						<input type="hidden" name="courseId" value="<?php echo $cid; ?>">
-						<button type="submit" name="submitEdited" class="btn btn-primary">Edit Course</button>
-					</div>
-				</div>
 			</form>
+			</div>
+			</div>
 			
 <?php
 		}
@@ -497,7 +575,7 @@
 				<p>Please enter the course prefix & number and click <em>"Edit Course"</em> button.</p>
 			</div>
 			
-			<form class="form-horizontal" action="courses-edit.php" method="post">
+			<form class="form-horizontal" action="courses-edit.php" method="post" onsubmit="return validateForm1()">
 				<div class="control-group">
 					<label class="control-label" for="courseId">Course</label>
 					<div class="controls">
