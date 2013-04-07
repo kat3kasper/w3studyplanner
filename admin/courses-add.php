@@ -139,31 +139,28 @@
 		$rownum = $sth->rowCount();
 		
 		if($rownum)
-			{
+		{
 ?>
 			<div class="alert alert-error alert-block">
-			 <button type="button" class="close" data-dismiss="alert"></button>
-			 <h4>Oh Snap!</h4>
-			<p><?php echo $cid ?> already exists in database...</p>
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<h4>Oh Snap!</h4>
+				<p><?php echo $cid ?> already exists in database...</p>
 			</div>
 <?php
 		}
 		else
 		{
-			$prereq_status = 1;
+			$valid_prereq = 1;
+			$invalid_prereq = "<li>";
+			
 			$coreq_status = 1;
 			
-			//Insert into course prerequisites
+			//Parsing course prerequisites
 			if(!empty($prereq))
 			{
-				$sql = "SELECT * FROM course WHERE CONCAT(prefix, number) = :cid";
-		
-				$sth = $dbh->prepare($sql);
+				$pre_and_list = "";
+				$pre_or_list = "";
 				
-				$and_list = "";
-				$or_list = "";
-				
-				//Parse AND
 				$prereq_arr = explode("\n", $prereq);
 				foreach($prereq_arr as $value)
 				{
@@ -172,25 +169,22 @@
 					{
 						$exploded = explode(" OR ", $value);
 						foreach($exploded as $c)
-						{
-							$sth->bindParam(":cid", $c);
-							$sth->execute();
-							
-							$rownum = $sth->rowCount();
-							
-							if(!$rownum)
-								$prereq_status = 0;
-						}
+							if(!course_exists($c))
+							{
+								$valid_prereq = 0;
+								$invalid_prereq .= "<li>" . $c . "</li>";
+							}
 						
-						if($prereq_status)
+						if($valid_prereq)
 						{
 							//Delimiter for each group of OR
-							if($or_list !== "")
-								$or_list .= ",";
+							if($pre_or_list !== "")
+								$pre_or_list .= ",";
 							
-							$or_list .= implode("|", explode(" OR ", $value));
+							$pre_or_list .= implode("|", $exploded);
 						}
 					}
+					//Parse AND
 					else
 					{
 						$sth->bindParam(":cid", $value);
@@ -199,42 +193,28 @@
 						$rownum = $sth->rowCount();
 						
 						if(!$rownum)
-							$prereq_status = 0;
+							$valid_prereq = 0;
 						
-						if($prereq_status)
+						if($valid_prereq)
 						{
-							if($and_list !== "")
-								$and_list .= ",";
+							if($pre_and_list !== "")
+								$pre_and_list .= ",";
 							
-							$and_list .= $value;
+							$pre_and_list .= $value;
 						}
 					}
 				}
-				
-				if($prereq_status)
-				{
-					$sql = "INSERT INTO course_prerequisites(parent_course_id, and_course_id, or_course_id) VALUES (:cid, :acid, :ocid)";
-					
-					$sth = $dbh->prepare($sql);
-					
-					$cid = $pre . $num;
-					$sth->bindParam(":cid", $cid);
-					$sth->bindParam(":acid", $and_list);
-					$sth->bindParam(":ocid", $or_list);
-				
-					$sth->execute();
-				}
 			}
 			
-			//Insert into course corequisites
+			//Parsing course corequisites
 			if(!empty($coreq))
 			{
 				$sql = "SELECT * FROM course WHERE CONCAT(prefix, number) = :cid";
 		
 				$sth = $dbh->prepare($sql);
 				
-				$and_list = "";
-				$or_list = "";
+				$co_and_list = "";
+				$co_or_list = "";
 				
 				//Parse AND
 				$coreq_arr = explode("\n", $coreq);
@@ -258,10 +238,10 @@
 						if($coreq_status)
 						{
 							//Delimiter for each group of OR
-							if($or_list !== "")
-								$or_list .= ",";
+							if($co_or_list !== "")
+								$co_or_list .= ",";
 							
-							$or_list .= implode("|", explode(" OR ", $value));
+							$co_or_list .= implode("|", explode(" OR ", $value));
 						}
 					}
 					else
@@ -276,15 +256,35 @@
 						
 						if($coreq_status)
 						{
-							if($and_list !== "")
-								$and_list .= ",";
+							if($co_and_list !== "")
+								$co_and_list .= ",";
 							
-							$and_list .= $value;
+							$co_and_list .= $value;
 						}
 					}
 				}
+			}
+			
+			//Insert into db
+			if($valid_prereq && $coreq_status)
+			{
+				//Insert into prereq
+				if(!empty($prereq))
+				{
+					$sql = "INSERT INTO course_prerequisites(parent_course_id, and_course_id, or_course_id) VALUES (:cid, :acid, :ocid)";
+					
+					$sth = $dbh->prepare($sql);
+					
+					$cid = $pre . $num;
+					$sth->bindParam(":cid", $cid);
+					$sth->bindParam(":acid", $pre_and_list);
+					$sth->bindParam(":ocid", $pre_or_list);
 				
-				if($coreq_status)
+					$sth->execute();
+				}
+				
+				//Insert into coreq
+				if(!empty($coreq))
 				{				
 					$sql = "INSERT INTO course_corequisites(parent_course_id, and_course_id, or_course_id) VALUES (:cid, :acid, :ocid)";
 					
@@ -292,16 +292,13 @@
 					
 					$cid = $pre . $num;
 					$sth->bindParam(":cid", $cid);
-					$sth->bindParam(":acid", $and_list);
-					$sth->bindParam(":ocid", $or_list);
+					$sth->bindParam(":acid", $co_and_list);
+					$sth->bindParam(":ocid", $co_or_list);
 				
 					$sth->execute();
 				}
-			}
-			
-			//Insert to course after prereq & coreq are successful
-			if($prereq_status && $coreq_status)
-			{
+				
+				//Insert into course
 				$sql = "INSERT INTO course(prefix, number, no_of_credits, course_name, department, on_campus_semesters, web_campus_semesters) VALUES (:pre, :num, :cred, :name, :dept, :oc, :wc)";
 				
 				$sth = $dbh->prepare($sql);
