@@ -22,7 +22,7 @@
 						  </li>
 						</ul>
 						<p class="navbar-text pull-right">
-							<a href="#" class="navbar-link"><strong><?php echo $_ENV["REDIRECT_displayName"]; ?></strong></a>
+							<a href="#" class="navbar-link"><strong><?php echo $_SERVER["REDIRECT_displayName"]; ?></strong></a>
 						</p>
 					</div>
 				</div>
