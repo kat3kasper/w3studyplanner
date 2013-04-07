@@ -137,7 +137,7 @@
 			?>
 			
 			<ul class="nav nav-tabs">
-				<li><a href="/studyplanner/admin">Admin Home</a></li>
+				<li><a href="index.php">Admin Home</a></li>
 				<li><a href="dprograms.php">Degree Programs</a></li>
 				<li><a href="courses.php">Courses</a></li>
 				<li class="active"><a href="cgroups.php">Course Groups</a></li>

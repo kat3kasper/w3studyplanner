@@ -13,7 +13,7 @@
 			?>
 			
 			<ul class="nav nav-tabs">
-				<li><a href="/studyplanner/student">Student Home</a></li>
+				<li><a href="index.php">Student Home</a></li>
 				<li><a href="dprograms.php">Degree Programs</a></li>
 				<li><a href="fcourses.php">Finished Courses</a></li>
 				<li class="active"><a href="ssetup.php">Semester Setup</a></li>

@@ -15,8 +15,8 @@
 			?>
 			
 			<p>
-				<a href="/studyplanner/admin"><button class="btn btn-primary" type="button">Administrator</button></a>
-				<a href="/studyplanner/student"><button class="btn" type="button">Student</button></a>
+				<a href="admin"><button class="btn btn-primary" type="button">Administrator</button></a>
+				<a href="student"><button class="btn" type="button">Student</button></a>
 			</p>
 			
 			<p>You can also switch between the two from the navigation bar at the top.</p>
