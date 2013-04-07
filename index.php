@@ -9,8 +9,8 @@
 		
 		<div class="container">
 			<?php
-				$member = substr($_ENV["REDIRECT_unscoped_affiliation"],7);
-				echo "<p>Welcome, " . $_ENV["REDIRECT_displayName"] . "<br/>You are currently logged in as " . $member . "</p>";
+				$member = substr($_SERVER["REDIRECT_unscoped_affiliation"],7);
+				echo "<p>Welcome, " . $_SERVER["REDIRECT_displayName"] . "<br/>You are currently logged in as " . $member . "</p>";
 				echo "<p>Use the site as:</p>";
 			?>
 			
