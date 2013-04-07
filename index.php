@@ -1,23 +1,31 @@
-<?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/studyplanner/lib/SDAutoloader.php';
-
-// register main autoloader for classes
-SDAutoloader::register();
-
-$twig = new Twig_Environment(new Twig_Loader_Filesystem(TemplateDirs::getTemplateDirs()), array('cache' => TemplateDirs::getCacheDir(),'auto_reload' => true));
-
-$username = "John Doe";
-$usertype = "student";
-
-// define all template variables
-$tvars = array(
-    "titlesub" => "Home",
-    "navitems" => NavBar::renderNavBar(),
-    "listitems" => NavBar::renderNavBarList(),
-    "username" => $username,
-    "usertype" => $usertype,
-    );
-
-// display rendered site
-echo $twig->render('index.html', $tvars);
-?>
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Stevens' Study Planner &raquo; Home</title>
+		<?php require("includes/styles.php"); ?>
+	</head>
+	<body>
+		<?php require("includes/navigation.php"); ?>
+		
+		<div class="container">
+			<?php
+				$member = substr($_ENV["REDIRECT_unscoped_affiliation"],7);
+				echo "<p>Welcome, " . $_ENV["REDIRECT_displayName"] . "<br/>You are currently logged in as " . $member . "</p>";
+				echo "<p>Use the site as:</p>";
+			?>
+			
+			<p>
+				<a href="/studyplanner/admin"><button class="btn btn-primary" type="button">Administrator</button></a>
+				<a href="/studyplanner/student"><button class="btn" type="button">Student</button></a>
+			</p>
+			
+			<p>You can also switch between the two from the navigation bar at the top.</p>
+			
+			<footer>
+				<p>© Study Planner 2013</p>
+			</footer>
+		</div>
+		
+		<?php require("includes/scripts.php"); ?>
+	</body>
+</html>
