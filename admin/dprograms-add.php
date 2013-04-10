@@ -43,6 +43,20 @@
 			}
 			
 			
+
+			function duplicate()
+			{
+				var x = document.getElementById("dynamicInput");
+				var y = document.getElementById("s1");
+				var w = document.getElementById("duplicate");
+				
+				var z = x.cloneNode(true);
+
+				z.id = "dynamicInput2";
+				w.appendChild(z);
+			}
+			
+			
 		
 			function addCourseGroup()
 			{
@@ -50,18 +64,25 @@
 				var e2 = document.getElementById('cgroup');
 				var e3 = document.getElementById('Requirements');
 				var e4 = " FROM ";
-				var o=document.createElement('option');
+				var e5 = document.getElementById('operator');
+				var o = document.createElement('option');
+				var oor = document.createElement('option');
 				o.value = e1.value.concat(e4,e2.value);
 				o.text = e1.value.concat(e4,e2.value);
+				oor.value = e1.value.concat(e4,e2.value," ",e5.value);
+				oor.text = e1.value.concat(e4,e2.value," ",e5.value);
+				
 				
 				for(var i = 0; i < e3.length; i++)
 				{
-					if(e3.options[i].value === o.value)
+					if(e3.options[i].value === o.value||e3.options[i].value === oor.value)
 					{
 						alert("That requirement is already added.");
 						return false;
 					}
+					
 				}
+				
 				
 				if (e1.value==null || e1.value=="")//check for empty form
 				{
@@ -78,34 +99,32 @@
 					alert("Please check for non-numeric characters!\n\ne.g. @#$Abc are not allowed!");
 					return false;
 				}
-				else 
+				else if(e5.value=="AND")
 				{
 					e3.options.add(o);
 					//select.appendChild(from);
 				}
+				else if(e5.value=="OR")
+				{
+
+					for(var i = 0; i < e3.length; i++)
+					{
+						if(e3.options[i].value === oor.value)
+						{
+							e3.options[i].value.concat(e4,e2.value," ",e5.value);
+						}
+					}
+				
+					e3.options.add(oor);
+				
+				}
+				else if(e5.value=="" || e5.value==null)
+				{
+					e3.options.add(o);
+				}
 
 			}
 			
-			function addOperator()
-			{
-				var e1 = document.getElementById('operator');
-				var e2=document.getElementById('Requirements');
-				var o=document.createElement('option');
-				o.value=e1.value;
-				o.text=e1.value;
-				
-				if (e1.value==null || e1.value=="")//check for empty form
-				{
-				  alert("Please select an operator first");
-				  return false;
-				}
-				else 
-				{
-					e2.options.add(o);
-					//select.appendChild(from);
-				}
-
-			}
 			
 			//Remove a constraint from the list
 			function removeRequirement()
@@ -344,30 +363,42 @@
 				</div>
 				
 				<br>
-				<div class="alert alert-info">
-					<button type="button" class="close" data-dismiss="alert"></button>
-					<h4>Degree Requirements</h4>
-					<p>Please add the following to the Degree Requirements box below to form a valid combination.</p>
-				</div>
+				<h4>Degree Requirements</h4>
+				<p>Please add the following to the Degree Requirements box below to form a valid combination.</p>
+				<br>
 				
 				<div class="row-fluid">
 					<div id="formLeft" class="span2">
 						<div class="control-group">
 							<label class="control-label" for="NumberOfCourses">Number of Courses</label>
-							<div class="controls">
-								<input type="text" id="NumberOfCourses" class="span5"/>
-							</div>
 						</div>
+					</div>
+
+					<div id="formCenter" class="span4">
+						<div class="control-group">
+								<label class="control-label" for="CourseGroup">Course Group</label>
+						</div>
+					</div>
+	
+					<div id="formRight" class="span2">
+					  <div class="control-group">
+						<label for="operator" class="control-label">Operator</label>     
+					  </div>    
 					</div>
 				</div>
 				
-				<div class="row-fluid">
+				
+		
+				<div class="row-fluid" id="dynamicInput">
 					<div id="formLeft" class="span2">
 						<div class="control-group">
-							FROM
+							<div class="controls">
+								<input type="text" id="NumberOfCourses" class="span5" name="NumberOfCourses[]"/>
+								FROM
+							</div>
 						</div>
 					</div>
-				</div>
+				
 					
 					<?php
 					$sql2 = "SELECT name FROM course_group";
@@ -382,12 +413,11 @@
 					{
 						$cgroup_arr = $sth2->fetchAll(PDO::FETCH_ASSOC);
 					?>
-						<div class="row-fluid">
+				
 						<div id="formCenter" class="span4">
 							<div class="control-group">
-									<label class="control-label" for="CourseGroup">Course Group</label>
 									<div class="controls">
-										<select name="cgroup" id="cgroup" class="span9">
+										<select name="cgroup" id="cgroup" class="span11">
 										<option value="">Select a Course Group...</option>
 										<?php
 											foreach ($cgroup_arr as $row) 
@@ -397,41 +427,38 @@
 											}
 										?>
 										</select>
-										<button name="cgroup-add" type="button" class="btn btn-success" onclick="addCourseGroup()"><i class="icon-plus"></i></button>
 									</div>					
 							</div>
 						</div>
-						</div>
+				
 					<?php
 					}
 					?>
 					
-				
-				<div class="row-fluid">
-				
-				<div id="formLeft" class="span2">
-				  <div class="control-group">
-					<label for="operator" class="control-label">Operator</label>
-					<div class="controls">
-						<select id="operator" class="span5">
-							<option value="">---</option>
-							<option value="AND">AND</option>
-							<option value="OR">OR</option>
-						</select>
-						<button class="btn btn-success" type="button" onclick="addOperator()" id="operator" title="Add Operator"><i class="icon-plus"></i></button>
-					</div>      
-				  </div>    
+					<div id="formRight" class="span2">
+					  <div class="control-group">
+						<div class="controls">
+							<select id="operator" class="span5" name="operator">
+								<option value="">---</option>
+								<option value="AND">AND</option>
+								<option value="OR">OR</option>
+							</select>
+							<button class="btn btn-success" id="dynamic-btn" type="button" onClick="duplicate()" title="Add Requirement"><i class="icon-plus"></i></button>
+							
+						</div>      
+					  </div>    
+					</div>
 				</div>
-
-				</div>
-					
+				
+				<span id="duplicate"></span>
+				
 				<br>
 				<div class="row-fluid">
 					<div id="formLeft" class="span12">
 							<div class="control-group">
 								<label class="control-label" for="Degree Requirements">Degree Requirements</label>
 								<div class="controls">
-									<select multiple="multiple" name="requirements[]" id="Requirements" class="span4" size="5">
+									<select multiple="multiple" name="requirements[]" id="Requirements" class="span7" size="5">
 									</select>
 									<div class="btn-group btn-group-vertical">
 									  <button type="button" name="sort" class="btn" value="Up" id="moveup-btn" data-placement="right"title="Move Up"><i class="icon-arrow-up"></i></button>
