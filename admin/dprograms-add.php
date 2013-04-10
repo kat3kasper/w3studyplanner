@@ -64,13 +64,9 @@
 				var e2 = document.getElementById('cgroup');
 				var e3 = document.getElementById('Requirements');
 				var e4 = " FROM ";
-				var e5 = document.getElementById('operator');
 				var o = document.createElement('option');
-				var oor = document.createElement('option');
 				o.value = e1.value.concat(e4,e2.value);
 				o.text = e1.value.concat(e4,e2.value);
-				oor.value = e1.value.concat(e4,e2.value," ",e5.value);
-				oor.text = e1.value.concat(e4,e2.value," ",e5.value);
 				
 				
 				for(var i = 0; i < e3.length; i++)
@@ -99,26 +95,7 @@
 					alert("Please check for non-numeric characters!\n\ne.g. @#$Abc are not allowed!");
 					return false;
 				}
-				else if(e5.value=="AND")
-				{
-					e3.options.add(o);
-					//select.appendChild(from);
-				}
-				else if(e5.value=="OR")
-				{
-
-					for(var i = 0; i < e3.length; i++)
-					{
-						if(e3.options[i].value === oor.value)
-						{
-							e3.options[i].value.concat(e4,e2.value," ",e5.value);
-						}
-					}
-				
-					e3.options.add(oor);
-				
-				}
-				else if(e5.value=="" || e5.value==null)
+				else 
 				{
 					e3.options.add(o);
 				}
@@ -417,7 +394,7 @@
 						<div id="formCenter" class="span4">
 							<div class="control-group">
 									<div class="controls">
-										<select name="cgroup" id="cgroup" class="span11">
+										<select name="cgroup" id="cgroup" class="span11" name="cgroup[]">
 										<option value="">Select a Course Group...</option>
 										<?php
 											foreach ($cgroup_arr as $row) 
@@ -434,21 +411,17 @@
 					<?php
 					}
 					?>
-					
+				
 					<div id="formRight" class="span2">
 					  <div class="control-group">
 						<div class="controls">
-							<select id="operator" class="span5" name="operator">
-								<option value="">---</option>
-								<option value="AND">AND</option>
-								<option value="OR">OR</option>
-							</select>
-							<button class="btn btn-success" id="dynamic-btn" type="button" onClick="duplicate()" title="Add Requirement"><i class="icon-plus"></i></button>
-							
+							<button class="btn btn-info" id="dynamic-btn" type="button" onClick="duplicate()" title="Add Requirement">OR</button>
 						</div>      
 					  </div>    
 					</div>
-				</div>
+					
+				</div>	
+				
 				
 				<span id="duplicate"></span>
 				
@@ -458,9 +431,10 @@
 							<div class="control-group">
 								<label class="control-label" for="Degree Requirements">Degree Requirements</label>
 								<div class="controls">
-									<select multiple="multiple" name="requirements[]" id="Requirements" class="span7" size="5">
+									<select multiple="multiple" name="requirements[]" id="Requirements" class="span7" size="7">
 									</select>
 									<div class="btn-group btn-group-vertical">
+									  <button class="btn btn-success" id="dynamic-btn" type="button" onClick="addCourseGroup()" title="Add Requirement"><i class="icon-plus"></i></button>
 									  <button type="button" name="sort" class="btn" value="Up" id="moveup-btn" data-placement="right"title="Move Up"><i class="icon-arrow-up"></i></button>
 									  <button type="button" name="sort" class="btn" value="Down" id="movedown-btn"  data-placement="right" title="Move Down"><i class="icon-arrow-down"></i></button>
 									  <button type="button" class="btn btn-danger" onclick="removeRequirement()" id="remove-btn" data-placement="right"title="Remove selected requirement" ><i class="icon-remove"></i></button>
