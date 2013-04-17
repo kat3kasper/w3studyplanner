@@ -94,7 +94,7 @@
 				<table class="table table-bordered table-condensed well">
 					<thead>
 						<tr>
-							<th>	</th>
+							<th>Year</th>
 							<th>	</th>
 							<th>Fall</th>
 							<th>Spring</th>
@@ -103,105 +103,42 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr>
-
+						
 <?php
-	$yearCurrent = date("Y");
-	for(; yearCurrent < yearGraduate; yearCurrent++)
+	$yearCurrent = 2012;//date("Y");
+	for(; $yearCurrent < $yearGraduate; $yearCurrent++)
 	{
-		echo "<td rowspan=\"2\">" . $yearCurrent . "-" . $yearCurrent + 1 . "</td><br/>\n";
-		echo "<td>Max</td><br/>\n";
-		echo "<td><br/>\n";
-		echo "	<select name=\"" . $yearCurrent . "MaxCredits[]\"><br/>\n";
-		
-		echo "	</select><br/>\n"
-		echo "</td>";
+		for($k = 0; $k < 2; $k++)
+		{
+			echo "<tr>";
+			if($k === 0)
+				echo "<td rowspan=\"2\">" . $yearCurrent . "-" . ($yearCurrent + 1) . "</td>";
+			
+			echo "<td>" . ($k === 0 ? "Max" : "Min") . "</td>";
+			
+			for($j = 0; $j < 4; $j++)
+			{
+				echo "<td>";
+				echo "<select name=\"" . $yearCurrent . ($k === 0 ? "Max" : "Min") . "Credits[]\">";
+				
+				for($i = 0; $i < 30; $i++)
+					echo "<option>" . $i . "</option>";
+				
+				echo "</select>";
+				echo "</td>";
+			}
+			
+			echo "</tr>";
+		}
 	}
 ?>
 						
-							<td rowspan="2">2011-2012</td>
-							<td>Max</td>
-							<td>
-								<select name="credits">
-									<?php 
-										$i="0";
-										for (; $i < 30; $i++) 
-											echo "<option>$i</option>";
-									?>
-								</select>
-							</td>
-							<td>
-								<select name="credits">
-									<?php 
-										$i="0";
-										for (; $i < 30; $i++) 
-											echo "<option>$i</option>";
-									?>
-								</select>
-							</td>
-							<td>
-								<select name="credits">
-									<?php 
-										$i="0";
-										for (; $i < 30; $i++) 
-											echo "<option>$i</option>";
-									?>
-								</select>
-							</td>
-							<td>
-								<select name="credits">
-									<?php 
-										$i="0";
-										for (; $i < 30; $i++) 
-											echo "<option>$i</option>";
-									?>
-								</select>
-							</td>
-						</tr>
-						<tr>
-							<td>Min</td>
-							<td>
-								<select name="credits">
-									<?php 
-										$i="0";
-										for (; $i < 30; $i++) 
-											echo "<option>$i</option>";
-									?>
-								</select>
-							</td>
-							<td>
-								<select name="credits">
-									<?php 
-										$i="0";
-										for (; $i < 30; $i++) 
-											echo "<option>$i</option>";
-									?>
-								</select>
-							</td>
-							<td>
-								<select name="credits">
-									<?php 
-										$i="0";
-										for (; $i < 30; $i++) 
-											echo "<option>$i</option>";
-									?>
-								</select>
-							</td>
-							<td>
-								<select name="credits">
-									<?php 
-										$i="0";
-										for (; $i < 30; $i++) 
-											echo "<option>$i</option>";
-									?>
-								</select>
-							</td>
-						</tr>
 					</tbody>	
 				</table>
 				
 				<div class="control-group">
 					<div class="controls">
+						<input type="hidden" name="step1Info" value="<?php echo $step1Info; ?>">
 						<input type="hidden" name="step2Info" value="<?php echo $step2Info; ?>">
 						<button type="submit" name="step4" class="btn btn-primary">Next</button>
 					</div>
@@ -213,12 +150,6 @@
 	else
 		header("Location: index.php");
 ?>
-			
-			<ul class="pager">
-				<li><a href="#">Back</a></li>
-				<li><a href="#">Save</a></li>
-				<li><a href="#">Save and Continue</a></li>
-			</ul>
 			
 			<footer>
 				<p>© Study Planner 2013</p>

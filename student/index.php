@@ -99,9 +99,11 @@
 					</div>
 				</div>
 			</form>
+			
 <?php
 		}
-	?>
+?>
+			
 			<footer>
 				<p>© Study Planner 2013</p>
 			</footer>
