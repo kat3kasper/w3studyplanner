@@ -19,21 +19,11 @@
 	//Coming from Degree Program setup
 	if(isset($_POST["step2"]))
 	{
-		//Setup database
-		$host = DB_HOST;
-		$dbname = DB_NAME;
-		$user = DB_USER;
-		$pass = DB_PASS;
-		
-		$dbh = new PDO("mysql:host=" . $host . ";dbname=" . $dbname, $user, $pass);
-		$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		
 		$yearEntered = s_int($_POST["yearEntered"]);
 		$department = s_string($_POST["department"]);
 		$degreeName = s_string($_POST["degreeName"]);
 		
-		$step1Info = array($yearEntered, $department, $degreeName);
+		$step1Info = htmlspecialchars(json_encode(array($yearEntered, $department, $degreeName)));
 ?>
 			
 			<h4>Semester Setup</h4>
@@ -69,28 +59,18 @@
 	//Coming from Semester setup part 1: term & year
 	else if(isset($_POST["step3"]))
 	{
-		//Setup database
-		$host = DB_HOST;
-		$dbname = DB_NAME;
-		$user = DB_USER;
-		$pass = DB_PASS;
-		
-		$dbh = new PDO("mysql:host=" . $host . ";dbname=" . $dbname, $user, $pass);
-		$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		
 		$termGraduate = s_string($_POST["termGraduate"]);
 		$yearGraduate = s_int($_POST["yearGraduate"]);
-		$step1Info = $_POST["step1Info"];
+		$step1Info = htmlspecialchars($_POST["step1Info"]);
 		
-		$step2Info = array($termGraduate, $yearGraduate);
+		$step2Info = htmlspecialchars(json_encode(array($termGraduate, $yearGraduate)));
 ?>
 			
 			<h4>Semester Setup</h4>
 			
 			<p>Please choose how many credits you wish to take per semester:</p>
 			
-			<form class="form-horizontal" method="post" action="cpreferences.php">
+			<form class="form-horizontal" method="post" action="ssetup.php">
 				<table class="table table-bordered table-condensed well">
 					<thead>
 						<tr>
@@ -105,9 +85,11 @@
 					<tbody>
 						
 <?php
-	$yearCurrent = 2012;//date("Y");
+	//Shows table from current year to graduation year
+	$yearCurrent = date("Y");
 	for(; $yearCurrent < $yearGraduate; $yearCurrent++)
 	{
+		//2 rows for max/min credits
 		for($k = 0; $k < 2; $k++)
 		{
 			echo "<tr>";
@@ -121,7 +103,7 @@
 				echo "<td>";
 				echo "<select name=\"" . $yearCurrent . ($k === 0 ? "Max" : "Min") . "Credits[]\">";
 				
-				for($i = 0; $i < 30; $i++)
+				for($i = 0; $i <= 30; $i++)
 					echo "<option>" . $i . "</option>";
 				
 				echo "</select>";
@@ -146,6 +128,25 @@
 			</form>
 			
 <?php
+	}
+	else if(isset($_POST["step4"]))
+	{
+		echo "These should pass to cpreferences.php<br/>";
+		
+		echo "Testing json data so far...<br/>";
+		
+		echo "<br/>step1Info<br/>";
+		echo "Encoded: " . $_POST["step1Info"] . "<br/>";
+		echo "Decoded: ";
+		var_dump(json_decode(htmlspecialchars_decode($_POST["step1Info"])));
+		
+		echo "<br/><br/>step2Info<br/>";
+		echo "Encoded: " . $_POST["step2Info"] . "<br/>";
+		echo "Decoded: ";
+		var_dump(json_decode(htmlspecialchars_decode($_POST["step2Info"])));
+		
+		echo "<br/><br/>\$_POST dump<br/>";
+		var_dump($_POST);
 	}
 	else
 		header("Location: index.php");
