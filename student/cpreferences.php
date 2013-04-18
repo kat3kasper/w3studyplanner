@@ -23,6 +23,7 @@
 		$step2Info = json_decode(htmlspecialchars_decode($_POST["step2Info"]));
 		
 		$yearEntered = s_int($step1Info[0]);
+		$degreeName = s_string($step1Info[2]);
 		$yearGraduate = s_int($step2Info[1]);
 		
 		
@@ -61,61 +62,83 @@
 		$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		
-		$sql = "SELECT * FROM course_group";
+		$sql = "SELECT degree_requirements FROM degree WHERE name = :name";
 				
 		$sth = $dbh->prepare($sql);
+		$sth->bindParam(":name", $degreeName);
 		$sth->execute();
 		$rownum = $sth->rowCount();
 				
 		if(!$rownum)
-			echo "There is no course group available.<br/>\n";
+			echo "Degree program doesn't exist.<br/>\n";
 		else
 		{
-			$rowarray = $sth->fetchAll(PDO::FETCH_ASSOC);
-		
+			$row = $sth->fetch(PDO::FETCH_ASSOC);
+			$reqArray = explode(",", $row);
+			
+			$sql = "SELECT course_id FROM course_group where name = :cgname";
+			$sth = $dbh->prepare($sql);
+			
 			//Each course group
-			foreach($rowarray as $row)
+			foreach($reqArray as $pairs)
 			{
-				$cgname = $row["name"];
-				$courses = explode(",",$row["course_id"]);
-				
-				echo "<div class=\"row-fluid\">
-						<div id=\"formLeft\" class=\"span4\">
-							<div class=\"control-group\">
-								<label class=\"control-label\">" . $cgname . "</label>
-								<div class=\"controls\">
-									<select name=\"course\" id=\"course\" class=\"span8\">
-										<option value=\"\">---</option>";
-				
-				foreach($courses as $course)
-					echo "<option value=\"" . $course . "\">" . $course . "</option>";
-				
-				echo "</select>
+				$temp = explode("|", $pairs);
+				$numCourses = $temp[0];
+				$cgName = $temp[1];
+			
+				$sth->bindParam(":cgname", $cgName);
+				$sth->execute();
+				$rownum = $sth->rowCount();
+						
+				if(!$rownum)
+					echo "The course group is not available.<br/>\n";
+				else
+				{
+					$row = $sth->fetch(PDO::FETCH_ASSOC);
+					
+					$courses = explode(",", $row["course_id"]);
+					
+					for(; $numCourses > 0; $numCourses--)
+					{
+						echo "<div class=\"row-fluid\">
+								<div id=\"formLeft\" class=\"span4\">
+									<div class=\"control-group\">"
+									. ($numCourses === $temp[0] ? "<label class=\"control-label\">" . $cgName . "</label>" : "") . 
+										"<div class=\"controls\">
+											<select name=\"course\" id=\"course\" class=\"span8\">
+												<option value=\"\">---</option>";
+						
+						foreach($courses as $course)
+							echo "<option value=\"" . $course . "\">" . $course . "</option>";
+						
+						echo "</select>
+										</div>
+									</div>
 								</div>
-							</div>
-						</div>
-						<div id=\"formLeft\" class=\"span1\">
-							<input type=\"checkbox\" name=\"completed\" id=\"completed\" value=\"completed\" />
-						</div>
-						<div id=\"formLeft\" class=\"span2\">
-							<select name=\"term\" id=\"term\" class=\"span8\">
-								<option value=\"\">---</option>
-								<option value=\"spring\">Spring</option>
-								<option value=\"summer\">Summer</option>
-								<option value=\"Fall\">Fall</option>
-							</select>
-						</div>
-						<div id=\"formLeft\" class=\"span2\">
-							<select name=\"year\" id=\"year\" class=\"span8\">
-								<option value=\"\">---</option>";
+								<div id=\"formLeft\" class=\"span1\">
+									<input type=\"checkbox\" name=\"completed\" id=\"completed\" value=\"completed\" />
+								</div>
+								<div id=\"formLeft\" class=\"span2\">
+									<select name=\"term\" id=\"term\" class=\"span8\">
+										<option value=\"\">---</option>
+										<option value=\"spring\">Spring</option>
+										<option value=\"summer\">Summer</option>
+										<option value=\"Fall\">Fall</option>
+									</select>
+								</div>
+								<div id=\"formLeft\" class=\"span2\">
+									<select name=\"year\" id=\"year\" class=\"span8\">
+										<option value=\"\">---</option>";
 
-				$year = $yearEntered - 1;
-				while($year++ < $yearGraduate)
-					echo "<option value=\"" . $year . "\">" . $year . "</option>";
+						$year = $yearEntered - 1;
+						while($year++ < $yearGraduate)
+							echo "<option value=\"" . $year . "\">" . $year . "</option>";
 
-				echo "</select>
-						</div>
-					</div>";
+						echo "</select>
+								</div>
+							</div>";
+					}
+				}
 			}
 			
 			echo "</form>";
