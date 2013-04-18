@@ -62,7 +62,7 @@
 		$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		
-		$sql = "SELECT degree_requirements FROM degree WHERE name = :name";
+		$sql = "SELECT degree_requirements FROM degree WHERE degree_name = :name";
 				
 		$sth = $dbh->prepare($sql);
 		$sth->bindParam(":name", $degreeName);
@@ -74,7 +74,7 @@
 		else
 		{
 			$row = $sth->fetch(PDO::FETCH_ASSOC);
-			$reqArray = explode(",", $row);
+			$reqArray = explode(",", $row["degree_requirements"]);
 			
 			$sql = "SELECT course_id FROM course_group where name = :cgname";
 			$sth = $dbh->prepare($sql);
@@ -140,8 +140,18 @@
 					}
 				}
 			}
+?>
+				
+				<div class="control-group">
+					<div class="controls">
+						<input type="hidden" name="step1Info" value="<?php echo $step1Info; ?>">
+						<input type="hidden" name="step2Info" value="<?php echo $step2Info; ?>">
+						<button type="submit" name="step5" class="btn btn-primary">Next</button>
+					</div>
+				</div>
+			</form>
 			
-			echo "</form>";
+<?php
 		}
 	}
 ?>
