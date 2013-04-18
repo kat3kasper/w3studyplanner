@@ -16,20 +16,16 @@
 			?>
 			
 <?php
+	//Coming from semester setup
 	if(isset($_POST["step4"]))
 	{
-		//Setup database
-		$host = DB_HOST;
-		$dbname = DB_NAME;
-		$user = DB_USER;
-		$pass = DB_PASS;
+		$step1Info = json_decode(htmlspecialchars_decode($_POST["step1Info"]));
+		$step2Info = json_decode(htmlspecialchars_decode($_POST["step2Info"]));
 		
-		$dbh = new PDO("mysql:host=" . $host . ";dbname=" . $dbname, $user, $pass);
-		$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$yearEntered = s_int($step1Info[0]);
+		$yearGraduate = s_int($step2Info[1]);
 		
 		
-	}
 ?>
 			
 			<h4>Course Preferences</h4>
@@ -54,455 +50,78 @@
 					</div>
 				</div>
 				
-				<!-- Math -->
-				<div class="row-fluid">
-					<div id="formLeft" class="span4">
-						<div class="control-group">
-							<label class="control-label">Math</label>
-							<div class="controls">
-								<select name="course" id="course" class="span8">
-									<option value="">---</option>
-									<option value="ma115">MA115</option>
-									<option value="ma116">MA116</option>
-									<option value="ma222">MA222</option>
-									<option value="ma331">MA331</option>
-								</select>
+<?php
+		//Setup database
+		$host = DB_HOST;
+		$dbname = DB_NAME;
+		$user = DB_USER;
+		$pass = DB_PASS;
+		
+		$dbh = new PDO("mysql:host=" . $host . ";dbname=" . $dbname, $user, $pass);
+		$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		
+		$sql = "SELECT * FROM course_group";
+				
+		$sth = $dbh->prepare($sql);
+		$sth->execute();
+		$rownum = $sth->rowCount();
+				
+		if(!$rownum)
+			echo "There is no course group available.<br/>\n";
+		else
+		{
+			$rowarray = $sth->fetchAll(PDO::FETCH_ASSOC);
+		
+			//Each course group
+			foreach($rowarray as $row)
+			{
+				$cgname = $row["name"];
+				$courses = explode(",",$row["course_id"]);
+				
+				echo "<div class=\"row-fluid\">
+						<div id=\"formLeft\" class=\"span4\">
+							<div class=\"control-group\">
+								<label class=\"control-label\">" . $cgname . "</label>
+								<div class=\"controls\">
+									<select name=\"course\" id=\"course\" class=\"span8\">
+										<option value=\"\">---</option>";
+				
+				foreach($courses as $course)
+					echo "<option value=\"" . $course . "\">" . $course . "</option>";
+				
+				echo "</select>
+								</div>
 							</div>
 						</div>
-					</div>
-					<div id="formLeft" class="span1">
-						<input type="checkbox" name="completed" id="completed" value="completed" />
-					</div>
-					<div id="formLeft" class="span2">
-						<select name="term" id="term" class="span8">
-							<option value="">---</option>
-							<option value="spring">Spring</option>
-							<option value="summer">Summer</option>
-							<option value="Fall">Fall</option>
-						</select>
-					</div>
-					<div id="formLeft" class="span2">
-						<select name="year" id="year" class="span8">
-							<option value="">---</option>
-<?php
-	$year = 1999;
-	while($year++ < date("Y"))
-		echo "<option value=\"" . $year . "\">" . $year . "</option>";
-?>
-						</select>
-					</div>
-				</div>
-				
-				<div class="row-fluid">
-					<div id="formLeft" class="span4">
-						<div class="control-group">
-							<div class="controls">
-								<select id="course" class="span8">
-									<option value="">---</option>
-									<option value="ma115">MA115</option>
-									<option value="ma116">MA116</option>
-									<option value="ma222">MA222</option>
-									<option value="ma331">MA331</option>
-								</select>
-							</div>
+						<div id=\"formLeft\" class=\"span1\">
+							<input type=\"checkbox\" name=\"completed\" id=\"completed\" value=\"completed\" />
 						</div>
-					</div>
-					<div id="formLeft" class="span1">
-						<input type="checkbox" name="completed" id="completed" value="completed" />
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="term" class="span8">
-							<option value="">---</option>
-							<option value="spring">Spring</option>
-							<option value="summer">Summer</option>
-							<option value="Fall">Fall</option>
-						</select>
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="year" class="span8">
-							<option value="">---</option>
-<?php
-	$year = 1999;
-	while($year++ < date("Y"))
-		echo "<option value=\"" . $year . "\">" . $year . "</option>";
-?>
-						</select>
-					</div>
-				</div>
-				
-				<div class="row-fluid">
-					<div id="formLeft" class="span4">
-						<div class="control-group">
-							<div class="controls">
-								<select id="course" class="span8">
-									<option value="">---</option>
-									<option value="ma115">MA115</option>
-									<option value="ma116">MA116</option>
-									<option value="ma222">MA222</option>
-									<option value="ma331">MA331</option>
-								</select>
-							</div>
+						<div id=\"formLeft\" class=\"span2\">
+							<select name=\"term\" id=\"term\" class=\"span8\">
+								<option value=\"\">---</option>
+								<option value=\"spring\">Spring</option>
+								<option value=\"summer\">Summer</option>
+								<option value=\"Fall\">Fall</option>
+							</select>
 						</div>
-					</div>
-					<div id="formLeft" class="span1">
-						<input type="checkbox" name="completed" id="completed" value="completed" />
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="term" class="span8">
-							<option value="">---</option>
-							<option value="spring">Spring</option>
-							<option value="summer">Summer</option>
-							<option value="Fall">Fall</option>
-						</select>
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="year" class="span8">
-							<option value="">---</option>
-<?php
-	$year = 1999;
-	while($year++ < date("Y"))
-		echo "<option value=\"" . $year . "\">" . $year . "</option>";
-?>
-						</select>
-					</div>
-				</div>
-				
-				<div class="row-fluid">
-					<div id="formLeft" class="span4">
-						<div class="control-group">
-							<div class="controls">
-								<select id="course" class="span8">
-									<option value="">---</option>
-									<option value="ma115">MA115</option>
-									<option value="ma116">MA116</option>
-									<option value="ma222">MA222</option>
-									<option value="ma331">MA331</option>
-								</select>
-							</div>
+						<div id=\"formLeft\" class=\"span2\">
+							<select name=\"year\" id=\"year\" class=\"span8\">
+								<option value=\"\">---</option>";
+
+				$year = $yearEntered - 1;
+				while($year++ < $yearGraduate)
+					echo "<option value=\"" . $year . "\">" . $year . "</option>";
+
+				echo "</select>
 						</div>
-					</div>
-					<div id="formLeft" class="span1">
-						<input type="checkbox" name="completed" id="completed" value="completed" />
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="term" class="span8">
-							<option value="">---</option>
-							<option value="spring">Spring</option>
-							<option value="summer">Summer</option>
-							<option value="Fall">Fall</option>
-						</select>
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="year" class="span8">
-							<option value="">---</option>
-<?php
-	$year = 1999;
-	while($year++ < date("Y"))
-		echo "<option value=\"" . $year . "\">" . $year . "</option>";
+					</div>";
+			}
+			
+			echo "</form>";
+		}
+	}
 ?>
-						</select>
-					</div>
-				</div>
-				
-				<hr/>
-				
-				<!-- Humanities Group A -->
-				<!--
-				<div class="row-fluid">
-					<div id="formLeft" class="span4">
-						<div class="control-group">
-							<label class="control-label">Humanities Group A</label>
-							<div class="controls">
-								<select id="course" class="span8">
-									<option value="">---</option>
-									<option value="hum103">HUM103</option>
-									<option value="hum104">HUM104</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<div id="formLeft" class="span1">
-						<input type="checkbox" name="completed" id="completed" value="completed" />
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="term" class="span8">
-							<option value="">---</option>
-							<option value="spring">Spring</option>
-							<option value="summer">Summer</option>
-							<option value="Fall">Fall</option>
-						</select>
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="year" class="span8">
-							<option value="">---</option>
-<?php
-	$year = 1999;
-	while($year++ < date("Y"))
-		echo "<option value=\"" . $year . "\">" . $year . "</option>";
-?>
-						</select>
-					</div>
-				</div>
-				
-				<div class="row-fluid">
-					<div id="formLeft" class="span4">
-						<div class="control-group">
-							<div class="controls">
-								<select id="course" class="span8">
-									<option value="">---</option>
-									<option value="hum103">HUM103</option>
-									<option value="hum104">HUM104</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<div id="formLeft" class="span1">
-						<input type="checkbox" name="completed" id="completed" value="completed" />
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="term" class="span8">
-							<option value="">---</option>
-							<option value="spring">Spring</option>
-							<option value="summer">Summer</option>
-							<option value="Fall">Fall</option>
-						</select>
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="year" class="span8">
-							<option value="">---</option>
-<?php
-	$year = 1999;
-	while($year++ < date("Y"))
-		echo "<option value=\"" . $year . "\">" . $year . "</option>";
-?>
-						</select>
-					</div>
-				</div>
-				
-				<hr/>
-				-->
-				<!-- Humanities Group B -->
-				<!--
-				<div class="row-fluid">
-					<div id="formLeft" class="span4">
-						<div class="control-group">
-							<label class="control-label">Humanities Group B</label>
-							<div class="controls">
-								<select id="course" class="span8">
-									<option value="">---</option>
-									<option value="hum103">HUM103</option>
-									<option value="hum104">HUM104</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<div id="formLeft" class="span1">
-						<input type="checkbox" name="completed" id="completed" value="completed" />
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="term" class="span8">
-							<option value="">---</option>
-							<option value="spring">Spring</option>
-							<option value="summer">Summer</option>
-							<option value="Fall">Fall</option>
-						</select>
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="year" class="span8">
-							<option value="">---</option>
-<?php
-	$year = 1999;
-	while($year++ < date("Y"))
-		echo "<option value=\"" . $year . "\">" . $year . "</option>";
-?>
-						</select>
-					</div>
-				</div>
-				
-				<div class="row-fluid">
-					<div id="formLeft" class="span4">
-						<div class="control-group">
-							<div class="controls">
-								<select id="course" class="span8">
-									<option value="">---</option>
-									<option value="hum103">HUM103</option>
-									<option value="hum104">HUM104</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<div id="formLeft" class="span1">
-						<input type="checkbox" name="completed" id="completed" value="completed" />
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="term" class="span8">
-							<option value="">---</option>
-							<option value="spring">Spring</option>
-							<option value="summer">Summer</option>
-							<option value="Fall">Fall</option>
-						</select>
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="year" class="span8">
-							<option value="">---</option>
-<?php
-	$year = 1999;
-	while($year++ < date("Y"))
-		echo "<option value=\"" . $year . "\">" . $year . "</option>";
-?>
-						</select>
-					</div>
-				</div>
-				
-				<hr/>
-				-->
-				<!-- Humanities Higher Level -->
-				<!--
-				<div class="row-fluid">
-					<div id="formLeft" class="span4">
-						<div class="control-group">
-							<label class="control-label">Humanities Higher Level</label>
-							<div class="controls">
-								<select id="course" class="span8">
-									<option value="">---</option>
-									<option value="hum103">HUM103</option>
-									<option value="hum104">HUM104</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<div id="formLeft" class="span1">
-						<input type="checkbox" name="completed" id="completed" value="completed" />
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="term" class="span8">
-							<option value="">---</option>
-							<option value="spring">Spring</option>
-							<option value="summer">Summer</option>
-							<option value="Fall">Fall</option>
-						</select>
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="year" class="span8">
-							<option value="">---</option>
-<?php
-	$year = 1999;
-	while($year++ < date("Y"))
-		echo "<option value=\"" . $year . "\">" . $year . "</option>";
-?>
-						</select>
-					</div>
-				</div>
-				
-				<div class="row-fluid">
-					<div id="formLeft" class="span4">
-						<div class="control-group">
-							<div class="controls">
-								<select id="course" class="span8">
-									<option value="">---</option>
-									<option value="hum103">HUM103</option>
-									<option value="hum104">HUM104</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<div id="formLeft" class="span1">
-						<input type="checkbox" name="completed" id="completed" value="completed" />
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="term" class="span8">
-							<option value="">---</option>
-							<option value="spring">Spring</option>
-							<option value="summer">Summer</option>
-							<option value="Fall">Fall</option>
-						</select>
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="year" class="span8">
-							<option value="">---</option>
-<?php
-	$year = 1999;
-	while($year++ < date("Y"))
-		echo "<option value=\"" . $year . "\">" . $year . "</option>";
-?>
-						</select>
-					</div>
-				</div>
-				
-				<div class="row-fluid">
-					<div id="formLeft" class="span4">
-						<div class="control-group">
-							<div class="controls">
-								<select id="course" class="span8">
-									<option value="">---</option>
-									<option value="hum103">HUM103</option>
-									<option value="hum104">HUM104</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<div id="formLeft" class="span1">
-						<input type="checkbox" name="completed" id="completed" value="completed" />
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="term" class="span8">
-							<option value="">---</option>
-							<option value="spring">Spring</option>
-							<option value="summer">Summer</option>
-							<option value="Fall">Fall</option>
-						</select>
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="year" class="span8">
-							<option value="">---</option>
-<?php
-	$year = 1999;
-	while($year++ < date("Y"))
-		echo "<option value=\"" . $year . "\">" . $year . "</option>";
-?>
-						</select>
-					</div>
-				</div>
-				
-				<div class="row-fluid">
-					<div id="formLeft" class="span4">
-						<div class="control-group">
-							<div class="controls">
-								<select id="course" class="span8">
-									<option value="">---</option>
-									<option value="hum103">HUM103</option>
-									<option value="hum104">HUM104</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					<div id="formLeft" class="span1">
-						<input type="checkbox" name="completed" id="completed" value="completed" />
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="term" class="span8">
-							<option value="">---</option>
-							<option value="spring">Spring</option>
-							<option value="summer">Summer</option>
-							<option value="Fall">Fall</option>
-						</select>
-					</div>
-					<div id="formLeft" class="span2">
-						<select id="year" class="span8">
-							<option value="">---</option>
-<?php
-	$year = 1999;
-	while($year++ < date("Y"))
-		echo "<option value=\"" . $year . "\">" . $year . "</option>";
-?>
-						</select>
-					</div>
-				</div>
-				
-				<hr/>
-				-->
-				
-			</form>
 			
 			<footer>
 				<p>© Study Planner 2013</p>

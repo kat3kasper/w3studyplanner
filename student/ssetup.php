@@ -70,24 +70,23 @@
 			
 			<p>Please choose how many credits you wish to take per semester:</p>
 			
-			<form class="form-horizontal" method="post" action="ssetup.php">
+			<form class="form-horizontal" method="post" action="cpreferences.php">
 				<table class="table table-bordered table-condensed well">
 					<thead>
 						<tr>
 							<th>Year</th>
 							<th>	</th>
-							<th>Fall</th>
 							<th>Spring</th>
 							<th>Summer 1</th>
 							<th>Summer 2</th>
+							<th>Fall</th>
 						</tr>
 					</thead>
 					<tbody>
 						
 <?php
 	//Shows table from current year to graduation year
-	$yearCurrent = date("Y");
-	for(; $yearCurrent < $yearGraduate; $yearCurrent++)
+	for($yearCurrent = date("Y"); $yearCurrent <= $yearGraduate; $yearCurrent++)
 	{
 		//2 rows for max/min credits
 		for($k = 0; $k < 2; $k++)
@@ -101,7 +100,7 @@
 			for($j = 0; $j < 4; $j++)
 			{
 				echo "<td>";
-				echo "<select name=\"" . $yearCurrent . ($k === 0 ? "Max" : "Min") . "Credits[]\">";
+				echo "<select name=\"" . ($k === 0 ? "max" : "min") . "Credits" . $yearCurrent . "[]\">";
 				
 				for($i = 0; $i <= 30; $i++)
 					echo "<option>" . $i . "</option>";

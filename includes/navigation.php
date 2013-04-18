@@ -14,12 +14,41 @@
 						  <li><a href="#">Contact</a></li>
 						  <li class="divider-vertical"></li>
 						  <li class="dropdown">
+						  
+			 <?php
+				$member = substr($_SERVER["REDIRECT_unscoped_affiliation"],7);
+				$uid = $_SERVER["REDIRECT_uid"];
+				$arrAdmin = array("nyahya", "mabrahim", "kkaspero", "rsalas", "usivagur");
+
+				if($member == "student")
+				{
+					if(in_array($uid, $arrAdmin))
+					{
+										
+			?>
+						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown">Switch to.. <b class="caret"></b></a>
 							<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
 								<li><a href="/studyplanner/admin">Administrator view</a></li>
 								<li><a href="/studyplanner/student">Student view</a></li>
 							</ul>
-						  </li>
+						 </li>
+			<?php									
+					}
+				}
+				else
+				{			
+			?>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Switch to.. <b class="caret"></b></a>
+					<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+						<li><a href="/studyplanner/admin">Administrator view</a></li>
+						<li><a href="/studyplanner/student">Student view</a></li>
+					</ul>
+				 </li>
+			<?php	
+				}
+			?>
 						</ul>
 						<p class="navbar-text pull-right">
 							<a href="#" class="navbar-link"><strong><?php echo $_SERVER["REDIRECT_displayName"]; ?></strong></a>
