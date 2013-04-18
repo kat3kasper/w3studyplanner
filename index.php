@@ -30,7 +30,7 @@
 					}
 					else
 					{
-						header("Location: /student/index.php");
+						header("Location: student/index.php");
 					}
 				}
 				else
