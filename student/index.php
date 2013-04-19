@@ -6,6 +6,26 @@
 		<?php require("../includes/config.php"); ?>
 		<?php require("../includes/functions.php"); ?>
 		<?php require("../includes/scripts.php"); ?>
+		
+		<script type="text/javascript">
+			//Validate form inputs
+			function validateForm()
+			{
+				var inputs = ["yearEntered", "department", "degreeName"];
+				
+				for(var i = 0; i < inputs.length;i++)
+				{
+					var x = document.getElementById(inputs[i]).value;
+					
+					//Check for empty fields
+					if(x == null || x == "")
+					{
+						alert("Please fill in all required fields");
+						return false;
+					}
+				}
+			}
+		</script>
 	</head>
 	<body>
 		<?php require("../includes/navigation.php"); ?>
@@ -16,7 +36,7 @@
 			?>
 		
 <?php
-	
+
 		//Setup database
 		$host = DB_HOST;
 		$dbname = DB_NAME;
@@ -45,12 +65,12 @@
 			<div class="well">
 			<h4>Degree Programs</h4>
 			
-			<form class="form-horizontal" method="post" action="ssetup.php">
+			<form class="form-horizontal" method="post" action="ssetup.php" onsubmit="return validateForm()">
 				<div class="control-group">
 					<label class="control-label" for="YearEntered">Please select the year you entered school</label>
 					<div class="controls">
-						<select name="yearEntered" id="year">
-							<option> Year Entered </option>
+						<select name="yearEntered" id="yearEntered">
+							<option value="">> Year Entered </option>
 							<?php					
 								for($year = date("Y"); $year > 2005; $year--)
 								echo "<option>$year</option>"; 

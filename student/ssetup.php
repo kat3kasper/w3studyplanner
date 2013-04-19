@@ -6,6 +6,28 @@
 		<?php require("../includes/config.php"); ?>
 		<?php require("../includes/functions.php"); ?>
 		<?php require("../includes/scripts.php"); ?>
+		
+		<script type="text/javascript">
+			//Validate form inputs
+			function validateForm()
+			{
+				var inputs = ["termGraduate", "yearGraduate"];
+				
+				for(var i = 0; i < inputs.length;i++)
+				{
+					var x = document.getElementById(inputs[i]).value;
+					
+					//Check for empty fields
+					if(x == null || x == "")
+					{
+						alert("Please fill in all required fields");
+						return false;
+					}
+				}
+			}
+			
+		</script>
+		
 	</head>
 	<body>
 		<?php require("../includes/navigation.php"); ?>
@@ -28,16 +50,18 @@
 			
 			<h4>Semester Setup</h4>
 			
-			<form class="form-horizontal" method="post" action="ssetup.php">
+			<form class="form-horizontal" method="post" action="ssetup.php"onsubmit="return validateForm()">
 				<div class="control-group">
 					<label class="control-label">Please enter the semester you wish to graduate</label>
 					<div class="controls">
 						<select name="termGraduate" id="termGraduate">
-							<option>Spring</option>
-							<option>Summer</option>
-							<option>Fall</option>
+							<option value="">Select a term..</option>
+							<option value="spring">Spring</option>
+							<option value="summer">Summer</option>
+							<option value="fall">Fall</option>
 						</select>
 						<select name="yearGraduate" id="yearGraduate">
+							<option value="">Select a year..</option>
 							<?php
 								$limit = date("Y") + 10;
 								for($year = date("Y"); $year < $limit; $year++)
