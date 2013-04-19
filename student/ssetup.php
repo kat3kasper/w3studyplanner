@@ -57,7 +57,6 @@
 						<select name="termGraduate" id="termGraduate">
 							<option value="">Select a term..</option>
 							<option value="spring">Spring</option>
-							<option value="summer">Summer</option>
 							<option value="fall">Fall</option>
 						</select>
 						<select name="yearGraduate" id="yearGraduate">
