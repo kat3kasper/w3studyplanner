@@ -53,44 +53,66 @@
 			}
 			
 			//Add requirement into list
-			function addRequirement()
+			function addCourseGroup()
 			{
-				var e1 = document.getElementById("Requirement");
-				var e2 = document.getElementById("Requirements");
-				var o = document.createElement("option");
-				o.value = e1.options[e1.selectedIndex].value;
-				o.text = e1.options[e1.selectedIndex].text;
+				var e1 = document.getElementById('NumberOfCourses');
+				var e2 = document.getElementById('cgroup');
+				var e3 = document.getElementById('Requirements');
+				var e4 = " FROM ";
+				var o = document.createElement('option');
+				o.value = e1.value.concat(e4,e2.value);
+				o.text = e1.value.concat(e4,e2.value);
 				
-				if (e1.value==null || e1.value=="")//check for empty form
-				{
-				  alert("Please select a requirement from the list first");
-				  return false;
-				}
 				
-				for(var i = 0; i < e2.length; i++)
+				for(var i = 0; i < e3.length; i++)
 				{
-					if(e2.options[i].value === o.value)
+					if(e3.options[i].value === o.value)
 					{
 						alert("That requirement is already added.");
 						return false;
 					}
+					
 				}
 				
-				e2.options.add(o);
+				
+				if (e1.value==null || e1.value=="")//check for empty form
+				{
+				  alert("Please input number of courses!");
+				  return false;
+				}
+				else if (e2.value==null || e2.value=="")//check for empty form
+				{
+				  alert("Please select a course group first");
+				  return false;
+				}
+				else if(/[^0-9]+/i.test(e1.value))//check for non numeric characters
+				{
+					alert("Please check for non-numeric characters!\n\ne.g. @#$Abc are not allowed!");
+					return false;
+				}
+				else 
+				{
+					e3.options.add(o);
+				}
+
 			}
 			
-			//Remove course from the list
+			
+			//Remove a constraint from the list
 			function removeRequirement()
 			{
-				var e2 = document.getElementById("Requirements");
-				//x.remove(x.selectedIndex);
+				var e2=document.getElementById('Requirements');
+				var o=document.createElement('option');
+				//o.value=e1.value;
+				//o.text=e1.value;
+				
 				if (e2.value==null || e2.value=="")//check for empty form
 				{
-				  alert("Please select a requirement from the list first");
+				  alert("Please select a constraint from the list above first");
 				  return false;
 				}
 				
-				var ce=confirm("Are you sure you want to remove the selected requirement?");
+				var ce=confirm("Are you sure you want to remove the constraint from the requirements?");
 				if(ce===true)
 				{
 					e2.remove(e2.selectedIndex);
@@ -99,7 +121,22 @@
 				{
 					return false;
 				}
+				
 			}
+			
+			$(document).ready(function()
+			{ $('button[name="sort"]').click(function()
+				{
+					var $op = $('#Requirements option:selected'),
+						$this = $(this);
+					if($op.length)
+					{
+						($this.val() == 'Up') ? 
+							$op.first().prev().before($op) : 
+							$op.last().next().after($op);
+					}
+				});
+			});
 			
 				$(document).ready(function()
 				{ $('button[name="sort"]').click(function()
@@ -128,9 +165,9 @@
 			
 			<ul class="nav nav-tabs">
 				<li><a href="index.php">Admin Home</a></li>
-				<li class="active"><a href="dprograms.php">Degree Programs</a></li>
 				<li><a href="courses.php">Courses</a></li>
 				<li><a href="cgroups.php">Course Groups</a></li>
+				<li class="active"><a href="dprograms.php">Degree Programs</a></li>
 			</ul>
 			
 			<ul class="nav nav-pills">
@@ -280,7 +317,7 @@
 			
 			$year = $row["year"];
 			$dept = $row["department"];
-			$rid_list = $row["requirement_id"];
+			$req_deg = $row["degree_requirements"];
 			
 ?>
 		<div class="well">
