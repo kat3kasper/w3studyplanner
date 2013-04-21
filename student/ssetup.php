@@ -116,14 +116,14 @@
 		{
 			echo "<tr>";
 			if($k === 0)
-				echo "<td rowspan=\"2\">" . $yearCurrent . "-" . ($yearCurrent + 1) . "</td>";
+				echo "<td rowspan=\"2\">" . $yearCurrent . "</td>";
 			
 			echo "<td>" . ($k === 0 ? "Max" : "Min") . "</td>";
 			
 			for($j = 0; $j < 4; $j++)
 			{
 				echo "<td>";
-				echo "<select name=\"" . ($k === 0 ? "max" : "min") . "Credits" . $yearCurrent . "[]\">";
+				echo "<select name=\"" . ($k === 0 ? "max" : "min") . "Credits[" . $yearCurrent . "][]\">";
 				
 				for($i = 0; $i <= 30; $i++)
 					echo "<option>" . $i . "</option>";
@@ -150,25 +150,6 @@
 			</form>
 			
 <?php
-	}
-	else if(isset($_POST["step4"]))
-	{
-		echo "These should pass to cpreferences.php<br/>";
-		
-		echo "Testing json data so far...<br/>";
-		
-		echo "<br/>step1Info<br/>";
-		echo "Encoded: " . $_POST["step1Info"] . "<br/>";
-		echo "Decoded: ";
-		var_dump(json_decode(htmlspecialchars_decode($_POST["step1Info"])));
-		
-		echo "<br/><br/>step2Info<br/>";
-		echo "Encoded: " . $_POST["step2Info"] . "<br/>";
-		echo "Decoded: ";
-		var_dump(json_decode(htmlspecialchars_decode($_POST["step2Info"])));
-		
-		echo "<br/><br/>\$_POST dump<br/>";
-		var_dump($_POST);
 	}
 	else
 		header("Location: index.php");
