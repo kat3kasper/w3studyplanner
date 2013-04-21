@@ -338,151 +338,151 @@
 ?>
 			
 			<div id="wrapper" class="fluid">
-			<div class="row-fluid">
-			<form id="frmOptions" class="well form-inline span12" action="courses-add.php" method="post" onsubmit="return validateForm()">
-				<h4>Add Course</h4>
-				<div class="alert alert-info">
-					<button type="button" class="close" data-dismiss="alert"></button>
-					<p>Please fill in the required fields (*) and click on <em>"Add Course"</em> button.</p>
-				</div>
-				<br>
-				<div class="row-fluid">   
-					<div id="formLeft" class="span2">
-						<div class="control-group">
-						<label class="control-label" for="coursePrefix">Course Prefix*</label>
-						<div class="controls">
-							<input type="text" name="coursePrefix" id="coursePrefix" class="input-medium" placeholder="e.g. CS" /> 
+				<div class="row-fluid">
+					<form id="frmOptions" class="well form-inline span12" action="courses-add.php" method="post" onsubmit="return validateForm()">
+						<h4>Add Course</h4>
+						<div class="alert alert-info">
+							<button type="button" class="close" data-dismiss="alert"></button>
+							<p>Please fill in the required fields (*) and click on <em>"Add Course"</em> button.</p>
 						</div>
-						</div>
-					</div>
-					
-					  <div id="formCenter" class="span2">
-						<div class="control-group">
-							<label class="control-label" for="courseNumber">Course Number*</label>
-							<div class="controls">
-								<input type="text" name="courseNumber" id="courseNumber" class="input-medium" placeholder="e.g. 101" /> 
-							</div>
-						</div>
-					  </div>
-					  
-					    <div id="formRight" class="span2">
-							<div class="control-group">
-								<label class="control-label" for="credits">Credits*</label>
+						<br>
+						<div class="row-fluid">   
+							<div id="formLeft" class="span2">
+								<div class="control-group">
+								<label class="control-label" for="coursePrefix">Course Prefix*</label>
 								<div class="controls">
-									<input type="text" name="credits" id="credits" class="input-medium" /> 
+									<input type="text" name="coursePrefix" id="coursePrefix" class="input-medium" placeholder="e.g. CS" /> 
+								</div>
 								</div>
 							</div>
-						</div>
-				</div>
-				<br>
-				<div class="row-fluid">  
-					<div id="formLeft" class="span3">
-						<div class="control-group">
-							<label class="control-label" for="courseName">Course Name*</label>
-							<div class="controls">
-								<input type="text" name="courseName" id="courseName"> 
-							</div>
-						</div>
-					</div>
-					
-					<div id="formCenter" class="span7">
-						<div class="control-group">
-							<label class="control-label" for="department">Department*</label>
-							<div class="controls">
-								<select name="department" id="department" class="span5">
-									<option value="">Select a department..</option>
-									<option value="arts">Arts and Letters</option>
-									<option value="business">Business and Technology</option>
-									<option value="chemical">Chemical Engineering & Materials Science</option>
-									<option value="chemistry">Chemistry, Biology & Biomedical Engineering</option>
-									<option value="civil">Civil, Environmental & Ocean Engineering</option>
-									<option value="computer">Computer Science</option>
-									<option value="electrical">Electrical & Computer Engineering</option>
-									<option value="mathematical">Mathematical Science</option>
-									<option value="mechanical">Mechanical Engineering</option>
-									<option value="physics">Physics & Engineering Physics</option>
-									<option value="quantitative">Quantitative Finance</option>
-									<option value="systems">Systems & Enterprises</option>
-								</select>
-							</div>
-						</div>
-					</div>
-					
-				</div>
-				<br>
-				<div class="row-fluid">  
-					<div id="formLeft" class="span3">
-						<div class="control-group">
-							<label class="control-label" for="prerequisites">Prerequisites</label>
-							<div class="controls">
-								<textarea name="prerequisites" id="prerequisites" placeholder="e.g. CS115 OR CS180                   CS284"></textarea>
-							</div>
-						</div>
-					</div>
-					
-					<div id="formCenter" class="span7">
-						<div class="control-group">
-							<label class="control-label" for="corequisites">Corequisites</label>
-							<div class="controls">
-								<textarea name="corequisites" id="corequisites" class="span5" placeholder="e.g. CS115 OR CS180                   CS284"></textarea> 
-							</div>
-						</div>
-					</div>
-				</div>
-				
-				<br>
-				<div class="row-fluid">  
-					<div id="formCenter" class="span12">
-						<div class="control-group">
-							<label class="control-label">Term Offered*</label>
-							<div class="controls">
+							
+							  <div id="formCenter" class="span2">
 								<div class="control-group">
-									<label class="control-label"><br>On Campus</label>
+									<label class="control-label" for="courseNumber">Course Number*</label>
 									<div class="controls">
-										<label class="checkbox inline">
-											Fall<input type="checkbox" name="onCampus[]" id="fall" value="fall" />
-										</label>
-										<label class="checkbox inline">
-											Spring<input type="checkbox" name="onCampus[]" id="spring" value="spring" />
-										</label>
-										<label class="checkbox inline">
-											Summer 1<input type="checkbox" name="onCampus[]" id="summer1" value="summer1" />
-										</label>
-										<label class="checkbox inline">
-											Summer 2<input type="checkbox" name="onCampus[]" id="summer2" value="summer2" />
-										</label>
+										<input type="text" name="courseNumber" id="courseNumber" class="input-medium" placeholder="e.g. 101" /> 
+									</div>
+								</div>
+							  </div>
+							  
+								<div id="formRight" class="span2">
+									<div class="control-group">
+										<label class="control-label" for="credits">Credits*</label>
+										<div class="controls">
+											<input type="text" name="credits" id="credits" class="input-medium" /> 
+										</div>
+									</div>
+								</div>
+						</div>
+						<br>
+						<div class="row-fluid">  
+							<div id="formLeft" class="span3">
+								<div class="control-group">
+									<label class="control-label" for="courseName">Course Name*</label>
+									<div class="controls">
+										<input type="text" name="courseName" id="courseName"> 
 									</div>
 								</div>
 							</div>
-							<div class="controls">
+							
+							<div id="formCenter" class="span7">
 								<div class="control-group">
-									<label class="control-label"><br>Web Campus</label>
+									<label class="control-label" for="department">Department*</label>
 									<div class="controls">
-										<label class="checkbox inline">
-											Fall<input type="checkbox" name="webCampus[]" id="fall" value="fall" />
-										</label>
-										<label class="checkbox inline">
-											Spring<input type="checkbox" name="webCampus[]" id="spring" value="spring" />
-										</label>
-										<label class="checkbox inline">
-											Summer 1<input type="checkbox" name="webCampus[]" id="summer1" value="summer1" />
-										</label>
-										<label class="checkbox inline">
-											Summer 2<input type="checkbox" name="webCampus[]" id="summer2" value="summer2" />
-										</label>
+										<select name="department" id="department" class="span5">
+											<option value="">Select a department..</option>
+											<option value="arts">Arts and Letters</option>
+											<option value="business">Business and Technology</option>
+											<option value="chemical">Chemical Engineering & Materials Science</option>
+											<option value="chemistry">Chemistry, Biology & Biomedical Engineering</option>
+											<option value="civil">Civil, Environmental & Ocean Engineering</option>
+											<option value="computer">Computer Science</option>
+											<option value="electrical">Electrical & Computer Engineering</option>
+											<option value="mathematical">Mathematical Science</option>
+											<option value="mechanical">Mechanical Engineering</option>
+											<option value="physics">Physics & Engineering Physics</option>
+											<option value="quantitative">Quantitative Finance</option>
+											<option value="systems">Systems & Enterprises</option>
+										</select>
+									</div>
+								</div>
+							</div>
+							
+						</div>
+						<br>
+						<div class="row-fluid">  
+							<div id="formLeft" class="span3">
+								<div class="control-group">
+									<label class="control-label" for="prerequisites">Prerequisites</label>
+									<div class="controls">
+										<textarea name="prerequisites" id="prerequisites" placeholder="e.g. CS115 OR CS180                   CS284"></textarea>
+									</div>
+								</div>
+							</div>
+							
+							<div id="formCenter" class="span7">
+								<div class="control-group">
+									<label class="control-label" for="corequisites">Corequisites</label>
+									<div class="controls">
+										<textarea name="corequisites" id="corequisites" class="span5" placeholder="e.g. CS115 OR CS180                   CS284"></textarea> 
 									</div>
 								</div>
 							</div>
 						</div>
-					</div>
+						
+						<br>
+						<div class="row-fluid">  
+							<div id="formCenter" class="span12">
+								<div class="control-group">
+									<label class="control-label">Term Offered*</label>
+									<div class="controls">
+										<div class="control-group">
+											<label class="control-label"><br>On Campus</label>
+											<div class="controls">
+												<label class="checkbox inline">
+													Fall<input type="checkbox" name="onCampus[]" id="fall" value="fall" />
+												</label>
+												<label class="checkbox inline">
+													Spring<input type="checkbox" name="onCampus[]" id="spring" value="spring" />
+												</label>
+												<label class="checkbox inline">
+													Summer 1<input type="checkbox" name="onCampus[]" id="summer1" value="summer1" />
+												</label>
+												<label class="checkbox inline">
+													Summer 2<input type="checkbox" name="onCampus[]" id="summer2" value="summer2" />
+												</label>
+											</div>
+										</div>
+									</div>
+									<div class="controls">
+										<div class="control-group">
+											<label class="control-label"><br>Web Campus</label>
+											<div class="controls">
+												<label class="checkbox inline">
+													Fall<input type="checkbox" name="webCampus[]" id="fall" value="fall" />
+												</label>
+												<label class="checkbox inline">
+													Spring<input type="checkbox" name="webCampus[]" id="spring" value="spring" />
+												</label>
+												<label class="checkbox inline">
+													Summer 1<input type="checkbox" name="webCampus[]" id="summer1" value="summer1" />
+												</label>
+												<label class="checkbox inline">
+													Summer 2<input type="checkbox" name="webCampus[]" id="summer2" value="summer2" />
+												</label>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+						<div class="form-actions">
+						 <button type="submit" name="submit" class="btn btn-primary">Add Course</button>
+						</div>
+					
+					</form>
 				</div>
-				
-				<div class="form-actions">
-				 <button type="submit" name="submit" class="btn btn-primary">Add Course</button>
-				</div>
-			
-			</form>
-			</div>
 			</div>
 			
 <?php
