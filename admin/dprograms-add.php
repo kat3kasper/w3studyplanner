@@ -56,8 +56,6 @@
 				w.appendChild(z);
 			}
 			
-			
-		
 			function addCourseGroup()
 			{
 				var e1 = document.getElementById('NumberOfCourses');
@@ -71,7 +69,7 @@
 				
 				for(var i = 0; i < e3.length; i++)
 				{
-					if(e3.options[i].value === o.value||e3.options[i].value === oor.value)
+					if(e3.options[i].value === o.value)
 					{
 						alert("That requirement is already added.");
 						return false;
@@ -154,10 +152,10 @@
 			?>
 			
 			<ul class="nav nav-tabs">
-				<li><a href="/studyplanner/admin">Admin Home</a></li>
-				<li class="active"><a href="dprograms.php">Degree Programs</a></li>
+				<li><a href="index.php">Admin Home</a></li>
 				<li><a href="courses.php">Courses</a></li>
 				<li><a href="cgroups.php">Course Groups</a></li>
+				<li class="active"><a href="dprograms.php">Degree Programs</a></li>
 			</ul>
 			
 			<ul class="nav nav-pills">
@@ -269,7 +267,7 @@
 		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		
 		//Get requirement list
-		$sql = "SELECT requirement_id, requirement_name FROM requirements";
+		$sql = "SELECT degree_requirements FROM degree";
 		
 		$sth = $dbh->prepare($sql);
 		$sth->execute();
@@ -362,9 +360,7 @@
 					  </div>    
 					</div>
 				</div>
-				
-				
-		
+
 				<div class="row-fluid" id="dynamicInput">
 					<div id="formLeft" class="span2">
 						<div class="control-group">
@@ -406,7 +402,7 @@
 									</div>					
 							</div>
 						</div>
-				
+					
 					<?php
 					}
 					?>
@@ -414,7 +410,8 @@
 					<div id="formRight" class="span2">
 					  <div class="control-group">
 						<div class="controls">
-							<button class="btn btn-info" id="dynamic-btn" type="button" onClick="duplicate()" title="Add Requirement">OR</button>
+
+							<button class="btn btn-info" name="operator" id="dynamic-btn" type="button" onClick="duplicate()" title="Add Requirement">OR</button>
 						</div>      
 					  </div>    
 					</div>
@@ -429,7 +426,7 @@
 					<div id="formLeft" class="span12">
 							<div class="control-group">
 								<label class="control-label" for="Degree Requirements">Degree Requirements</label>
-								<div class="controls">
+				 				<div class="controls">
 									<select multiple="multiple" name="requirements[]" id="Requirements" class="span7" size="7">
 									</select>
 									<div class="btn-group btn-group-vertical">
