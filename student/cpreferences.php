@@ -133,7 +133,7 @@
 			//Each course group
 			foreach($reqArray as $pairs)
 			{
-				$temp = explode("|", $pairs);
+				$temp = explode(" FROM ", $pairs);
 				$numCourses = $temp[0];
 				$cgName = $temp[1];
 			
