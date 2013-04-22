@@ -150,134 +150,67 @@
 		else
 		{
 			$valid_prereq = 1;
-			$invalid_prereq = "<li>";
-			
-			$coreq_status = 1;
+			$valid_coreq = 1;
 			
 			//Parsing course prerequisites
 			if(!empty($prereq))
 			{
-				$pre_and_list = "";
-				$pre_or_list = "";
+				//Split ANDs
+				$prereq_arr = array_map("trim", explode("\n", $prereq));
 				
-				$prereq_arr = explode("\n", $prereq);
+				//Check course exists
 				foreach($prereq_arr as $value)
 				{
-					//Parse OR
 					if(strpos($value, " OR ") > 0)
 					{
-						$exploded = explode(" OR ", $value);
+						$exploded = array_map("trim", explode(" OR ", $value));
 						foreach($exploded as $c)
 							if(!course_exists($c))
-							{
 								$valid_prereq = 0;
-								$invalid_prereq .= "<li>" . $c . "</li>";
-							}
-						
-						if($valid_prereq)
-						{
-							//Delimiter for each group of OR
-							if($pre_or_list !== "")
-								$pre_or_list .= ",";
-							
-							$pre_or_list .= implode("|", $exploded);
-						}
 					}
-					//Parse AND
-					else
-					{
-						$sth->bindParam(":cid", $value);
-						$sth->execute();
-						
-						$rownum = $sth->rowCount();
-						
-						if(!$rownum)
-							$valid_prereq = 0;
-						
-						if($valid_prereq)
-						{
-							if($pre_and_list !== "")
-								$pre_and_list .= ",";
-							
-							$pre_and_list .= $value;
-						}
-					}
+					else if(!course_exists($value))
+						$valid_prereq = 0;
 				}
+				
+				if($valid_prereq)
+					$formattedPrereq = wrap($prereq_arr, 1);
 			}
 			
 			//Parsing course corequisites
-			if(!empty($coreq))
+			if(!empty($coreq) && $valid_prereq)
 			{
-				$sql = "SELECT * FROM course WHERE CONCAT(prefix, number) = :cid";
-		
-				$sth = $dbh->prepare($sql);
+				//Split ANDs
+				$coreq_arr = array_map("trim", explode("\n", $coreq));
 				
-				$co_and_list = "";
-				$co_or_list = "";
-				
-				//Parse AND
-				$coreq_arr = explode("\n", $coreq);
+				//Check course exists
 				foreach($coreq_arr as $value)
 				{
-					//Parse OR
 					if(strpos($value, " OR ") > 0)
 					{
-						$exploded = explode(" OR ", $value);
+						$exploded = array_map("trim", explode(" OR ", $value));
 						foreach($exploded as $c)
-						{
-							$sth->bindParam(":cid", $c);
-							$sth->execute();
-							
-							$rownum = $sth->rowCount();
-							
-							if(!$rownum)
-								$coreq_status = 0;
-						}
-						
-						if($coreq_status)
-						{
-							//Delimiter for each group of OR
-							if($co_or_list !== "")
-								$co_or_list .= ",";
-							
-							$co_or_list .= implode("|", explode(" OR ", $value));
-						}
+							if(!course_exists($c))
+								$valid_coreq = 0;
 					}
-					else
-					{
-						$sth->bindParam(":cid", $value);
-						$sth->execute();
-						
-						$rownum = $sth->rowCount();
-						
-						if(!$rownum)
-							$coreq_status = 0;
-						
-						if($coreq_status)
-						{
-							if($co_and_list !== "")
-								$co_and_list .= ",";
-							
-							$co_and_list .= $value;
-						}
-					}
+					else if(!course_exists($value))
+						$valid_coreq = 0;
 				}
+				
+				if($valid_coreq)
+					$formattedCoreq = wrap($coreq_arr, 1);
 			}
 			
 			//Insert into db
-			if($valid_prereq && $coreq_status)
+			if($valid_prereq && $valid_coreq)
 			{
 				//Insert into prereq
 				if(!empty($prereq))
 				{
-					$sql = "INSERT INTO course_prerequisites(parent_course_id, and_course_id, or_course_id) VALUES (:cid, :acid, :ocid)";
+					$sql = "INSERT INTO course_prerequisites(parent_course_id, prereq_course_id) VALUES (:cid, :pcid)";
 					
 					$sth = $dbh->prepare($sql);
-					
-					$cid = $pre . $num;
 					$sth->bindParam(":cid", $cid);
-					$sth->bindParam(":acid", $pre_and_list);
-					$sth->bindParam(":ocid", $pre_or_list);
+					$sth->bindParam(":pcid", $formattedPrereq);
 				
 					$sth->execute();
 				}
@@ -285,14 +218,11 @@
 				//Insert into coreq
 				if(!empty($coreq))
 				{				
-					$sql = "INSERT INTO course_corequisites(parent_course_id, and_course_id, or_course_id) VALUES (:cid, :acid, :ocid)";
+					$sql = "INSERT INTO course_corequisites(parent_course_id, coreq_course_id) VALUES (:cid, :ccid)";
 					
 					$sth = $dbh->prepare($sql);
-					
-					$cid = $pre . $num;
 					$sth->bindParam(":cid", $cid);
-					$sth->bindParam(":acid", $co_and_list);
-					$sth->bindParam(":ocid", $co_or_list);
+					$sth->bindParam(":ccid", $formattedCoreq);
 				
 					$sth->execute();
 				}
@@ -311,23 +241,27 @@
 				$sth->bindParam(":wc", $wc);
 					
 				$sth->execute();
-						
-				?>		
-				<div class="alert alert-success alert-block">
-				 <button type="button" class="close" data-dismiss="alert"></button>
-				 <h4>Success!</h4>
+?>
+			
+			<div class="alert alert-success alert-block">
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<h4>Success!</h4>
 				<p>Course successfully added.</p>
-				</div>
-				<?php
+			</div>
+			
+<?php
 			}
+			//Invalid prereq/coreq
 			else
 			{
-				?>
-				<div class="alert alert-block">
-				 <button type="button" class="close" data-dismiss="alert"></button>
-				 <h4>Wait!</h4>
-				<p>Course cannot be added. Make sure the prerequisites or corequisites are added first</p>
-				</div>
+?>
+			
+			<div class="alert alert-block">
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<h4>Wait!</h4>
+				<p>Course cannot be added. Make sure the prerequisites or corequisites have been added as course first</p>
+			</div>
+			
 <?php
 			}
 		}
@@ -413,7 +347,7 @@
 						<div class="row-fluid">  
 							<div id="formLeft" class="span3">
 								<div class="control-group">
-									<label class="control-label" for="prerequisites">Prerequisites</label>
+									<label class="control-label" for="prerequisites">Prerequisites <a onClick="alert('Insert OR combinations on the same line\nInsert AND combinations on different lines\n\ne.g. (CS105 OR CS135) AND CS284 will be:\nCS105 OR CS135\nCS284');">(How to?)</a></label>
 									<div class="controls">
 										<textarea name="prerequisites" id="prerequisites" placeholder="e.g. CS115 OR CS180                   CS284"></textarea>
 									</div>
@@ -422,7 +356,7 @@
 							
 							<div id="formCenter" class="span7">
 								<div class="control-group">
-									<label class="control-label" for="corequisites">Corequisites</label>
+									<label class="control-label" for="corequisites">Corequisites <a onClick="alert('Insert OR combinations on the same line\nInsert AND combinations on different lines\n\ne.g. (CS105 OR CS135) AND CS284 will be:\nCS105 OR CS135\nCS284');">(How to?)</a></label>
 									<div class="controls">
 										<textarea name="corequisites" id="corequisites" class="span5" placeholder="e.g. CS115 OR CS180                   CS284"></textarea> 
 									</div>

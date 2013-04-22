@@ -5,6 +5,7 @@
 		<?php require("../includes/styles.php"); ?>
 		<?php require("../includes/config.php"); ?>
 		<?php require("../includes/functions.php"); ?>
+		<?php require("../includes/scripts.php"); ?>
 		
 		<script type="text/javascript">
 			//Popup window code
@@ -16,7 +17,7 @@
 			//Get value from child window
 			function GetValueFromChild(course)
 			{
-				document.getElementById('courseId').value = course;
+				document.getElementById("courseId").value = course;
 			}
 			
 			//Validates form inputs
@@ -164,153 +165,201 @@
 		$rownum = $sth->rowCount();
 		
 		if($rownum)
-			{
+		{
 ?>
-				<div class="alert alert-block">
-				 <button type="button" class="close" data-dismiss="alert"></button>
-				 <h4>Wait!</h4>
+			
+			<div class="alert alert-block">
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<h4>Wait!</h4>
 				<p>Course with that prefix & number already exist in database.</p>
-				</div>
+			</div>
+			
 <?php
-			}
+		}
 		else
 		{
-			//Update course
-			$sql = "UPDATE course SET prefix = :pre, number = :num, no_of_credits = :cred, course_name = :name, department = :dept, on_campus_semesters = :oc, web_campus_semesters = :wc WHERE CONCAT(prefix, number) = :cid";
+			$valid_prereq = 1;
+			$valid_coreq = 1;
 			
-			$sth = $dbh->prepare($sql);
-			
-			$sth->bindParam(":pre", $pre);
-			$sth->bindParam(":num", $num);
-			$sth->bindParam(":cred", $cred);
-			$sth->bindParam(":name", $name);
-			$sth->bindParam(":dept", $dept);
-			$sth->bindParam(":oc", $oc);
-			$sth->bindParam(":wc", $wc);
-			$sth->bindParam(":cid", $cid);
-			
-			$sth->execute();
-			
-			//Insert to course prerequisites
+			//Parsing course prerequisites
 			if(!empty($prereq))
 			{
-				//Check for duplicates
-				$sql = "SELECT * FROM course_prerequisites WHERE parent_course_id = :cid";
+				//Split ANDs
+				$prereq_arr = array_map("trim", explode("\n", $prereq));
 				
-				$sth = $dbh->prepare($sql);
-				$sth->bindParam(":cid", $cid);
-				$sth->execute();
-				
-				$rownum = $sth->rowCount();
-				
-				//If course has existing prerequisites
-				if($rownum)
-					$sql = "UPDATE course_prerequisites SET parent_course_id = :ncid, and_course_id = :acid, or_course_id = :ocid WHERE parent_course_id = :cid";
-				//If course doesn't have prerequisites
-				else
-					$sql = "INSERT INTO course_prerequisites(parent_course_id, and_course_id, or_course_id) VALUES (:ncid, :acid, :ocid)";
-				
-				$sth = $dbh->prepare($sql);
-				
-				$and_list = "";
-				$or_list = "";
-				
-				//Parse AND
-				$prereq_arr = explode("\n", $prereq);
+				//Check course exists
 				foreach($prereq_arr as $value)
 				{
-					//Parse OR
 					if(strpos($value, " OR ") > 0)
 					{
-						//Delimiter for each group of OR
-						if($or_list !== "")
-							$or_list .= ",";
-						
-						$or_list .= implode("|", explode(" OR ", $value));
+						$exploded = array_map("trim", explode(" OR ", $value));
+						foreach($exploded as $c)
+							if(!course_exists($c))
+								$valid_prereq = 0;
 					}
-					else
-					{
-						if($and_list !== "")
-							$and_list .= ",";
-						
-						$and_list .= $value;
-					}
+					else if(!course_exists($value))
+						$valid_prereq = 0;
 				}
 				
-				$ncid = $pre . $num;
-				$sth->bindParam(":ncid", $ncid);
-				$sth->bindParam(":acid", $and_list);
-				$sth->bindParam(":ocid", $or_list);
-				if($rownum)
-					$sth->bindParam(":cid", $cid);
-			
-				$sth->execute();
+				if($valid_prereq)
+					$formattedPrereq = wrap($prereq_arr, 1);
 			}
 			
-			//Insert to course corequisites
-			if(!empty($coreq))
+			//Parsing course corequisites
+			if(!empty($coreq) && $valid_prereq)
 			{
-				//Check for duplicates
-				$sql = "SELECT * FROM course_corequisites WHERE parent_course_id = :cid";
+				//Split ANDs
+				$coreq_arr = array_map("trim", explode("\n", $coreq));
 				
-				$sth = $dbh->prepare($sql);
-				$sth->bindParam(":cid", $cid);
-				$sth->execute();
-				
-				$rownum = $sth->rowCount();
-				
-				//If course has existing corequisites
-				if($rownum)
-					$sql = "UPDATE course_corequisites SET parent_course_id = :ncid, and_course_id = :acid, or_course_id = :ocid WHERE parent_course_id = :cid";
-				//If course doesn't have corequisites
-				else
-					$sql = "INSERT INTO course_corequisites(parent_course_id, and_course_id, or_course_id) VALUES (:ncid, :acid, :ocid)";
-				
-				$sth = $dbh->prepare($sql);
-				
-				$and_list = "";
-				$or_list = "";
-				
-				//Parse AND
-				$coreq_arr = explode("\n", $coreq);
+				//Check course exists
 				foreach($coreq_arr as $value)
 				{
-					//Parse OR
 					if(strpos($value, " OR ") > 0)
 					{
-						//Delimiter for each group of OR
-						if($or_list !== "")
-							$or_list .= ",";
-						
-						$or_list .= implode("|", explode(" OR ", $value));
+						$exploded = array_map("trim", explode(" OR ", $value));
+						foreach($exploded as $c)
+							if(!course_exists($c))
+								$valid_coreq = 0;
+					}
+					else if(!course_exists($value))
+						$valid_coreq = 0;
+				}
+				
+				if($valid_coreq)
+					$formattedCoreq = wrap($coreq_arr, 1);
+			}
+			
+			//Insert into db
+			if($valid_prereq && $valid_coreq)
+			{
+				//Insert into prereq
+				{
+					//Check for existing prereq
+					$sql = "SELECT * FROM course_prerequisites WHERE parent_course_id = :cid";
+					
+					$sth = $dbh->prepare($sql);
+					$sth->bindParam(":cid", $cid);
+					$sth->execute();
+					
+					$rownum = $sth->rowCount();
+					
+					//If course has existing prerequisites
+					if($rownum)
+					{
+						//Prerequisites erased on form
+						if(empty($prereq))
+							$sql = "DELETE FROM course_prerequisites WHERE parent_course_id = :cid";
+						else
+							$sql = "UPDATE course_prerequisites SET parent_course_id = :ncid, prereq_course_id = :pcid WHERE parent_course_id = :cid";
+					}
+					//If course doesn't have prerequisites
+					else
+						$sql = "INSERT INTO course_prerequisites(parent_course_id, prereq_course_id) VALUES (:ncid, :pcid)";
+					
+					$sth = $dbh->prepare($sql);
+					
+					$ncid = $pre . $num;
+					if($rownum)
+					{
+						$sth->bindParam(":cid", $cid);
+						if(!empty($prereq))
+						{
+							$sth->bindParam(":pcid", $formattedPrereq);
+							$sth->bindParam(":ncid", $ncid);
+						}
 					}
 					else
 					{
-						if($and_list !== "")
-							$and_list .= ",";
-						
-						$and_list .= $value;
+						$sth->bindParam(":ncid", $ncid);
+						$sth->bindParam(":pcid", $formattedPrereq);
 					}
+				
+					$sth->execute();
 				}
 				
-				$ncid = $pre . $num;
-				$sth->bindParam(":ncid", $ncid);
-				$sth->bindParam(":acid", $and_list);
-				$sth->bindParam(":ocid", $or_list);
-				if($rownum)
+				//Insert into coreq
+				{				
+					//Check for existing coreq
+					$sql = "SELECT * FROM course_corequisites WHERE parent_course_id = :cid";
+					
+					$sth = $dbh->prepare($sql);
 					$sth->bindParam(":cid", $cid);
+					$sth->execute();
+					
+					$rownum = $sth->rowCount();
+					
+					//If course has existing corequisites
+					if($rownum)
+					{
+						//Corequisites erased on form
+						if(empty($coreq))
+							$sql = "DELETE FROM course_corequisites WHERE parent_course_id = :cid";
+						else
+							$sql = "UPDATE course_corequisites SET parent_course_id = :ncid, coreq_course_id = :ccid WHERE parent_course_id = :cid";
+					}
+					//If course doesn't have corequisites
+					else
+						$sql = "INSERT INTO course_corequisites(parent_course_id, coreq_course_id) VALUES (:ncid, :ccid)";
+					
+					$sth = $dbh->prepare($sql);
+					
+					$ncid = $pre . $num;
+					if($rownum)
+					{
+						$sth->bindParam(":cid", $cid);
+						if(!empty($coreq))
+						{
+							$sth->bindParam(":pcid", $formattedCoreq);
+							$sth->bindParam(":ncid", $ncid);
+						}
+					}
+					else
+					{
+						$sth->bindParam(":ncid", $ncid);
+						$sth->bindParam(":pcid", $formattedCoreq);
+					}
+				
+					$sth->execute();
+				}
 			
+				//Update course
+				$sql = "UPDATE course SET prefix = :pre, number = :num, no_of_credits = :cred, course_name = :name, department = :dept, on_campus_semesters = :oc, web_campus_semesters = :wc WHERE CONCAT(prefix, number) = :cid";
+				
+				$sth = $dbh->prepare($sql);
+				
+				$sth->bindParam(":pre", $pre);
+				$sth->bindParam(":num", $num);
+				$sth->bindParam(":cred", $cred);
+				$sth->bindParam(":name", $name);
+				$sth->bindParam(":dept", $dept);
+				$sth->bindParam(":oc", $oc);
+				$sth->bindParam(":wc", $wc);
+				$sth->bindParam(":cid", $cid);
+				
 				$sth->execute();
-			}
-		
-		
-		?>		
-				<div class="alert alert-success alert-block">
-				 <button type="button" class="close" data-dismiss="alert"></button>
-				 <h4>Success!</h4>
+?>
+			
+			<div class="alert alert-success alert-block">
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<h4>Success!</h4>
 				<p>Changes successfully saved.</p>
-				</div>
-		<?php
+			</div>
+			
+<?php
+			}
+			//Invalid prereq/coreq
+			else
+			{
+?>
+			
+			<div class="alert alert-block">
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<h4>Wait!</h4>
+				<p>Course cannot be edited. Make sure the prerequisites or corequisites have been added as course first</p>
+			</div>
+			
+<?php
+			}
 		}
 	}
 	//If default edit form is submitted
@@ -339,13 +388,15 @@
 		$rownum = $sth->rowCount();
 		
 		if(!$rownum)
-			{
+		{
 ?>
+			
 			<div class="alert alert-error alert-block">
-			 <button type="button" class="close" data-dismiss="alert"></button>
-			 <h4>Oh Snap!</h4>
-			<p><?php echo $cid ?> does not exists in database...</p>
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<h4>Oh Snap!</h4>
+				<p><?php echo $cid ?> does not exists in database...</p>
 			</div>
+			
 <?php
 		}
 		else
@@ -374,8 +425,7 @@
 			{
 				$row = $sth->fetch(PDO::FETCH_ASSOC);
 				
-				$acid = $row["and_course_id"];
-				$ocid = $row["or_course_id"];
+				$pcid = $row["prereq_course_id"];
 				
 				$prereq = implode("\n", explode(",", $acid));
 				
@@ -487,7 +537,7 @@
 				<div class="row-fluid">  
 					<div id="formLeft" class="span3">
 						<div class="control-group">
-							<label class="control-label" for="prerequisites">Prerequisites</label>
+							<label class="control-label" for="prerequisites">Prerequisites <a onClick="alert('Insert OR combinations on the same line\nInsert AND combinations on different lines\n\ne.g. (CS105 OR CS135) AND CS284 will be:\nCS105 OR CS135\nCS284');">(How to?)</a></label>
 							<div class="controls">
 								<textarea name="prerequisites" id="prerequisites" placeholder="e.g. CS115 OR CS180                   CS284"><?php if(isset($prereq)) echo $prereq; ?></textarea>
 							</div>
@@ -496,7 +546,7 @@
 					
 					<div id="formCenter" class="span7">
 						<div class="control-group">
-							<label class="control-label" for="corequisites">Corequisites</label>
+							<label class="control-label" for="corequisites">Corequisites <a onClick="alert('Insert OR combinations on the same line\nInsert AND combinations on different lines\n\ne.g. (CS105 OR CS135) AND CS284 will be:\nCS105 OR CS135\nCS284');">(How to?)</a></label>
 							<div class="controls">
 								<textarea name="corequisites" id="corequisites" class="span5" placeholder="e.g. CS115 OR CS180                   CS284"><?php if(isset($coreq)) echo $coreq; ?></textarea> 
 							</div>
@@ -598,7 +648,5 @@
 				<p>© Study Planner 2013</p>
 			</footer>
 		</div>
-		
-		<?php require("../includes/scripts.php"); ?>
 	</body>
 </html>
