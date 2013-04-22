@@ -26,6 +26,25 @@
 				}
 			}
 			
+			//Validate semester credits table
+			function validateSem(yearCurrent, yearGraduate)
+			{
+				//Form control b/c of brackets in child names
+				var myForm = document.getElementById("semesterCredits");
+				
+				for(; yearCurrent <= yearGraduate; yearCurrent++)
+				{
+					var max = myForm["maxCredits[" + yearCurrent + "][]"];
+					var min = myForm["minCredits[" + yearCurrent + "][]"];
+					
+					for(x = 0; x < max.length; x++)
+						if(max[x].value < min[x].value)
+						{
+							alert("Maximum credit values should be equal to or larger than minimum values");
+							return false;
+						}
+				}
+			}
 		</script>
 		
 	</head>
@@ -50,7 +69,7 @@
 			
 			<h4>Semester Setup</h4>
 			
-			<form class="form-horizontal" method="post" action="ssetup.php"onsubmit="return validateForm()">
+			<form class="form-horizontal" method="post" action="ssetup.php" onSubmit="return validateForm()">
 				<div class="control-group">
 					<label class="control-label">Please enter the semester you wish to graduate</label>
 					<div class="controls">
@@ -93,7 +112,7 @@
 			
 			<p>Please choose how many credits you wish to take per semester:</p>
 			
-			<form class="form-horizontal" method="post" action="cpreferences.php">
+			<form class="form-horizontal" id="semesterCredits" method="post" action="cpreferences.php" onSubmit="return validateSem(<?php echo date("Y") . ", " . $yearGraduate; ?>)">
 				<table class="table table-bordered table-condensed well">
 					<thead>
 						<tr>
