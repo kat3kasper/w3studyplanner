@@ -38,7 +38,7 @@
 					var min = myForm["minCredits[" + yearCurrent + "][]"];
 					
 					for(x = 0; x < max.length; x++)
-						if(max[x].value < min[x].value)
+						if(parseInt(max[x].value) < parseInt(min[x].value))
 						{
 							alert("Maximum credit values should be equal to or larger than minimum values");
 							return false;
