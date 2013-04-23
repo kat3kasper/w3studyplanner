@@ -51,7 +51,7 @@
 	function wrap($arr, $type)
 	{
 		$str = array_shift($arr);
-		$wrapper = ($type == 1 ? "AND" : "OR");
+		$wrapper = ($type == 1 ? "and" : "or");
 		
 		//Empty array
 		if($str == NULL)
@@ -66,7 +66,7 @@
 	//Handle OR
 	function formatOR($str)
 	{
-		$arr = array_map("trim", explode(" OR ", $str));
+		$arr = array_map("trim", explode(" or ", $str));
 		
 		//Not an OR statement
 		if($arr[0] == $str)

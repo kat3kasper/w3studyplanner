@@ -92,13 +92,13 @@
 		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		
 		//Sanitize & extract values
-		$pre = strtoupper(s_string($_POST["coursePrefix"]));
+		$pre = strtolower(s_string($_POST["coursePrefix"]));
 		$num = s_int($_POST["courseNumber"]);
 		$cred = s_int($_POST["credits"]);
 		$name = s_string($_POST["courseName"]);
 		$dept = strtolower(s_string($_POST["department"]));
-		$prereq = strtoupper(s_string($_POST["prerequisites"]));
-		$coreq = strtoupper(s_string($_POST["corequisites"]));
+		$prereq = strtolower(s_string($_POST["prerequisites"]));
+		$coreq = strtolower(s_string($_POST["corequisites"]));
 		
 		if(isset($_POST["onCampus"]))
 			$ocarr = $_POST["onCampus"];
@@ -161,9 +161,9 @@
 				//Check course exists
 				foreach($prereq_arr as $value)
 				{
-					if(strpos($value, " OR ") > 0)
+					if(strpos($value, " or ") > 0)
 					{
-						$exploded = array_map("trim", explode(" OR ", $value));
+						$exploded = array_map("trim", explode(" or ", $value));
 						foreach($exploded as $c)
 							if(!course_exists($c))
 								$valid_prereq = 0;
@@ -185,9 +185,9 @@
 				//Check course exists
 				foreach($coreq_arr as $value)
 				{
-					if(strpos($value, " OR ") > 0)
+					if(strpos($value, " or ") > 0)
 					{
-						$exploded = array_map("trim", explode(" OR ", $value));
+						$exploded = array_map("trim", explode(" or ", $value));
 						foreach($exploded as $c)
 							if(!course_exists($c))
 								$valid_coreq = 0;
@@ -285,7 +285,7 @@
 								<div class="control-group">
 								<label class="control-label" for="coursePrefix">Course Prefix*</label>
 								<div class="controls">
-									<input type="text" name="coursePrefix" id="coursePrefix" class="input-medium" placeholder="e.g. CS" /> 
+									<input type="text" name="coursePrefix" id="coursePrefix" class="input-medium" placeholder="e.g. cs" /> 
 								</div>
 								</div>
 							</div>
@@ -347,18 +347,18 @@
 						<div class="row-fluid">  
 							<div id="formLeft" class="span3">
 								<div class="control-group">
-									<label class="control-label" for="prerequisites">Prerequisites <a onClick="alert('Insert OR combinations on the same line\nInsert AND combinations on different lines\n\ne.g. (CS105 OR CS135) AND CS284 will be:\nCS105 OR CS135\nCS284');">(How to?)</a></label>
+									<label class="control-label" for="prerequisites">Prerequisites <a onClick="alert('Insert OR combinations on the same line\nInsert AND combinations on different lines\n\ne.g. (cs105 or cs135) and cs284 will be:\ncs105 or cs135\ncs284');">(How to?)</a></label>
 									<div class="controls">
-										<textarea name="prerequisites" id="prerequisites" placeholder="e.g. CS115 OR CS180                   CS284"></textarea>
+										<textarea name="prerequisites" id="prerequisites" placeholder="e.g. cs115 or cs180                    cs284"></textarea>
 									</div>
 								</div>
 							</div>
 							
 							<div id="formCenter" class="span7">
 								<div class="control-group">
-									<label class="control-label" for="corequisites">Corequisites <a onClick="alert('Insert OR combinations on the same line\nInsert AND combinations on different lines\n\ne.g. (CS105 OR CS135) AND CS284 will be:\nCS105 OR CS135\nCS284');">(How to?)</a></label>
+									<label class="control-label" for="corequisites">Corequisites <a onClick="alert('Insert OR combinations on the same line\nInsert AND combinations on different lines\n\ne.g. (cs105 or cs135) and cs284 will be:\ncs105 or cs135\ncs284');">(How to?)</a></label>
 									<div class="controls">
-										<textarea name="corequisites" id="corequisites" class="span5" placeholder="e.g. CS115 OR CS180                   CS284"></textarea> 
+										<textarea name="corequisites" id="corequisites" class="span5" placeholder="e.g. cs115 or cs180                    cs284"></textarea> 
 									</div>
 								</div>
 							</div>

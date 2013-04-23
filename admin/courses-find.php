@@ -44,7 +44,7 @@
 		//$db->setup("w3_studyplanner", "QcRo2mEC", "localhost", "w3_studyplanner");
 		
 		//Sanitize & extract values		
-		$course = strtoupper(s_string($_POST["course"]));
+		$course = strtolower(s_string($_POST["course"]));
 		$name = s_string($_POST["coursename"]);
 		$dept = strtolower(s_string($_POST["department"]));
 		

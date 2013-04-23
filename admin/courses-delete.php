@@ -77,7 +77,7 @@
 		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 		//Sanitize & extract values
-		$cid = strtoupper(s_string($_POST["courseId"]));
+		$cid = strtolower(s_string($_POST["courseId"]));
 		
 		//Check if course exists
 		$sql = "SELECT * FROM course WHERE CONCAT(prefix, number) = :cid";

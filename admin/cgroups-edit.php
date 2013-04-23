@@ -336,7 +336,7 @@
 				<div class="control-group">
 					<label class="control-label" for="course">Find or Add Course</label>
 					<div class="controls">
-						<input type="text" name="course" id="course" class="input-small" placeholder="e.g. CS101" />
+						<input type="text" name="course" id="course" class="input-small" placeholder="e.g. cs101" />
 						<button type="button" class="btn btn-info" onclick="Javascript:newPopup('courses-find.php');" title="Find Course"><i class="icon-search"></i></button>
 						</a>
 						<button class="btn btn-success" type="button" onclick="addCourse()" id="add-btn" title="Add Course to the list" value="Add to List" ><i class="icon-plus"></i></button>	
