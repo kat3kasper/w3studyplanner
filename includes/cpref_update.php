@@ -40,7 +40,7 @@
 		{
 			$wcarr = explode(",", $wcs);
 			foreach($wcarr as $val)
-				echo "<option value=\"wc" . $val . "\">WC " . ucfirst($val) . "</option>";
+				echo "<option value=\"" . $val . "\">WC " . ucfirst($val) . "</option>";
 		}
 	}
 ?>

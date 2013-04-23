@@ -50,9 +50,6 @@
 		$sql = "SELECT * FROM degree";
 		
 		$sth = $dbh->prepare($sql);
-		//$sth->bindParam(":year", $year);
-		//$sth->bindParam(":dept", $dept);
-		//$sth->bindParam(":degname", $degname);
 		$sth->execute();
 		$rownum = $sth->rowCount();
 		$rowarray = $sth->fetchAll(PDO::FETCH_ASSOC); //move down

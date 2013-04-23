@@ -19,83 +19,118 @@
 			
 			<p>Here is suggested schedule. If you wish to save your schedule, please click the download button on the bottom of the page</p>
 			
-			<!--
-			<table class="table table-bordered table-condensed well">
-				<thead>
-					<tr>
-						<th>Fall 2012</th>
-						<th>Spring 2013</th>
-						<th>Summer A 2013</th>
-						<th>Summer B 2013</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr> 
-						<td>CS115</td>
-						<td>CS284</td>
-						<td>CS385</td>
-						<td>	</td>
-					</tr>
-					<tr> 
-						<td>HUM103</td>
-						<td>HUM105</td>
-						<td>	</td>
-						<td>	</td>
-					</tr>
-					<tr> 
-						<td>MA112</td>
-						<td>CS146</td>
-						<td>	</td>
-						<td>	</td>
-					</tr>
-					<tr> 
-						<td>CH114</td>
-						<td>CH115</td>
-						<td>	</td>
-						<td>	</td>
-					</tr>
-				</tbody>
-				<thead>
-					<tr>
-						<th>Fall 2013</th>
-						<th>Spring 2014</th>
-						<th></th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr> 
-						<td>CS347</td>
-						<td>CS392</td>
-						<td>	</td>
-						<td>	</td>
-					</tr>
-					<tr> 
-						<td>HHS371</td>
-						<td>MA123</td>
-						<td>	</td>
-						<td>	</td>
-					</tr>
-					<tr> 
-						<td>SSW564</td>
-						<td>CS344</td>
-						<td>	</td>
-						<td>	</td>
-					</tr>
-					<tr> 
-						<td>CS509</td>
-						<td>CS442</td>
-						<td>	</td>
-						<td>	</td>
-					</tr>
-				</tbody>
-			</table>
-			-->
+<?php
+	if(isset($_POST["step5"]))
+	{
+		$step1Info = json_decode(htmlspecialchars_decode($_POST["step1Info"]), true);
+		$step2Info = json_decode(htmlspecialchars_decode($_POST["step2Info"]), true);
+		$step3Info = json_decode(htmlspecialchars_decode($_POST["step3Info"]), true);
+		$groupList = json_decode(htmlspecialchars_decode($_POST["groupList"]));
+		$groupCourses = json_decode(htmlspecialchars_decode($_POST["groupCourses"]));
+		
+		$termGraduate = $step2Info["termGraduate"];
+		$yearGraduate = $step2Info["yearGraduate"];
+		$maxCredits = $step3Info["maxCredits"];
+		$minCredits = $step3Info["minCredits"];
+		
+		$groups = $_POST["group"];
+		
+		$currMonth = date("n");
+		$currYear = date("Y");
+		
+		if($currMonth < 5) $currTerm = 4;
+		else if($currMonth < 6) $currTerm = 3;
+		else if($currMonth < 8) $currTerm = 2;
+		else $currTerm = 1;
+		
+		$termNames = array(
+			4 => "spring",
+			3 => "summer1",
+			2 => "summer2",
+			1 => "fall"
+		);
+		
+		$termNum = array(
+			4 => 0,
+			3 => 1,
+			2 => 2,
+			1 => 3
+		);
+		
+		$yearDiff = $yearGraduate - $currYear;
+		$termDiff = array_search($termGraduate, $termNames) - $currTerm;
+		$totalTerms = abs(($yearDiff * 4) - $termDiff) + 1;
+		
+		$semester = array();
+		
+		for($termPoint = $currTerm, $yearPoint = $currYear, $termCount = 0; $termCount < $totalTerms; $termCount++)
+		{
+			$pref = array();
+			
+			$i = 0;
+			$k = 0;
+			while(isset($groups[$i]))
+			{
+				$j = 0;
+				while(isset($groups[$i][$j]))
+				{
+					if(isset($groups[$i][$j][2]) && isset($groups[$i][$j][1]))
+					{
+						if($groups[$i][$j][2] == $yearPoint && $groups[$i][$j][1] == $termNames[$termPoint])
+						{
+							$pref[$k]["coursegroup"] = $groupList[$i];
+							$pref[$k]["coursename"] = $groups[$i][$j][0];
+							$k++;
+						}
+					}
+					$j++;
+				}
+				$i++;
+			}
+			
+			$term = array(
+				"term" => $termNames[$termPoint],
+				"year" => $yearPoint,
+				"min_credits" => $minCredits[$yearPoint][$termNum[$termPoint]],
+				"max_credits" => $maxCredits[$yearPoint][$termNum[$termPoint]],
+				"preferences" => $pref
+			);
+			
+			$semester[] = $term;
+			
+			$termPoint--;
+			if($termPoint == 0)
+			{
+				$termPoint = 4;
+				$yearPoint++;
+			}
+		}
+		
+		$requirements = array();
+		foreach(
+		
+		
+		$sem = array(
+			$term, $term
+		);
+		
+		$all = array(
+			"semesters" => $sem,
+			"requirements" => array(
+				$cg, $cg
+			),
+			"transcript" => array()
+		);
+		
+		echo count($semester) . "semesters<br/>";
+		echo htmlspecialchars(json_encode($semester));
+	}
+?>
 			
 			<ul class="pager">
 				<li><a href="#">Back</a></li>
 				<li><a href="#">Download Schedule</a></li>
-			</ul>		
+			</ul>
 			
 			<footer>
 				<p>© Study Planner 2013</p>

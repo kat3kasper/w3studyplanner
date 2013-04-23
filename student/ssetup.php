@@ -64,7 +64,12 @@
 		$department = s_string($_POST["department"]);
 		$degreeName = s_string($_POST["degreeName"]);
 		
-		$step1Info = htmlspecialchars(json_encode(array($yearEntered, $department, $degreeName)));
+		$step1Info = htmlspecialchars(json_encode(
+			array(
+				"yearEntered" => $yearEntered,
+				"department" => $department,
+				"degreeName" => $degreeName
+			)));
 ?>
 			
 			<h4>Semester Setup</h4>
@@ -105,7 +110,11 @@
 		$yearGraduate = s_int($_POST["yearGraduate"]);
 		$step1Info = htmlspecialchars($_POST["step1Info"]);
 		
-		$step2Info = htmlspecialchars(json_encode(array($termGraduate, $yearGraduate)));
+		$step2Info = htmlspecialchars(json_encode(
+			array(
+				"termGraduate" => $termGraduate,
+				"yearGraduate" => $yearGraduate
+			)));
 ?>
 			
 			<h4>Semester Setup</h4>

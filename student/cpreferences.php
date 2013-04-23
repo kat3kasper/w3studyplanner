@@ -67,20 +67,23 @@
 		$step2Info = htmlspecialchars($_POST["step2Info"]);
 		
 		//To use in current page
-		$step1InfoArray = json_decode(htmlspecialchars_decode($step1Info));
-		$step2InfoArray = json_decode(htmlspecialchars_decode($step2Info));
+		$step1InfoArray = json_decode(htmlspecialchars_decode($step1Info), true);
+		$step2InfoArray = json_decode(htmlspecialchars_decode($step2Info), true);
 		
-		$yearEntered = s_int($step1InfoArray[0]);
-		$degreeName = s_string($step1InfoArray[2]);
-		$yearGraduate = s_int($step2InfoArray[1]);
+		$yearEntered = s_int($step1InfoArray["yearEntered"]);
+		$degreeName = s_string($step1InfoArray["degreeName"]);
+		$yearGraduate = s_int($step2InfoArray["yearGraduate"]);
 		
 		//Data from previous page
-		$step3Info = htmlspecialchars(json_encode(array($_POST["maxCredits"], $_POST["minCredits"])));
+		$step3Info = htmlspecialchars(json_encode(array(
+			"maxCredits" => $_POST["maxCredits"],
+			"minCredits" => $_POST["minCredits"]
+		)));
 ?>
 			
 			<h4>Course Preferences</h4>
 			
-			<form class="form-horizontal" method="post" action="cpreferences.php">
+			<form class="form-horizontal" method="post" action="cschedule.php">
 				<div class="row-fluid">
 					<div id="formLeft" class="span4">
 						<div class="control-group">
@@ -129,6 +132,8 @@
 			$sth = $dbh->prepare($sql);
 			
 			$groupNum = 0;
+			$groupList = array();
+			$groupCourses = array();
 			
 			//Each course group
 			foreach($reqArray as $pairs)
@@ -136,6 +141,7 @@
 				$temp = explode(" FROM ", $pairs);
 				$numCourses = $temp[0];
 				$cgName = $temp[1];
+				$groupList[] = $cgName;
 			
 				$sth->bindParam(":cgname", $cgName);
 				$sth->execute();
@@ -148,6 +154,7 @@
 					$row = $sth->fetch(PDO::FETCH_ASSOC);
 					
 					$courses = explode(",", $row["course_id"]);
+					$groupCourses[] = $courses;
 					
 					for($currCourse = 0; $currCourse < $numCourses; $currCourse++)
 					{
@@ -194,6 +201,9 @@
 				//Increment number of course groups so far for id
 				$groupNum++;
 			}
+			
+			$groupList = htmlspecialchars(json_encode($groupList));
+			$groupCourses = htmlspecialchars(json_encode($groupCourses));
 ?>
 				
 				<div class="control-group">
@@ -201,52 +211,14 @@
 						<input type="hidden" name="step1Info" value="<?php echo $step1Info; ?>">
 						<input type="hidden" name="step2Info" value="<?php echo $step2Info; ?>">
 						<input type="hidden" name="step3Info" value="<?php echo $step3Info; ?>">
+						<input type="hidden" name="groupList" value="<?php echo $groupList; ?>">
+						<input type="hidden" name="groupCourses" value="<?php echo $groupCourses; ?>">
 						<button type="submit" name="step5" class="btn btn-primary">Next</button>
 					</div>
 				</div>
 			</form>
 			
 <?php
-		}
-	}
-	else if(isset($_POST["step5"]))
-	{
-		echo "This page should be replaced with cschedule.php<br/>";
-		echo "Dumping json data so far...<br/>";
-		
-		echo "<br/>step1Info from index.php<br/>";
-		echo "Year entered, Department, Degree program<br/>";
-		echo "Encoded: " . $_POST["step1Info"] . "<br/>";
-		echo "Decoded: ";
-		var_dump(json_decode(htmlspecialchars_decode($_POST["step1Info"])));
-		
-		echo "<br/><br/>step2Info from ssetup.php<br/>";
-		echo "Term, Year to graduate<br/>";
-		echo "Encoded: " . $_POST["step2Info"] . "<br/>";
-		echo "Decoded: ";
-		var_dump(json_decode(htmlspecialchars_decode($_POST["step2Info"])));
-		
-		echo "<br/><br/>step3Info from ssetup.php<br/>";
-		echo "Max Credits, Min Credits<br/>";
-		echo "Encoded: " . $_POST["step3Info"] . "<br/>";
-		echo "Decoded: ";
-		var_dump(json_decode(htmlspecialchars_decode($_POST["step3Info"])));
-		
-		echo "<br/><br/>Course preferences info dump<br/>";
-		echo "\$_POST[\"group\"][group numbering][course numbering]<br/><br/>";
-		
-		$group = $_POST["group"];
-		
-		for($i = 0; $i < count($group); $i++)
-		{
-			for($j = 0; $j < count($group[$i]); $j++)
-			{
-				echo "\$_POST[\"group\"][" . $i . "][" . $j . "]: ";
-				print_r($group[$i][$j]);
-				echo "<br/>";
-			}
-			
-			echo "<br/>";
 		}
 	}
 	else
