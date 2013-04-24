@@ -116,11 +116,11 @@
 				o.value=e1.value;
 				o.text=e1.value;
 				
-				if (e2.value==null || e2.value=="")//check for empty form
+				/*if (e2.value==null || e2.value=="")//check for empty form
 				{
 				  alert("Please select a course from the list above first");
 				  return false;
-				}
+				}*/
 				
 				var ce=confirm("Are you sure you want to remove the course from the course group?");
 				if(ce===true)
