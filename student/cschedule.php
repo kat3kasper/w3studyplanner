@@ -144,10 +144,261 @@
 		
 		
 		//CONNECT TO CONSTRAINT SOLVER
-	
+		include_once('../degclient.php');
+
+		$jsonString = '{
+  "semesters" : [
+    { "term" : "fall",
+      "year" : 2009,
+      "min_credits" : 12,
+      "max_credits" : 18,
+      "preferences" : [
+        {
+          "coursegroup" : "techElect",
+          "coursename" : "cs105"
+        },
+        {
+          "coursegroup" : "humGroupA",
+          "coursename"  : "hpl111"
+        }
+      ]
+    },
+    { "term" : "spring",
+      "year" : 2010,
+      "min_credits" : 12,
+      "max_credits" : 18,
+      "preferences" : [
+        {
+          "coursegroup" : "csReq",
+          "coursename" : "cs115"
+        }
+      ]
+    },
+    { "term" : "fall",
+      "year" : 2010,
+      "min_credits" : 12,
+      "max_credits" : 18,
+      "preferences" : [
+      ]
+    },
+    { "term" : "spring",
+      "year" : 2011,
+      "min_credits" : 12,
+      "max_credits" : 18,
+      "preferences" : [
+      ]
+    },
+    { "term" : "fall",
+      "year" : 2011,
+      "min_credits" : 12,
+      "max_credits" : 18,
+      "preferences" : [
+      ]
+    },
+    { "term" : "spring",
+      "year" : 2012,
+      "min_credits" : 12,
+      "max_credits" : 18,
+      "preferences" : [
+      ]
+    },
+    { "term" : "fall",
+      "year" : 2012,
+      "min_credits" : 12,
+      "max_credits" : 18,
+      "preferences" : [
+      ]
+    },
+    { "term" : "spring",
+      "year" : 2013,
+      "min_credits" : 12,
+      "max_credits" : 18,
+      "preferences" : [
+      ]
+    }
+  ],
+  "requirements" : [
+  {
+        "coursegroup": "sci",
+        "coursename": "ch115"
+    },
+    {
+        "coursegroup": "sci",
+        "coursename": "ch281"
+    },
+    {
+        "coursegroup": "math",
+        "coursename": "ma115"
+    },
+    {
+        "coursegroup": "math",
+        "coursename": "ma116"
+    },
+    {
+        "coursegroup": "math",
+        "coursename": "ma222"
+    },
+    {
+        "coursegroup": "math",
+        "coursename": "ma331"
+    },
+    {
+        "coursegroup": "mngt",
+        "coursename": "mgt111"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs146"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs135"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs284"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs334"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs383"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs385"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs347"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs392"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs496"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs442"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs511"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs488"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs492"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs506"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs423"
+    },
+    {
+        "coursegroup": "csReq",
+        "coursename": "cs424"
+    },
+    {
+        "coursegroup": "techElect",
+        "coursename": "none"
+    },
+    {
+        "coursegroup": "softwareDevElective",
+        "coursename": "none"
+    },
+    {
+        "coursegroup": "mathScienceElective",
+        "coursename": "none"
+    },
+    {
+        "coursegroup": "mathScienceElective",
+        "coursename": "none"
+    },
+    {
+        "coursegroup": "freeElective",
+        "coursename": "none"
+    },
+    {
+        "coursegroup": "freeElective",
+        "coursename": "none"
+    },
+    {
+        "coursegroup": "humGroupA",
+        "coursename": "none"
+    },
+    {
+        "coursegroup": "humGroupB",
+        "coursename": "none"
+    },
+    {
+        "coursegroup": "humGroupB",
+        "coursename": "none"
+    },
+    {
+        "coursegroup": "humRequiredClass",
+        "coursename": "hss371"
+    },
+    {
+        "coursegroup": "hum300400",
+        "coursename": "none"
+    },
+    {
+        "coursegroup": "hum300400",
+        "coursename": "none"
+    },
+    {
+        "coursegroup": "hum300400",
+        "coursename": "none"
+    }
+
+  ],
+  "transcript" : [] 
+}';
+
+$input = json_decode($jsonString, true);
+
+$trydeg = new Degree();
+
+
+// iterate through the list of semesters and add semester information to the degree
+foreach ($input['semesters'] as $semester) {
+  $sem_prefs = array();
+  foreach ($semester['preferences'] as $pref) {
+    array_push($sem_prefs, Degree::degreeReq($pref['coursegroup'], $pref['coursename']));
+  }
+
+  $trydeg->addSemester($semester['term'], $semester['year'], $semester['min_credits'], $semester['max_credits'], $sem_prefs);
+}
+
+// add statements of degree requirements
+foreach ($input['requirements'] as $req) {
+  $trydeg->requires($req['coursegroup'], $req['coursename']);
+}
+
+// add courses
+foreach ($input['transcript'] as $course) {
+  $trydeg->courseTaken($course);
+}
+
+$ecl = new ECLiPSeQuery();
+
+$sol = $ecl->getSolutionJSON($trydeg);
+
 	
 		//Receive output from constraint solver
-		$jsonString = '{
+		/*$jsonString = '{
 			"semesters": [
 				{
 					"term": "fall",
@@ -158,25 +409,25 @@
 						{
 							"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
 							"coursename": "cs146",
-							"classlist": [
+							"courselist": [
 							]
 						},
 						{
 							"coursegroup": "MATH REQUIRED COURSES",
 							"coursename": "ma115",
-							"classlist": [
+							"courselist": [
 							]
 						},
 						{
 							"coursegroup": "BUSINESS TECHNOLOGY REQUIRED COURSES",
 							"coursename": "bt330",
-							"classlist": [
+							"courselist": [
 							]
 						},
 						{
 							"coursegroup": "HUMANITIES GROUP A",
 							"coursename": "none",
-							"classlist": [
+							"courselist": [
 								"hum103",
 								"hum104"
 							]
@@ -192,25 +443,25 @@
 						{
 							"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
 							"coursename": "cs284",
-							"classlist": [
+							"courselist": [
 							]
 						},
 						{
 							"coursegroup": "MATH REQUIRED COURSES",
 							"coursename": "ma116",
-							"classlist": [
+							"courselist": [
 							]
 						},
 						{
 							"coursegroup": "MATH SCIENCE ELECTIVES",
 							"coursename": "ma221",
-							"classlist": [
+							"courselist": [
 							]
 						},
 						{
 							"coursegroup": "HUMANITIES GROUP B",
 							"coursename": "none",
-							"classlist": [
+							"courselist": [
 								"hum103",
 								"cs334"
 							]
@@ -588,9 +839,11 @@
 				"hum103",
 				"hum104"
 			]
-		}';
+		}';*/
 		
-		$decodedString = json_decode($jsonString, true);
+		$decodedString = $sol;//json_decode($result, true);
+
+		echo '<pre>'.json_encode($sol, JSON_PRETTY_PRINT).'</pre>';
 		
 		$semesters = $decodedString["semesters"];
 		$transcript = $decodedString["transcript"];
@@ -627,11 +880,11 @@
 				$classes = "";
 				if($course["coursename"] == "none")
 				{
-					$classlist = $course["classlist"];
-					$classCount = count($classlist);
+					$courselist = $course["courselist"];
+					$classCount = count($courselist);
 					$k = 1;
 					
-					foreach($classlist as $class)
+					foreach($courselist as $class)
 					{
 						//Get each prereq
 						$sth->bindParam(":cid", $class);
