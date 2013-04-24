@@ -64,21 +64,24 @@
 	}
 
 	// and(or(a,b),and(c,d))
-	function unwrap($ststring, $cumresult = array()) {
+	function unwrap($ststring, $cumresult = array())
+	{
+		if($cumresult == null)
+			$cumresult = array();
+
     if(preg_match('/^and\((\w+\(?\w*\,?\w*\)?)\,(\w+\(?\w*\,?\w*\)?)\)$/', $ststring, $res))
     {
-      $cumresult = array_merge(unwrap($res[1], $cumresult),unwrap($res[2], $cumresult), $cumresult);
+		$cumresult = array_merge(unwrap($res[1], $cumresult),unwrap($res[2], $cumresult), $cumresult);
     }
     elseif(preg_match('/^or\((.*)\,(.*)\)$/', $ststring, $res))
     {
-      array_push($cumresult, "{$res[1]} OR {$res[2]}");
+		array_push($cumresult, "{$res[1]} OR {$res[2]}");
     }
-    else {
-      array_push($cumresult, $ststring);
-    }
-
+    else
+		array_push($cumresult, $ststring);
+	
     return $cumresult;
-  }
+	}
 	
 	//Handle OR
 	function formatOR($str)

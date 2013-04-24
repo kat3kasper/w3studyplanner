@@ -20,7 +20,7 @@
 			<p>Here is suggested schedule. If you wish to save your schedule, please click the download button on the bottom of the page</p>
 			
 <?php
-	if(isset($_POST["step5"]))
+	if(isset($_POST["step6"]))
 	{
 		$step1Info = json_decode(htmlspecialchars_decode($_POST["step1Info"]), true);
 		$step2Info = json_decode(htmlspecialchars_decode($_POST["step2Info"]), true);
@@ -843,7 +843,7 @@ $sol = $ecl->getSolutionJSON($trydeg);
 		
 		$decodedString = $sol;//json_decode($result, true);
 
-		echo '<pre>'.json_encode($sol, JSON_PRETTY_PRINT).'</pre>';
+		//echo '<pre>'.json_encode($sol).'</pre>';
 		
 		$semesters = $decodedString["semesters"];
 		$transcript = $decodedString["transcript"];
@@ -891,14 +891,13 @@ $sol = $ecl->getSolutionJSON($trydeg);
 						$sth->execute();
 						$rownum = $sth->rowCount();
 						
+						//Parse prereq
 						if($rownum > 0)
 						{
 							$courserow = $sth->fetch(PDO::FETCH_ASSOC);
 							$prereq = $courserow["prereq_course_id"];
+							$prereq = implode(",", unwrap($prereq)); 
 						}
-						
-						//Parse prereq
-						$prereq = implode(",", unwrap($prereq, $temp));
 						
 						$classes .= $class . (isset($prereq) ? "(" .  $prereq . ")" : "");
 						if($k++ != $classCount)

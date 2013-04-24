@@ -160,25 +160,25 @@
 	{
 ?>
 			<div class="well">
-			<h4>Delete Course</h4>
-			<div class="alert alert-info">
-				<button type="button" class="close" data-dismiss="alert"></button>
-				<p>Please enter the course number and click <em>"Delete Course"</em> button.</p>
-			</div>
-		
-			<form class="form-horizontal" action="courses-delete.php" method="post" onsubmit="return validateForm()">
-				<div class="control-group">
-					<label class="control-label" for="courseId">Course</label>
-					<div class="controls">
-						<input type="text" name="courseId" id="courseId" class="input-small" placeholder="e.g. CS101" />
-						<button type="button" class="btn btn-info" onclick="Javascript:newPopup('courses-find.php');" title="Find Course"><i class="icon-search"></i></button>
+				<h4>Delete Course</h4>
+				<div class="alert alert-info">
+					<button type="button" class="close" data-dismiss="alert"></button>
+					<p>Please enter the course number and click <em>"Delete Course"</em> button.</p>
+				</div>
+			
+				<form class="form-horizontal" action="courses-delete.php" method="post" onsubmit="return validateForm()">
+					<div class="control-group">
+						<label class="control-label" for="courseId">Course</label>
+						<div class="controls">
+							<input type="text" name="courseId" id="courseId" class="input-small" placeholder="e.g. CS101" />
+							<button type="button" class="btn btn-info" onclick="Javascript:newPopup('courses-find.php');" title="Find Course"><i class="icon-search"></i></button>
+						</div>
 					</div>
-				</div>
 
-				<div class="form-actions">
-				  <button type="submit" name="submit" class="btn btn-primary">Delete Course</button>
-				</div>
-			</form>
+					<div class="form-actions">
+					  <button type="submit" name="submit" class="btn btn-primary">Delete Course</button>
+					</div>
+				</form>
 			</div>
 <?php
 	}
