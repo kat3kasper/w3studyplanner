@@ -20,7 +20,7 @@
 			<p>Here is suggested schedule. If you wish to save your schedule, please click the download button on the bottom of the page</p>
 			
 <?php
-	//if(isset($_POST["step5"]))
+	if(isset($_POST["step5"]))
 	{
 		$step1Info = json_decode(htmlspecialchars_decode($_POST["step1Info"]), true);
 		$step2Info = json_decode(htmlspecialchars_decode($_POST["step2Info"]), true);
@@ -898,7 +898,7 @@ $sol = $ecl->getSolutionJSON($trydeg);
 						}
 						
 						//Parse prereq
-						//$prereq = implode(",", unwrap($prereq, $temp));
+						$prereq = implode(",", unwrap($prereq, $temp));
 						
 						$classes .= $class . (isset($prereq) ? "(" .  $prereq . ")" : "");
 						if($k++ != $classCount)
