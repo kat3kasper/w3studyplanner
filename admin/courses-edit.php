@@ -424,15 +424,10 @@
 			if($rownum)
 			{
 				$row = $sth->fetch(PDO::FETCH_ASSOC);
-				
 				$pcid = $row["prereq_course_id"];
 				
-				$prereq = implode("\n", explode(",", $acid));
-				
-				//Handling OR
-				$or_groups = explode(",", $ocid);
-				foreach($or_groups as $value)
-					$prereq .= implode(" or ", explode("|", $value));
+				$temp = array();
+				$prereq = implode("\n", unwrap($pcid, $temp));
 			}
 			
 			//Get corequisites details
@@ -447,16 +442,10 @@
 			if($rownum)
 			{
 				$row = $sth->fetch(PDO::FETCH_ASSOC);
+				$ccid = $row["coreq_course_id"];
 				
-				$acid = $row["and_course_id"];
-				$ocid = $row["or_course_id"];
-				
-				$coreq = implode("\n", explode(",", $acid));
-				
-				//Handling OR
-				$or_groups = explode(",", $ocid);
-				foreach($or_groups as $value)
-					$coreq .= implode(" or ", explode("|", $value));
+				$temp = array();
+				$coreq = implode("\n", unwrap($ccid, $temp));
 			}
 			
 ?>

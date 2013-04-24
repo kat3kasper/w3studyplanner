@@ -90,13 +90,15 @@
 		
 		if(!$rownum)
 		{
-		?>
+?>
+			
 			<div class="alert alert-block">
-				 <button type="button" class="close" data-dismiss="alert"></button>
-				 <h4>Wait!</h4>
+				<button type="button" class="close" data-dismiss="alert"></button>
+				<h4>Wait!</h4>
 				<p><?php echo "Course " . $cid . " does not exist in database.<br/>\n"; ?></p>
 			</div>
-	<?php
+			
+<?php
 		}
 		else
 		{
