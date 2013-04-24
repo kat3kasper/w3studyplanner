@@ -1,0 +1,7 @@
+#! /bin/sh
+ECLIPSEDIR="${ECLIPSEDIR:-/opt/apache/htdocs/studyplanner/eclipseclp}"
+LD_LIBRARY_PATH="$ECLIPSEDIR/lib/i386_linux:$LD_LIBRARY_PATH"
+DAVINCIHOME="${DAVINCIHOME:-$ECLIPSEDIR/daVinci/i386_linux}"
+JRE_HOME="${JRE_HOME:-}"
+export ECLIPSEDIR LD_LIBRARY_PATH DAVINCIHOME JRE_HOME
+exec "/opt/apache/htdocs/studyplanner/eclipseclp/lib/i386_linux/eclipse.exe" "$@"
