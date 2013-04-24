@@ -25,15 +25,15 @@
 		$step1Info = json_decode(htmlspecialchars_decode($_POST["step1Info"]), true);
 		$step2Info = json_decode(htmlspecialchars_decode($_POST["step2Info"]), true);
 		$step3Info = json_decode(htmlspecialchars_decode($_POST["step3Info"]), true);
-		$groupList = json_decode(htmlspecialchars_decode($_POST["groupList"]));
-		$groupCourses = json_decode(htmlspecialchars_decode($_POST["groupCourses"]));
+		$groupList = json_decode(htmlspecialchars_decode($_POST["groupList"])); //Name of course groups
+		$groupCourses = json_decode(htmlspecialchars_decode($_POST["groupCourses"])); //Grouped courses
 		
 		$termGraduate = $step2Info["termGraduate"];
 		$yearGraduate = $step2Info["yearGraduate"];
 		$maxCredits = $step3Info["maxCredits"];
 		$minCredits = $step3Info["minCredits"];
 		
-		$groups = $_POST["group"];
+		$groups = $_POST["group"]; //Everything from course preferences
 		
 		$currMonth = date("n");
 		$currYear = date("Y");
@@ -57,46 +57,59 @@
 			1 => 3
 		);
 		
+		//Find total term to do
 		$yearDiff = $yearGraduate - $currYear;
 		$termDiff = array_search($termGraduate, $termNames) - $currTerm;
 		$totalTerms = abs(($yearDiff * 4) - $termDiff) + 1;
 		
-		$semester = array();
+		$semesters = array();
+		$transcript = array();
 		
+		//Format data on each semester to take
 		for($termPoint = $currTerm, $yearPoint = $currYear, $termCount = 0; $termCount < $totalTerms; $termCount++)
 		{
-			$pref = array();
+			$preferences = array();
 			
 			$i = 0;
 			$k = 0;
+			//Course group
 			while(isset($groups[$i]))
 			{
 				$j = 0;
+				//Course in the group
 				while(isset($groups[$i][$j]))
 				{
+					//If year and term is set
 					if(isset($groups[$i][$j][2]) && isset($groups[$i][$j][1]))
 					{
+						//If year & term matches current iteration's
 						if($groups[$i][$j][2] == $yearPoint && $groups[$i][$j][1] == $termNames[$termPoint])
 						{
-							$pref[$k]["coursegroup"] = $groupList[$i];
-							$pref[$k]["coursename"] = $groups[$i][$j][0];
+							$preferences[$k]["coursegroup"] = $groupList[$i];
+							$preferences[$k]["coursename"] = $groups[$i][$j][0];
 							$k++;
 						}
 					}
+					//If course is completed
+					else if(isset($groups[$i][$j][1]) && $groups[$i][$j][1] == "completed")
+						if(!in_array($groups[$i][$j][0], $transcript))
+							$transcript[] = $groups[$i][$j][0];
+					
 					$j++;
 				}
 				$i++;
 			}
 			
+			//Build term array
 			$term = array(
 				"term" => $termNames[$termPoint],
 				"year" => $yearPoint,
 				"min_credits" => $minCredits[$yearPoint][$termNum[$termPoint]],
 				"max_credits" => $maxCredits[$yearPoint][$termNum[$termPoint]],
-				"preferences" => $pref
+				"preferences" => $preferences
 			);
 			
-			$semester[] = $term;
+			$semesters[] = $term;
 			
 			$termPoint--;
 			if($termPoint == 0)
@@ -107,36 +120,494 @@
 		}
 		
 		$requirements = array();
-		foreach(
+		$n = 0;
+		
+		//Build list of requirement
+		foreach($groupCourses as $aGroup)
+		{
+			foreach($aGroup as $aCourse)
+			{
+				array_push($requirements, array(
+					"coursegroup" => $groupList[$n],
+					"coursename" => $aCourse
+				));
+			}
+			$n++;
+		}
+		
+		//Build the json to send to constraint solver
+		$jsonString = json_encode(array(
+			"semesters" => $semesters,
+			"requirements" => $requirements,
+			"transcript" => $transcript
+		), JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK);
 		
 		
-		$sem = array(
-			$term, $term
-		);
+		//CONNECT TO CONSTRAINT SOLVER
+	
+	
+		//Receive output from constraint solver
+		$jsonString = '{
+			"semesters": [
+				{
+					"term": "fall",
+					"year": 2009,
+					"min_credits": 12,
+					"max_credits": 18,
+					"selection": [
+						{
+							"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+							"coursename": "cs146"
+						},
+						{
+							"coursegroup": "MATH REQUIRED COURSES",
+							"coursename": "ma115"
+						},
+						{
+							"coursegroup": "BUSINESS TECHNOLOGY REQUIRED COURSES",
+							"coursename": "bt330"
+						},
+						{
+							"coursegroup": "HUMANITIES GROUP A",
+							"coursename": "none"
+						}
+					]
+				},
+				{
+					"term": "spring",
+					"year": 2010,
+					"min_credits": 12,
+					"max_credits": 18,
+					"selection": [
+						{
+							"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+							"coursename": "cs284"
+						},
+						{
+							"coursegroup": "MATH REQUIRED COURSES",
+							"coursename": "ma116"
+						},
+						{
+							"coursegroup": "MATH SCIENCE ELECTIVES",
+							"coursename": "ma221"
+						},
+						{
+							"coursegroup": "HUMANITIES GROUP B",
+							"coursename": "none"
+						}
+					]
+				}
+			],
+			"requirements": [
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs115"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs146"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs135"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs284"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs334"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs383"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs385"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs347"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs392"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs442"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs506"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs496"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs511"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs488"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs492"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs423"
+				},
+				{
+					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
+					"coursename": "cs424"
+				},
+				{
+					"coursegroup": "SCIENCE REQUIRED COURSES 3",
+					"coursename": "ch115"
+				},
+				{
+					"coursegroup": "SCIENCE REQUIRED COURSES 3",
+					"coursename": "ch281"
+				},
+				{
+					"coursegroup": "SCIENCE REQUIRED COURSES 3",
+					"coursename": "ch117"
+				},
+				{
+					"coursegroup": "MATH REQUIRED COURSES",
+					"coursename": "ma115"
+				},
+				{
+					"coursegroup": "MATH REQUIRED COURSES",
+					"coursename": "ma116"
+				},
+				{
+					"coursegroup": "MATH REQUIRED COURSES",
+					"coursename": "ma222"
+				},
+				{
+					"coursegroup": "MATH REQUIRED COURSES",
+					"coursename": "ma331"
+				},
+				{
+					"coursegroup": "BUSINESS TECHNOLOGY REQUIRED COURSES",
+					"coursename": "bt330"
+				},
+				{
+					"coursegroup": "TECHNICAL ELECTIVES",
+					"coursename": "ssw533"
+				},
+				{
+					"coursegroup": "TECHNICAL ELECTIVES",
+					"coursename": "ssw564"
+				},
+				{
+					"coursegroup": "TECHNICAL ELECTIVES",
+					"coursename": "ssw565"
+				},
+				{
+					"coursegroup": "TECHNICAL ELECTIVES",
+					"coursename": "ssw567"
+				},
+				{
+					"coursegroup": "TECHNICAL ELECTIVES",
+					"coursename": "ssw687"
+				},
+				{
+					"coursegroup": "TECHNICAL ELECTIVES",
+					"coursename": "ssw689"
+				},
+				{
+					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
+					"coursename": "cs516"
+				},
+				{
+					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
+					"coursename": "cs521"
+				},
+				{
+					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
+					"coursename": "cs522"
+				},
+				{
+					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
+					"coursename": "cs526"
+				},
+				{
+					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
+					"coursename": "cs537"
+				},
+				{
+					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
+					"coursename": "cs541"
+				},
+				{
+					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
+					"coursename": "cs546"
+				},
+				{
+					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
+					"coursename": "cs549"
+				},
+				{
+					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
+					"coursename": "cs558"
+				},
+				{
+					"coursegroup": "MATH\/SCIENCE ELECTIVES",
+					"coursename": "ma221"
+				},
+				{
+					"coursegroup": "MATH\/SCIENCE ELECTIVES",
+					"coursename": "ma227"
+				},
+				{
+					"coursegroup": "MATH\/SCIENCE ELECTIVES",
+					"coursename": "ch243"
+				},
+				{
+					"coursegroup": "MATH\/SCIENCE ELECTIVES",
+					"coursename": "ch244"
+				},
+				{
+					"coursegroup": "FREE ELECTIVES",
+					"coursename": "ma221"
+				},
+				{
+					"coursegroup": "FREE ELECTIVES",
+					"coursename": "ma227"
+				},
+				{
+					"coursegroup": "FREE ELECTIVES",
+					"coursename": "bt100"
+				},
+				{
+					"coursegroup": "FREE ELECTIVES",
+					"coursename": "bt353"
+				},
+				{
+					"coursegroup": "FREE ELECTIVES",
+					"coursename": "bt360"
+				},
+				{
+					"coursegroup": "FREE ELECTIVES",
+					"coursename": " mis201"
+				},
+				{
+					"coursegroup": "FREE ELECTIVES",
+					"coursename": "ch243"
+				},
+				{
+					"coursegroup": "FREE ELECTIVES",
+					"coursename": "ch244"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP A",
+					"coursename": "hum103"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP A",
+					"coursename": "hum104"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP A",
+					"coursename": "hli113"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP A",
+					"coursename": "hli114"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP A",
+					"coursename": "hli117"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP A",
+					"coursename": "hli118"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP A",
+					"coursename": "hmu192"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP A",
+					"coursename": "hmu193"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP A",
+					"coursename": "hpl111"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP A",
+					"coursename": "hpl112"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hum103"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hum104"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hum107"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hum108"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hum288"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "har190"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "har191"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hhs123"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hhs124"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hhs125"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hhs126"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hhs129"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hhs130"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hhs135"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hmu101"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hmu102"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hss121"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hss122"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hss127"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hss128"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hss175"
+				},
+				{
+					"coursegroup": "HUMANITIES GROUP B",
+					"coursename": "hss176"
+				},
+				{
+					"coursegroup": "HUMANITIES UPPER LEVEL",
+					"coursename": "hss371"
+				},
+				{
+					"coursegroup": "HUMANITIES UPPER LEVEL",
+					"coursename": "hss377"
+				},
+				{
+					"coursegroup": "HUMANITIES UPPER LEVEL",
+					"coursename": "hss458"
+				},
+				{
+					"coursegroup": "HUMANITIES UPPER LEVEL",
+					"coursename": "hhs415"
+				},
+				{
+					"coursegroup": "HUMANITIES UPPER LEVEL",
+					"coursename": "hhs476"
+				},
+				{
+					"coursegroup": "HUMANITIES UPPER LEVEL",
+					"coursename": "bt243"
+				},
+				{
+					"coursegroup": "HUMANITIES UPPER LEVEL",
+					"coursename": "bt244"
+				}
+			],
+			"transcript": [
+				"hum103",
+				"hum104"
+			]
+		}';
 		
-		$all = array(
-			"semesters" => $sem,
-			"requirements" => array(
-				$cg, $cg
-			),
-			"transcript" => array()
-		);
+		$decodedString = json_decode($jsonString, true);
 		
-		echo count($semester) . "semesters<br/>";
-		echo htmlspecialchars(json_encode($semester));
+		$semesters = $decodedString["semesters"];
+		$transcript = $decodedString["transcript"];
+		
+		//change cpref - if required courses from cgroup is same as cgroup size, list down
+		
+		foreach($semesters as $sem)
+		{
+			echo "
+			<table class=\"table table-striped table-hover table-bordered\">
+				<thead>
+					<tr>
+						<th colspan=\"2\">" . ucfirst($sem["term"]) . " " . $sem["year"] . " [" . $sem["min_credits"] . "-" . $sem["max_credits"] . " Credit hours]</th>
+					</tr>
+				</thead>
+				<tbody>";
+			
+			foreach($sem["selection"] as $course)
+			{
+				echo "
+					<tr>
+						<td class=\"span8\">" . $course["coursegroup"] . "</td>
+						<td>" . strtoupper($course["coursename"]) . "</td>
+					</tr>";
+			}
+			
+			echo "
+				</tbody>
+			</table>";
+			
+		}
 	}
 ?>
-			
-			<ul class="pager">
-				<li><a href="#">Back</a></li>
-				<li><a href="#">Download Schedule</a></li>
-			</ul>
 			
 			<footer>
 				<p>© Study Planner 2013</p>
 			</footer>
 		</div>
-		
-		<?php require("../includes/scripts.php"); ?>
 	</body>
 </html>

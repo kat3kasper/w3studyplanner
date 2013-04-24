@@ -122,7 +122,7 @@
 			<p>Please choose how many credits you wish to take per semester:</p>
 			
 			<form class="form-horizontal" id="semesterCredits" method="post" action="cpreferences.php" onSubmit="return validateSem(<?php echo date("Y") . ", " . $yearGraduate; ?>)">
-				<table class="table table-bordered table-condensed well">
+				<table class="table table-striped table-hover">
 					<thead>
 						<tr>
 							<th>Year</th>
@@ -143,15 +143,13 @@
 		for($k = 0; $k < 2; $k++)
 		{
 			echo "<tr>";
-			if($k === 0)
-				echo "<td rowspan=\"2\">" . $yearCurrent . "</td>";
-			
-			echo "<td>" . ($k === 0 ? "Max" : "Min") . "</td>";
+			echo "<td>" . ($k == 0 ? $yearCurrent : "") . "</td>";
+			echo "<td>" . ($k == 0 ? "Max" : "Min") . "</td>";
 			
 			for($j = 0; $j < 4; $j++)
 			{
 				echo "<td>";
-				echo "<select name=\"" . ($k === 0 ? "max" : "min") . "Credits[" . $yearCurrent . "][]\">";
+				echo "<select name=\"" . ($k == 0 ? "max" : "min") . "Credits[" . $yearCurrent . "][]\">";
 				
 				for($i = 0; $i <= 30; $i++)
 					echo "<option>" . $i . "</option>";
