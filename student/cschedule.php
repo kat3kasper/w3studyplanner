@@ -20,7 +20,7 @@
 			<p>Here is suggested schedule. If you wish to save your schedule, please click the download button on the bottom of the page</p>
 			
 <?php
-	if(isset($_POST["step5"]))
+	//if(isset($_POST["step5"]))
 	{
 		$step1Info = json_decode(htmlspecialchars_decode($_POST["step1Info"]), true);
 		$step2Info = json_decode(htmlspecialchars_decode($_POST["step2Info"]), true);
@@ -157,19 +157,29 @@
 					"selection": [
 						{
 							"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-							"coursename": "cs146"
+							"coursename": "cs146",
+							"classlist": [
+							]
 						},
 						{
 							"coursegroup": "MATH REQUIRED COURSES",
-							"coursename": "ma115"
+							"coursename": "ma115",
+							"classlist": [
+							]
 						},
 						{
 							"coursegroup": "BUSINESS TECHNOLOGY REQUIRED COURSES",
-							"coursename": "bt330"
+							"coursename": "bt330",
+							"classlist": [
+							]
 						},
 						{
 							"coursegroup": "HUMANITIES GROUP A",
-							"coursename": "none"
+							"coursename": "none",
+							"classlist": [
+								"hum103",
+								"hum104"
+							]
 						}
 					]
 				},
@@ -181,19 +191,29 @@
 					"selection": [
 						{
 							"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-							"coursename": "cs284"
+							"coursename": "cs284",
+							"classlist": [
+							]
 						},
 						{
 							"coursegroup": "MATH REQUIRED COURSES",
-							"coursename": "ma116"
+							"coursename": "ma116",
+							"classlist": [
+							]
 						},
 						{
 							"coursegroup": "MATH SCIENCE ELECTIVES",
-							"coursename": "ma221"
+							"coursename": "ma221",
+							"classlist": [
+							]
 						},
 						{
 							"coursegroup": "HUMANITIES GROUP B",
-							"coursename": "none"
+							"coursename": "none",
+							"classlist": [
+								"hum103",
+								"cs334"
+							]
 						}
 					]
 				}
@@ -360,19 +380,19 @@
 					"coursename": "cs558"
 				},
 				{
-					"coursegroup": "MATH\/SCIENCE ELECTIVES",
+					"coursegroup": "MATH SCIENCE ELECTIVES",
 					"coursename": "ma221"
 				},
 				{
-					"coursegroup": "MATH\/SCIENCE ELECTIVES",
+					"coursegroup": "MATH SCIENCE ELECTIVES",
 					"coursename": "ma227"
 				},
 				{
-					"coursegroup": "MATH\/SCIENCE ELECTIVES",
+					"coursegroup": "MATH SCIENCE ELECTIVES",
 					"coursename": "ch243"
 				},
 				{
-					"coursegroup": "MATH\/SCIENCE ELECTIVES",
+					"coursegroup": "MATH SCIENCE ELECTIVES",
 					"coursename": "ch244"
 				},
 				{
@@ -577,6 +597,20 @@
 		
 		//change cpref - if required courses from cgroup is same as cgroup size, list down
 		
+		//Setup database
+		$host = DB_HOST;
+		$dbname = DB_NAME;
+		$user = DB_USER;
+		$pass = DB_PASS;
+		
+		$dbh = new PDO("mysql:host=" . $host . ";dbname=" . $dbname, $user, $pass);
+		$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		
+		//Get prerequisites details
+		$sql = "SELECT * FROM course_prerequisites WHERE parent_course_id = :cid";
+		$sth = $dbh->prepare($sql);
+		
 		foreach($semesters as $sem)
 		{
 			echo "
@@ -590,10 +624,38 @@
 			
 			foreach($sem["selection"] as $course)
 			{
+				$classes = "";
+				if($course["coursename"] == "none")
+				{
+					$classlist = $course["classlist"];
+					$classCount = count($classlist);
+					$k = 1;
+					
+					foreach($classlist as $class)
+					{
+						//Get each prereq
+						$sth->bindParam(":cid", $class);
+						$sth->execute();
+						$rownum = $sth->rowCount();
+						
+						if($rownum)
+							$prereq = $sth->fetch(PDO::FETCH_ASSOC)["prereq_course_id"];
+						
+						//parse prereq first
+						//still writing parser for prereq
+						
+						$classes .= $class . (isset($prereq) ? "(" .  $prereq . ")" : "");
+						if($k++ != $classCount)
+							$classes .= ", ";
+					}
+				}
+				else
+					$classes = $course["coursename"];
+				
 				echo "
 					<tr>
 						<td class=\"span8\">" . $course["coursegroup"] . "</td>
-						<td>" . strtoupper($course["coursename"]) . "</td>
+						<td>" . strtoupper($classes) . "</td>
 					</tr>";
 			}
 			
