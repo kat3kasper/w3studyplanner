@@ -36,26 +36,17 @@
 						for(var i = 0; i < z.length; i++) 
 							z.options[i].selected = true;
 					}
-
 				}
-				
-				
 			}
 			
-			
-
-			function duplicate()
+			//Clear text area
+			function clearTextArea()
 			{
-				var x = document.getElementById("dynamicInput");
-				var y = document.getElementById("s1");
-				var w = document.getElementById("duplicate");
-				
-				var z = x.cloneNode(true);
-
-				z.id = "dynamicInput2";
-				w.appendChild(z);
+				document.getElementById('NumberOfCourses').value = "";
+				document.getElementById('cgroup').value = "";
 			}
 			
+			//Add constraint into the list
 			function addCourseGroup()
 			{
 				var e1 = document.getElementById('NumberOfCourses');
@@ -66,7 +57,6 @@
 				o.value = e1.value.concat(e4,e2.value);
 				o.text = e1.value.concat(e4,e2.value);
 				
-				
 				for(var i = 0; i < e3.length; i++)
 				{
 					if(e3.options[i].value === o.value)
@@ -74,10 +64,8 @@
 						alert("That requirement is already added.");
 						return false;
 					}
-					
 				}
-				
-				
+
 				if (e1.value==null || e1.value=="")//check for empty form
 				{
 				  alert("Please input number of courses!");
@@ -96,6 +84,7 @@
 				else 
 				{
 					e3.options.add(o);
+					clearTextArea();
 				}
 
 			}
@@ -124,7 +113,6 @@
 				{
 					return false;
 				}
-				
 			}
 			
 			$(document).ready(function()
@@ -182,7 +170,7 @@
 		
 		if(isset($_POST["requirements"])&& !empty($_POST["requirements"]))
 		{
-			$reqs = s_string(implode("|", $_POST["requirements"]));
+			$reqs = s_string(implode(",", $_POST["requirements"]));
 		}
 		else
 		{
@@ -353,12 +341,6 @@
 								<label class="control-label" for="CourseGroup">Course Group</label>
 						</div>
 					</div>
-	
-					<div id="formRight" class="span2">
-					  <div class="control-group">
-						<label for="operator" class="control-label">Operator</label>     
-					  </div>    
-					</div>
 				</div>
 
 				<div class="row-fluid" id="dynamicInput">
@@ -366,7 +348,7 @@
 						<div class="control-group">
 							<div class="controls">
 								<input type="text" id="NumberOfCourses" class="span5" name="NumberOfCourses[]"/>
-								FROM
+								  FROM 
 							</div>
 						</div>
 					</div>
@@ -389,7 +371,7 @@
 						<div id="formCenter" class="span4">
 							<div class="control-group">
 									<div class="controls">
-										<select name="cgroup" id="cgroup" class="span11" name="cgroup[]">
+										<select id="cgroup" class="span11" name="cgroup[]">
 										<option value="">Select a Course Group...</option>
 										<?php
 											foreach ($cgroup_arr as $row) 
@@ -406,21 +388,9 @@
 					<?php
 					}
 					?>
-				
-					<div id="formRight" class="span2">
-					  <div class="control-group">
-						<div class="controls">
-
-							<button class="btn btn-info" name="operator" id="dynamic-btn" type="button" onClick="duplicate()" title="Add Requirement">OR</button>
-						</div>      
-					  </div>    
-					</div>
 					
 				</div>	
-				
-				
-				<span id="duplicate"></span>
-				
+					
 				<br>
 				<div class="row-fluid">
 					<div id="formLeft" class="span12">

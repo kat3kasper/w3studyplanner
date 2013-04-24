@@ -46,23 +46,26 @@
 						for(var i = 0; i < z.length; i++) 
 							z.options[i].selected = true;
 					}
-
 				}
-				
-				
 			}
 			
-			//Add requirement into list
+			//clear text area
+			function clearTextArea()
+			{
+				document.getElementById('NumberOfCourses').value = "";
+				document.getElementById('cgroup').value = "";
+			}			
+			
+			//Add constraints into list
 			function addCourseGroup()
 			{
 				var e1 = document.getElementById('NumberOfCourses');
 				var e2 = document.getElementById('cgroup');
-				var e3 = document.getElementById('Requirements');
+				var e3 = document.getElementById('requirements');
 				var e4 = " FROM ";
 				var o = document.createElement('option');
 				o.value = e1.value.concat(e4,e2.value);
 				o.text = e1.value.concat(e4,e2.value);
-				
 				
 				for(var i = 0; i < e3.length; i++)
 				{
@@ -71,9 +74,7 @@
 						alert("That requirement is already added.");
 						return false;
 					}
-					
 				}
-				
 				
 				if (e1.value==null || e1.value=="")//check for empty form
 				{
@@ -93,15 +94,14 @@
 				else 
 				{
 					e3.options.add(o);
+					clearTextArea();
 				}
-
 			}
-			
-			
+						
 			//Remove a constraint from the list
 			function removeRequirement()
 			{
-				var e2=document.getElementById('Requirements');
+				var e2=document.getElementById('requirements');
 				var o=document.createElement('option');
 				//o.value=e1.value;
 				//o.text=e1.value;
@@ -121,13 +121,12 @@
 				{
 					return false;
 				}
-				
 			}
 			
 			$(document).ready(function()
 			{ $('button[name="sort"]').click(function()
 				{
-					var $op = $('#Requirements option:selected'),
+					var $op = $('#requirements option:selected'),
 						$this = $(this);
 					if($op.length)
 					{
@@ -138,19 +137,19 @@
 				});
 			});
 			
-				$(document).ready(function()
-				{ $('button[name="sort"]').click(function()
+			$(document).ready(function()
+			{ $('button[name="sort"]').click(function()
+				{
+					var $op = $('#requirements option:selected'),
+						$this = $(this);
+					if($op.length)
 					{
-						var $op = $('#Requirements option:selected'),
-							$this = $(this);
-						if($op.length)
-						{
-							($this.val() == 'Up') ? 
-								$op.first().prev().before($op) : 
-								$op.last().next().after($op);
-						}
-					});
+						($this.val() == 'Up') ? 
+							$op.first().prev().before($op) : 
+							$op.last().next().after($op);
+					}
 				});
+			});
 			
 
 		</script>
@@ -182,6 +181,16 @@
 	//If newly edited degree program form is submitted
 	if(isset($_POST["submit2"]))
 	{
+		//Setup database
+		$host = DB_HOST;
+		$dbname = DB_NAME;
+		$user = DB_USER;
+		$pass = DB_PASS;
+		
+		$dbh = new PDO("mysql:host=" . $host . ";dbname=" . $dbname, $user, $pass);
+		$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		
 		//Sanitize & extract values
 		if(isset($_POST["year"])&& !empty($_POST["year"]))
 		{
@@ -221,16 +230,6 @@
 		
 		$dn = strtoupper(s_string($_POST["degreename"]));
 		
-	
-		//Setup database
-		$host = DB_HOST;
-		$dbname = DB_NAME;
-		$user = DB_USER;
-		$pass = DB_PASS;
-		
-		$dbh = new PDO("mysql:host=" . $host . ";dbname=" . $dbname, $user, $pass);
-		$dbh->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-		$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		
 		//Check for duplicates
 		$sql = "SELECT * FROM degree WHERE degree_name = :dn AND degree_name != :odn";
@@ -259,7 +258,7 @@
 		else
 		{
 			//Insert to degree
-			$sql = "UPDATE degree SET degree_name = :dn, year = :year, department = :dept, requirement_id = :rid WHERE degree_name = :odn";
+			$sql = "UPDATE degree SET degree_name = :dn, year = :year, department = :dept, degree_requirements = :rid WHERE degree_name = :odn";
 			
 			$sth = $dbh->prepare($sql);
 			
@@ -276,7 +275,7 @@
 			<div class="alert alert-success">
 			  <button type="button" class="close" data-dismiss="alert"></button>
 			  <h4>Hooray!</h4>
-			  <p>Changes saved!</p>
+			  <p>Changes saved successfully!</p>
 			</div>
 		<?php
 		}
@@ -317,10 +316,10 @@
 			
 			$year = $row["year"];
 			$dept = $row["department"];
-			$req_deg = $row["degree_requirements"];
+			$req_deg = explode(",",$row["degree_requirements"]);
 			
 ?>
-		<div class="well">
+			<div class="well">
 			<h4>Edit Degree Program</h4>
 			<div class="alert alert-info">
 				<button type="button" class="close" data-dismiss="alert"></button>
@@ -359,78 +358,106 @@
 						</select>
 					</div>
 				</div>
-				<div class="control-group">
-					<label class="control-label" for="Requirements">Requirements</label>
-					<div class="controls">	
-<?php
-					//Get requirement list
-					$sql = "SELECT requirement_id, requirement_name FROM requirements";
+				
+				<br>
+				<h4>Degree Requirements</h4>
+				<p>Please add the following to the Degree Requirements box below to form a valid combination.</p>
+				<br>
+				
+				<div class="row-fluid">
+					<div id="formLeft" class="span2">
+						<div class="control-group">
+							<label class="control-label" for="NumberOfCourses">Number of Courses</label>
+						</div>
+					</div>
+
+					<div id="formCenter" class="span4">
+						<div class="control-group">
+								<label class="control-label" for="CourseGroup">Course Group</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="row-fluid" id="dynamicInput">
+					<div id="formLeft" class="span2">
+						<div class="control-group">
+							<div class="controls">
+								<input type="text" id="NumberOfCourses" class="span5" name="NumberOfCourses[]"/>
+								  FROM 
+							</div>
+						</div>
+					</div>
+				
+					<?php
+					$sql2 = "SELECT name FROM course_group";
 					
-					$sth = $dbh->prepare($sql);
-					$sth->execute();
-					$rownum = $sth->rowCount();
+					$sth2 = $dbh->prepare($sql2);
+					$sth2->execute();
+					$rownum2 = $sth2->rowCount();
 					
-					if(!$rownum)
-						echo "There are no requirements to add to program.<br/>\n";
+					if(!$rownum2)
+						echo "There are no course groups to add to the requirement.<br/>\n";
 					else
 					{
-		?>	
-						<select name="requirement" id="Requirement" class="span4">	
-						<option value="">Select a requirement...</option>
-		<?php
-						$req_arr = $sth->fetchAll(PDO::FETCH_ASSOC);
-						foreach($req_arr as $inner_arr)
-						{
-							echo "<option value=\"" . $inner_arr["requirement_id"] . "\">" . ucwords($inner_arr["requirement_name"]) . "</option>\n";
-						}
-		?>	
-						</select>
-						<button class="btn btn-success" type="button" onclick="addRequirement()" id="add-btn" rel="tooltip" data-placement="right" data-trigger="hover" title="Add Requirement to the list"><i class="icon-plus"></i></button>
-		<?php
+						$cgroup_arr = $sth2->fetchAll(PDO::FETCH_ASSOC);
+					?>
+				
+						<div id="formCenter" class="span4">
+							<div class="control-group">
+								<div class="controls">
+									<select id="cgroup" class="span11" name="cgroup[]">
+									<option value="">Select a Course Group...</option>
+					<?php
+							foreach ($cgroup_arr as $row) 
+							{
+								$cgname = $row['name'];
+								echo "<option value=\"$cgname\">" .$cgname. "</option>\n";
+							}
+					?>
+									</select>
+								</div>					
+							</div>
+						</div>
+				<?php
 					}
-		?>
+					?>
+				</div>
+				
+				
+				<br>
+				<div class="row-fluid">
+					<div id="formLeft" class="span12">
+						<div class="control-group">
+							<label class="control-label" for="Degree Requirements">Degree Requirements</label>
+				 			<div class="controls">
+								<select multiple="multiple" name="requirements[]" id="requirements" class="span7" size="7">
+									<?php
+										//Get the requirements associated with degree program
+										foreach ($req_deg as $rid) 
+										{
+											echo "<option value=\"$rid\">" .$rid. "</option>\n";
+										}	
+
+									?>
+								</select>
+				
+								<div class="btn-group btn-group-vertical">
+								  <button class="btn btn-success" id="dynamic-btn" type="button" onClick="addCourseGroup()" title="Add Requirement"><i class="icon-plus"></i></button>
+								  <button type="button" name="sort" class="btn" value="Up" id="moveup-btn" data-placement="right"title="Move Up"><i class="icon-arrow-up"></i></button>
+								  <button type="button" name="sort" class="btn" value="Down" id="movedown-btn"  data-placement="right" title="Move Down"><i class="icon-arrow-down"></i></button>
+								  <button type="button" class="btn btn-danger" onclick="removeRequirement()" id="remove-btn" data-placement="right"title="Remove selected requirement" ><i class="icon-remove"></i></button>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 				
-				<div class="control-group">
-					<div class="controls">
+				
 					
-					<select multiple="multiple" name="requirements[]" id="Requirements" class="span4" size="5">
-			<?php
-						//Get requirement associated with degree program
-						if(!empty($rid_list))
-						{
-							$rid_arr = explode(",", $rid_list);
-							foreach($rid_arr as $value)
-							{
-								$sql = "SELECT requirement_id, requirement_name FROM requirements WHERE requirement_id = :rid";
-						
-								$sth = $dbh->prepare($sql);
-								$sth->bindParam(":rid", $value);
-								$sth->execute();
-								
-								$row = $sth->fetch(PDO::FETCH_ASSOC);
-								
-								$rid = $row["requirement_id"];
-								$rn = $row["requirement_name"];
-								
-								echo "<option value=\"" . $rid . "\">" . $rn . "</option>\n";
-							}
-						}
-			?>
-					</select>
-						
-						<div class="btn-group btn-group-vertical">
-						  <button type="button" name="sort" class="btn" value="Up" id="moveup-btn" title="Move Up"><i class="icon-arrow-up"></i></button>
-						  <button type="button" name="sort" class="btn" value="Down" id="movedown-btn" title="Move Down"><i class="icon-arrow-down"></i></button>
-						  <button type="button" class="btn btn-danger" onclick="removeRequirement()" id="remove-btn" title="Remove selected requirement" ><i class="icon-remove"></i></button>
-						</div>
-					</div>
-				</div>				
 
 				<div class="form-actions">
-				  <input type="hidden" name="olddegreename" value="<?php echo $dn; ?>"/>
-						<button class="btn btn-primary" type="submit" name="submit2">Save Changes</button>
+					<input type="hidden" name="olddegreename" value="<?php echo $dn; ?>"/>
+					<button class="btn btn-primary" type="submit" name="submit2">Save Changes</button>
 				</div>
 			</form>
 		</div>
@@ -480,6 +507,7 @@
 							<?php
 							foreach($deg_arr as $value)
 							{
+								
 								echo "<option value=\"" . $value . "\">" . $value . "</option>\n";
 							}
 							?>

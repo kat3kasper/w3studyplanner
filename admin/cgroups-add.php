@@ -46,6 +46,12 @@
 				document.getElementById('course').value = course;
 			}
 			
+			//Clear text area
+			function clearTextArea()
+			{
+				document.getElementById('course').value = "";
+			}
+			
 			//Add courses into list
 			function addCourse()
 			{
@@ -82,6 +88,7 @@
 				else 
 				{
 					e2.options.add(o);
+					clearTextArea();
 				}
 
 			}
