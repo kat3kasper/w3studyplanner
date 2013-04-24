@@ -140,7 +140,7 @@
 			"semesters" => $semesters,
 			"requirements" => $requirements,
 			"transcript" => $transcript
-		), JSON_PRETTY_PRINT | JSON_NUMERIC_CHECK);
+		), JSON_NUMERIC_CHECK);
 		
 		
 		//CONNECT TO CONSTRAINT SOLVER
@@ -891,9 +891,10 @@ $sol = $ecl->getSolutionJSON($trydeg);
 						$sth->execute();
 						$rownum = $sth->rowCount();
 						
-						if($rownum)
-							$prereq = $sth->fetch(PDO::FETCH_ASSOC)["prereq_course_id"];
-						
+            if($rownum > 0) {
+              $courserow = $sth->fetch(PDO::FETCH_ASSOC);
+              $prereq = $courserow["prereq_course_id"];
+            }
 						//parse prereq first
 						//still writing parser for prereq
 						
