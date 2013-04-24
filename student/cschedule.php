@@ -891,12 +891,14 @@ $sol = $ecl->getSolutionJSON($trydeg);
 						$sth->execute();
 						$rownum = $sth->rowCount();
 						
-            if($rownum > 0) {
-              $courserow = $sth->fetch(PDO::FETCH_ASSOC);
-              $prereq = $courserow["prereq_course_id"];
-            }
-						//parse prereq first
-						//still writing parser for prereq
+						if($rownum > 0)
+						{
+							$courserow = $sth->fetch(PDO::FETCH_ASSOC);
+							$prereq = $courserow["prereq_course_id"];
+						}
+						
+						//Parse prereq
+						//$prereq = implode(",", unwrap($prereq, $temp));
 						
 						$classes .= $class . (isset($prereq) ? "(" .  $prereq . ")" : "");
 						if($k++ != $classCount)
