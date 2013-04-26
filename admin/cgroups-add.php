@@ -238,7 +238,6 @@
 
 				$sth->execute();
 								
-				course_prologize();
 				coursegroup_prologize();
 
 						

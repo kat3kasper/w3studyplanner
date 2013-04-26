@@ -6,6 +6,7 @@
 		<?php require("../includes/config.php"); ?>
 		<?php require("../includes/functions.php"); ?>
 		<?php require("../includes/scripts.php"); ?>
+    <?php require("../includes/db2prolog.php"); ?>
 		
 		<script type="text/javascript">
 			//Validates form inputs
@@ -242,7 +243,6 @@
 					
 				$sth->execute();
 				
-				course_prologize();
 				coursegroup_prologize();
 
 ?>

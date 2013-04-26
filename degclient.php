@@ -383,7 +383,7 @@ class ECLiPSeQuery {
   "transcript" : [] 
 }';
 */
-if (!defined(DEGCLIENT_INCLUDED)) {
+if (!defined('DEGCLIENT_INCLUDED')) {
 
   $postdata = file_get_contents('php://input');
 

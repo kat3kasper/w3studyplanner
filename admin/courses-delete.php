@@ -5,6 +5,7 @@
 		<?php require("../includes/styles.php"); ?>
 		<?php require("../includes/config.php"); ?>
 		<?php require("../includes/functions.php"); ?>
+    <?php require("../includes/db2prolog.php"); ?>
 		
 		<script type="text/javascript">
 			//Popup window code
@@ -147,7 +148,6 @@
 			}
 
 			
-			course_prologize();
 			coursegroup_prologize();
 
 			

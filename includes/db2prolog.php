@@ -108,6 +108,8 @@ function getall_coursegroup_info()
 
 function coursegroup_prologize()
 {
+  // make sure courses are updated
+  course_prologize();
   $cginfo = getall_coursegroup_info();
 
   $filebuf = "% load course information\n".
@@ -121,7 +123,11 @@ function coursegroup_prologize()
   // add trailing newline
   $filebuf .= "\n\n";
 
+  // update prolog source
   file_put_contents('../lib/courseGroup.pl', $filebuf);
+
+  // kill eclipse process so that the new files are reloaded
+  exec("ps aux | grep eclipse | grep -v grep | kill `awk '{print $2}'`");
 }
 
 function course_prologize()

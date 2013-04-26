@@ -375,7 +375,7 @@
   "transcript" : [] 
 }';*/
 
-echo '<pre> input:\n\n' . $jsonString .'</pre>';
+//echo '<pre> input:\n\n' . $jsonString .'</pre>';
 
 $input = json_decode($jsonString, true);
 
