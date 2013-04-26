@@ -79,8 +79,12 @@
 				//Course in the group
 				while(isset($groups[$i][$j]))
 				{
+          /* change course to lowercase since for some reason course prefix case
+             doesnt match the database. */
+          $groups[$i][$j][0] = strtolower($groups[$i][$j][0]);
+
 					//If year and term is set
-					if(isset($groups[$i][$j][2]) && isset($groups[$i][$j][1]))
+					if(isset($groups[$i][$j][2]) && !empty($groups[$i][$j][2]) && isset($groups[$i][$j][1]))
 					{
 						//If year & term matches current iteration's
 						if($groups[$i][$j][2] == $yearPoint && $groups[$i][$j][1] == $termNames[$termPoint])
@@ -91,9 +95,12 @@
 						}
 					}
 					//If course is completed
-					else if(isset($groups[$i][$j][1]) && $groups[$i][$j][1] == "completed")
+					else if(isset($groups[$i][$j][1]) && $groups[$i][$j][1] == "completed") {
 						if(!in_array($groups[$i][$j][0], $transcript))
+            {
 							$transcript[] = $groups[$i][$j][0];
+            }
+          }
 					
 					$j++;
 				}
@@ -144,9 +151,10 @@
 		
 		
 		//CONNECT TO CONSTRAINT SOLVER
+    define('DEGCLIENT_INCLUDED', 1);
 		include_once('../degclient.php');
 
-		$jsonString = '{
+/*		$jsonString = '{
   "semesters" : [
     { "term" : "fall",
       "year" : 2009,
@@ -365,7 +373,9 @@
 
   ],
   "transcript" : [] 
-}';
+}';*/
+
+echo '<pre> input:\n\n' . $jsonString .'</pre>';
 
 $input = json_decode($jsonString, true);
 
@@ -842,8 +852,6 @@ $sol = $ecl->getSolutionJSON($trydeg);
 		}';*/
 		
 		$decodedString = $sol;//json_decode($result, true);
-
-		//echo '<pre>'.json_encode($sol).'</pre>';
 		
 		$semesters = $decodedString["semesters"];
 		$transcript = $decodedString["transcript"];
@@ -891,13 +899,15 @@ $sol = $ecl->getSolutionJSON($trydeg);
 						$sth->execute();
 						$rownum = $sth->rowCount();
 						
-						//Parse prereq
 						if($rownum > 0)
 						{
 							$courserow = $sth->fetch(PDO::FETCH_ASSOC);
 							$prereq = $courserow["prereq_course_id"];
-							$prereq = implode(",", unwrap($prereq)); 
+             //Parse prereq
+              $prereq = implode(",", unwrap($prereq)); 
 						}
+						
+						
 						
 						$classes .= $class . (isset($prereq) ? "(" .  $prereq . ")" : "");
 						if($k++ != $classCount)

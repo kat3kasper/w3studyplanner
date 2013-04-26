@@ -268,6 +268,9 @@
 				$sth->bindParam(":course_id", $course_id);	
 				$sth->bindParam(":ocgname", $ocgname);
 				$sth->execute();
+
+				course_prologize();
+				coursegroup_prologize();
 						
 	?>
 				<div class="alert alert-success alert-block">

@@ -241,6 +241,10 @@
 				$sth->bindParam(":wc", $wc);
 					
 				$sth->execute();
+				
+				course_prologize();
+				coursegroup_prologize();
+
 ?>
 			
 			<div class="alert alert-success alert-block">

@@ -145,6 +145,11 @@
 				$sth->bindParam(":cid", $cid);
 				$sth->execute();
 			}
+
+			
+			course_prologize();
+			coursegroup_prologize();
+
 			
 			echo "Course " . $cid . " has been deleted.";
 			?>
