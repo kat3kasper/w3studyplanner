@@ -182,9 +182,6 @@
 			$valid_prereq = 1;
 			$valid_coreq = 1;
 			
-			$formattedPrereq = "";
-			$formattedCoreq = "";
-			
 			//Parsing course prerequisites
 			if(!empty($prereq))
 			{
@@ -257,28 +254,32 @@
 							$sql = "UPDATE course_prerequisites SET parent_course_id = :ncid, prereq_course_id = :pcid WHERE parent_course_id = :cid";
 					}
 					//If course doesn't have prerequisites
-					else
+					else if(!$rownum && !empty($prereq))
 						$sql = "INSERT INTO course_prerequisites(parent_course_id, prereq_course_id) VALUES (:ncid, :pcid)";
-					
-					$sth = $dbh->prepare($sql);
 					
 					$ncid = $pre . $num;
 					if($rownum)
 					{
+						$sth = $dbh->prepare($sql);
+						
 						$sth->bindParam(":cid", $cid);
 						if(!empty($prereq))
 						{
 							$sth->bindParam(":pcid", $formattedPrereq);
 							$sth->bindParam(":ncid", $ncid);
 						}
+						
+						$sth->execute();
 					}
-					else
+					else if(!$rownum && !empty($prereq))
 					{
+						$sth = $dbh->prepare($sql);
+						
 						$sth->bindParam(":ncid", $ncid);
 						$sth->bindParam(":pcid", $formattedPrereq);
+						
+						$sth->execute();
 					}
-				
-					$sth->execute();
 				}
 				
 				//Insert into coreq
@@ -302,28 +303,32 @@
 							$sql = "UPDATE course_corequisites SET parent_course_id = :ncid, coreq_course_id = :ccid WHERE parent_course_id = :cid";
 					}
 					//If course doesn't have corequisites
-					else
+					else if(!$rownum && !empty($coreq))
 						$sql = "INSERT INTO course_corequisites(parent_course_id, coreq_course_id) VALUES (:ncid, :ccid)";
-					
-					$sth = $dbh->prepare($sql);
 					
 					$ncid = $pre . $num;
 					if($rownum)
 					{
+						$sth = $dbh->prepare($sql);
+						
 						$sth->bindParam(":cid", $cid);
 						if(!empty($coreq))
 						{
 							$sth->bindParam(":ccid", $formattedCoreq);
 							$sth->bindParam(":ncid", $ncid);
 						}
+						
+						$sth->execute();
 					}
-					else
+					else if(!$rownum && !empty($coreq))
 					{
+						$sth = $dbh->prepare($sql);
+						
 						$sth->bindParam(":ncid", $ncid);
 						$sth->bindParam(":ccid", $formattedCoreq);
+						
+						$sth->execute();
 					}
-				
-					$sth->execute();
 				}
 			
 				//Update course
