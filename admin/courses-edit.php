@@ -182,6 +182,9 @@
 			$valid_prereq = 1;
 			$valid_coreq = 1;
 			
+			$formattedPrereq = "";
+			$formattedCoreq = "";
+			
 			//Parsing course prerequisites
 			if(!empty($prereq))
 			{
@@ -310,14 +313,14 @@
 						$sth->bindParam(":cid", $cid);
 						if(!empty($coreq))
 						{
-							$sth->bindParam(":pcid", $formattedCoreq);
+							$sth->bindParam(":ccid", $formattedCoreq);
 							$sth->bindParam(":ncid", $ncid);
 						}
 					}
 					else
 					{
 						$sth->bindParam(":ncid", $ncid);
-						$sth->bindParam(":pcid", $formattedCoreq);
+						$sth->bindParam(":ccid", $formattedCoreq);
 					}
 				
 					$sth->execute();
