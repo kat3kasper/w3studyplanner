@@ -12,6 +12,6 @@ accept_loop(Socket) :-
         accept(Socket, _/_, ConSocket),
         % read Goal, evaluate it, and write the unified result
         % Goal is OR'd with true so that it never aborts if there is no solution
-        read_exdr(ConSocket, Goal), writeln(Goal), (Goal;true), write_exdr(ConSocket, Goal),
+        read_exdr(ConSocket, Goal), write(Goal), nl, Goal, write(Goal), nl,  write_exdr(ConSocket, Goal),
         close(ConSocket),
         accept_loop(Socket).

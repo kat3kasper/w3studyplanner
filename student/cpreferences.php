@@ -290,7 +290,7 @@
 		}
 	}
 	else
-		header("Location: index.php");
+		header("Location: http://stevens.edu/studyplanner/index.php");
 ?>
 			
 			<footer>

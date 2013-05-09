@@ -59,11 +59,11 @@ class Degree {
 
   // the following are named to match the prolog predicate they represent
   public static function degreeReq($name, $class) {
-  return new Predicate('degreeReq', array($name, $class, ($class == "none") ? null : array()));
+  return new Predicate('degreeReq', array(new Predicate($name), new Predicate ($class), ($class == "none") ? null : array()));
   }
 
   public static function semesterNew($term, $year, $minCredits, $maxCredits, $prefs) {
-    return new Predicate('semesterNew', array($term, $year, $minCredits, $maxCredits, null, $prefs));
+    return new Predicate('semesterNew', array(new Predicate($term), $year, $minCredits, $maxCredits, null, $prefs));
   }
 
   public static function okDegree($semesters, $degreeReqs, $classesTaken) {
@@ -116,28 +116,29 @@ class ECLiPSeQuery {
     $jsonlutions['semesters'] = array();
     foreach ($solutions[0] as $semester) {
       $s = array();
-      $s['term'] = $semester->getArg(0);
+      $s['term'] = $semester->getArg(0)->getName();
       $s['year'] = $semester->getArg(1);
       $s['min_credits'] = $semester->getArg(2);
       $s['max_credits'] = $semester->getArg(3);
       $s['selection'] = array();
       foreach ((array)$semester->getArg(4) as $course) {
         $c = array();
-        $c['coursegroup'] = $course->getArg(0);
-        $c['coursename'] = $course->getArg(1);
+        $c['coursegroup'] = $course->getArg(0)->getName();
+        $c['coursename'] = $course->getArg(1)->getName();
         $c['courselist'] = array();
         foreach ($course->getArg(2) as $value) {
-          array_push($c['courselist'], $value);
+          array_push($c['courselist'], $value->getName());
         }
         array_push($s['selection'], $c);
       }
       foreach ($semester->getArg(5) as $preference) {
         $p = array();
-        $p['coursegroup'] = $preference->getArg(0);
-        $p['coursename'] = $preference->getArg(1);
+        $p['coursegroup'] = $preference->getArg(0)->getName();
+        $p['coursename'] = $preference->getArg(1)->getName();
         $p['courselist'] = array();
         foreach ($preference->getArg(2) as $value) {
-          array_push($p['courselist'], $value);
+          var_dump($value);
+          array_push($p['courselist'], $value->getName());
         }
         array_push($s['selection'], $p);
       }
@@ -147,8 +148,8 @@ class ECLiPSeQuery {
     $jsonlutions['requirements'] = array();
     foreach ($solutions[1] as $requirement) {
       $r = array();
-      $r['coursegroup'] = $requirement->getArg(0);
-      $r['coursename'] = $requirement->getArg(1);
+      $r['coursegroup'] = $requirement->getArg(0)->getName();
+      $r['coursename'] = $requirement->getArg(1)->getName();
       
       array_push($jsonlutions['requirements'], $r);
     }
@@ -383,41 +384,42 @@ class ECLiPSeQuery {
   "transcript" : [] 
 }';
 */
-if (!defined('DEGCLIENT_INCLUDED')) {
+if (!defined(DEGCLIENT_INCLUDED)) {
 
   $postdata = file_get_contents('php://input');
 
-    if($postdata) {
-    $input = json_decode((empty($postdata)) ? $jsonString : $postdata, true);
+    if(!empty($postdata)) {
+      $input = json_decode($postdata, true);
 
-    $trydeg = new Degree();
+      if(json_last_error() == JSON_ERROR_NONE) {
+        $trydeg = new Degree();
 
+        // iterate through the list of semesters and add semester information to the degree
+        foreach ($input['semesters'] as $semester) {
+          $sem_prefs = array();
+          foreach ($semester['preferences'] as $pref) {
+            array_push($sem_prefs, Degree::degreeReq($pref['coursegroup'], $pref['coursename']));
+          }
 
-    // iterate through the list of semesters and add semester information to the degree
-    foreach ($input['semesters'] as $semester) {
-      $sem_prefs = array();
-      foreach ($semester['preferences'] as $pref) {
-        array_push($sem_prefs, Degree::degreeReq($pref['coursegroup'], $pref['coursename']));
+          $trydeg->addSemester($semester['term'], $semester['year'], $semester['min_credits'], $semester['max_credits'], $sem_prefs);
+        }
+
+        // add statements of degree requirements
+        foreach ($input['requirements'] as $req) {
+          $trydeg->requires($req['coursegroup'], $req['coursename']);
+        }
+
+        // add courses
+        foreach ($input['transcript'] as $course) {
+          $trydeg->courseTaken($course);
+        }
+
+        $ecl = new ECLiPSeQuery();
+
+        $sol = $ecl->getSolutionJSON($trydeg);
+
+        echo json_encode($sol);
       }
-
-      $trydeg->addSemester($semester['term'], $semester['year'], $semester['min_credits'], $semester['max_credits'], $sem_prefs);
-    }
-
-    // add statements of degree requirements
-    foreach ($input['requirements'] as $req) {
-      $trydeg->requires($req['coursegroup'], $req['coursename']);
-    }
-
-    // add courses
-    foreach ($input['transcript'] as $course) {
-      $trydeg->courseTaken($course);
-    }
-
-    $ecl = new ECLiPSeQuery();
-
-    $sol = $ecl->getSolutionJSON($trydeg);
-
-    echo json_encode($sol);
     }
 }
 ?>

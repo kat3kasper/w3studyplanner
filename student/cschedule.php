@@ -27,6 +27,8 @@
 		$step3Info = json_decode(htmlspecialchars_decode($_POST["step3Info"]), true);
 		$groupList = json_decode(htmlspecialchars_decode($_POST["groupList"])); //Name of course groups
 		$groupCourses = json_decode(htmlspecialchars_decode($_POST["groupCourses"])); //Grouped courses
+
+    //echo "<pre>". $_POST["groupList"] . "\n\n". $_POST["groupCourses"] ."</pre>";
 		
 		$termGraduate = $step2Info["termGraduate"];
 		$yearGraduate = $step2Info["yearGraduate"];
@@ -108,15 +110,17 @@
 			}
 			
 			//Build term array
-			$term = array(
-				"term" => $termNames[$termPoint],
-				"year" => $yearPoint,
-				"min_credits" => $minCredits[$yearPoint][$termNum[$termPoint]],
-				"max_credits" => $maxCredits[$yearPoint][$termNum[$termPoint]],
-				"preferences" => $preferences
-			);
-			
-			$semesters[] = $term;
+      if($maxCredits[$yearPoint][$termNum[$termPoint]] > 0) {
+  			$term = array(
+  				"term" => $termNames[$termPoint],
+  				"year" => $yearPoint,
+  				"min_credits" => $minCredits[$yearPoint][$termNum[$termPoint]],
+  				"max_credits" => $maxCredits[$yearPoint][$termNum[$termPoint]],
+  				"preferences" => $preferences
+  			);
+  			
+  			$semesters[] = $term;
+      }
 			
 			$termPoint--;
 			if($termPoint == 0)
@@ -130,13 +134,13 @@
 		$n = 0;
 		
 		//Build list of requirement
-		foreach($groupCourses as $aGroup)
+		foreach($groups as $aGroup)
 		{
 			foreach($aGroup as $aCourse)
 			{
 				array_push($requirements, array(
 					"coursegroup" => $groupList[$n],
-					"coursename" => $aCourse
+					"coursename" => empty($aCourse[0]) ? "none" : $aCourse[0]
 				));
 			}
 			$n++;
@@ -154,704 +158,54 @@
     define('DEGCLIENT_INCLUDED', 1);
 		include_once('../degclient.php');
 
-/*		$jsonString = '{
-  "semesters" : [
-    { "term" : "fall",
-      "year" : 2009,
-      "min_credits" : 12,
-      "max_credits" : 18,
-      "preferences" : [
-        {
-          "coursegroup" : "techElect",
-          "coursename" : "cs105"
-        },
-        {
-          "coursegroup" : "humGroupA",
-          "coursename"  : "hpl111"
-        }
-      ]
-    },
-    { "term" : "spring",
-      "year" : 2010,
-      "min_credits" : 12,
-      "max_credits" : 18,
-      "preferences" : [
-        {
-          "coursegroup" : "csReq",
-          "coursename" : "cs115"
-        }
-      ]
-    },
-    { "term" : "fall",
-      "year" : 2010,
-      "min_credits" : 12,
-      "max_credits" : 18,
-      "preferences" : [
-      ]
-    },
-    { "term" : "spring",
-      "year" : 2011,
-      "min_credits" : 12,
-      "max_credits" : 18,
-      "preferences" : [
-      ]
-    },
-    { "term" : "fall",
-      "year" : 2011,
-      "min_credits" : 12,
-      "max_credits" : 18,
-      "preferences" : [
-      ]
-    },
-    { "term" : "spring",
-      "year" : 2012,
-      "min_credits" : 12,
-      "max_credits" : 18,
-      "preferences" : [
-      ]
-    },
-    { "term" : "fall",
-      "year" : 2012,
-      "min_credits" : 12,
-      "max_credits" : 18,
-      "preferences" : [
-      ]
-    },
-    { "term" : "spring",
-      "year" : 2013,
-      "min_credits" : 12,
-      "max_credits" : 18,
-      "preferences" : [
-      ]
+
+    echo '<pre> input:\n\n' . $jsonString .'</pre>';
+
+    $input = json_decode($jsonString, true);
+
+    $trydeg = new Degree();
+
+    echo "<pre>PROLOG input:\n\nokDegree([";
+
+    // iterate through the list of semesters and add semester information to the degree
+    $i = 0;
+    foreach ($input['semesters'] as $semester) {
+      $sem_prefs = array();
+      foreach ($semester['preferences'] as $pref) {
+        array_push($sem_prefs, Degree::degreeReq($pref['coursegroup'], $pref['coursename']));
+      }
+
+      $trydeg->addSemester($semester['term'], $semester['year'], $semester['min_credits'], $semester['max_credits'], $sem_prefs);
+      echo "semesterNew('{$semester['term']}', {$semester['year']}, {$semester['min_credits']}, {$semester['max_credits']}, Sem{$i}, ". json_encode($sem_prefs) ."),\n";
+      $i++;
     }
-  ],
-  "requirements" : [
-  {
-        "coursegroup": "sci",
-        "coursename": "ch115"
-    },
-    {
-        "coursegroup": "sci",
-        "coursename": "ch281"
-    },
-    {
-        "coursegroup": "math",
-        "coursename": "ma115"
-    },
-    {
-        "coursegroup": "math",
-        "coursename": "ma116"
-    },
-    {
-        "coursegroup": "math",
-        "coursename": "ma222"
-    },
-    {
-        "coursegroup": "math",
-        "coursename": "ma331"
-    },
-    {
-        "coursegroup": "mngt",
-        "coursename": "mgt111"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs146"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs135"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs284"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs334"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs383"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs385"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs347"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs392"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs496"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs442"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs511"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs488"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs492"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs506"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs423"
-    },
-    {
-        "coursegroup": "csReq",
-        "coursename": "cs424"
-    },
-    {
-        "coursegroup": "techElect",
-        "coursename": "none"
-    },
-    {
-        "coursegroup": "softwareDevElective",
-        "coursename": "none"
-    },
-    {
-        "coursegroup": "mathScienceElective",
-        "coursename": "none"
-    },
-    {
-        "coursegroup": "mathScienceElective",
-        "coursename": "none"
-    },
-    {
-        "coursegroup": "freeElective",
-        "coursename": "none"
-    },
-    {
-        "coursegroup": "freeElective",
-        "coursename": "none"
-    },
-    {
-        "coursegroup": "humGroupA",
-        "coursename": "none"
-    },
-    {
-        "coursegroup": "humGroupB",
-        "coursename": "none"
-    },
-    {
-        "coursegroup": "humGroupB",
-        "coursename": "none"
-    },
-    {
-        "coursegroup": "humRequiredClass",
-        "coursename": "hss371"
-    },
-    {
-        "coursegroup": "hum300400",
-        "coursename": "none"
-    },
-    {
-        "coursegroup": "hum300400",
-        "coursename": "none"
-    },
-    {
-        "coursegroup": "hum300400",
-        "coursename": "none"
+    echo "],\n[";
+    $i = 0;
+    // add statements of degree requirements
+    foreach ($input['requirements'] as $req) {
+      $trydeg->requires($req['coursegroup'], $req['coursename']);
+      echo "degreeReq('{$req['coursegroup']}', ". (($req['coursename'] == "none") ? "none, C{$i}" : "{$req['coursename']}, []") ."),\n";
+      $i++;
     }
 
-  ],
-  "transcript" : [] 
-}';*/
+    echo "],\n[";
+    // add courses
+    foreach ($input['transcript'] as $course) {
+      $trydeg->courseTaken($course);
+      echo "'{$course}',\n";
+    }
 
-//echo '<pre> input:\n\n' . $jsonString .'</pre>';
-
-$input = json_decode($jsonString, true);
-
-$trydeg = new Degree();
+    echo "])\n</pre>";
 
 
-// iterate through the list of semesters and add semester information to the degree
-foreach ($input['semesters'] as $semester) {
-  $sem_prefs = array();
-  foreach ($semester['preferences'] as $pref) {
-    array_push($sem_prefs, Degree::degreeReq($pref['coursegroup'], $pref['coursename']));
-  }
+    $ecl = new ECLiPSeQuery();
 
-  $trydeg->addSemester($semester['term'], $semester['year'], $semester['min_credits'], $semester['max_credits'], $sem_prefs);
-}
+    $sol = $ecl->getSolutionJSON($trydeg);
 
-// add statements of degree requirements
-foreach ($input['requirements'] as $req) {
-  $trydeg->requires($req['coursegroup'], $req['coursename']);
-}
-
-// add courses
-foreach ($input['transcript'] as $course) {
-  $trydeg->courseTaken($course);
-}
-
-$ecl = new ECLiPSeQuery();
-
-$sol = $ecl->getSolutionJSON($trydeg);
-
-	
-		//Receive output from constraint solver
-		/*$jsonString = '{
-			"semesters": [
-				{
-					"term": "fall",
-					"year": 2009,
-					"min_credits": 12,
-					"max_credits": 18,
-					"selection": [
-						{
-							"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-							"coursename": "cs146",
-							"courselist": [
-							]
-						},
-						{
-							"coursegroup": "MATH REQUIRED COURSES",
-							"coursename": "ma115",
-							"courselist": [
-							]
-						},
-						{
-							"coursegroup": "BUSINESS TECHNOLOGY REQUIRED COURSES",
-							"coursename": "bt330",
-							"courselist": [
-							]
-						},
-						{
-							"coursegroup": "HUMANITIES GROUP A",
-							"coursename": "none",
-							"courselist": [
-								"hum103",
-								"hum104"
-							]
-						}
-					]
-				},
-				{
-					"term": "spring",
-					"year": 2010,
-					"min_credits": 12,
-					"max_credits": 18,
-					"selection": [
-						{
-							"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-							"coursename": "cs284",
-							"courselist": [
-							]
-						},
-						{
-							"coursegroup": "MATH REQUIRED COURSES",
-							"coursename": "ma116",
-							"courselist": [
-							]
-						},
-						{
-							"coursegroup": "MATH SCIENCE ELECTIVES",
-							"coursename": "ma221",
-							"courselist": [
-							]
-						},
-						{
-							"coursegroup": "HUMANITIES GROUP B",
-							"coursename": "none",
-							"courselist": [
-								"hum103",
-								"cs334"
-							]
-						}
-					]
-				}
-			],
-			"requirements": [
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs115"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs146"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs135"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs284"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs334"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs383"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs385"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs347"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs392"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs442"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs506"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs496"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs511"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs488"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs492"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs423"
-				},
-				{
-					"coursegroup": "COMPUTER SCIENCE REQUIRED COURSES",
-					"coursename": "cs424"
-				},
-				{
-					"coursegroup": "SCIENCE REQUIRED COURSES 3",
-					"coursename": "ch115"
-				},
-				{
-					"coursegroup": "SCIENCE REQUIRED COURSES 3",
-					"coursename": "ch281"
-				},
-				{
-					"coursegroup": "SCIENCE REQUIRED COURSES 3",
-					"coursename": "ch117"
-				},
-				{
-					"coursegroup": "MATH REQUIRED COURSES",
-					"coursename": "ma115"
-				},
-				{
-					"coursegroup": "MATH REQUIRED COURSES",
-					"coursename": "ma116"
-				},
-				{
-					"coursegroup": "MATH REQUIRED COURSES",
-					"coursename": "ma222"
-				},
-				{
-					"coursegroup": "MATH REQUIRED COURSES",
-					"coursename": "ma331"
-				},
-				{
-					"coursegroup": "BUSINESS TECHNOLOGY REQUIRED COURSES",
-					"coursename": "bt330"
-				},
-				{
-					"coursegroup": "TECHNICAL ELECTIVES",
-					"coursename": "ssw533"
-				},
-				{
-					"coursegroup": "TECHNICAL ELECTIVES",
-					"coursename": "ssw564"
-				},
-				{
-					"coursegroup": "TECHNICAL ELECTIVES",
-					"coursename": "ssw565"
-				},
-				{
-					"coursegroup": "TECHNICAL ELECTIVES",
-					"coursename": "ssw567"
-				},
-				{
-					"coursegroup": "TECHNICAL ELECTIVES",
-					"coursename": "ssw687"
-				},
-				{
-					"coursegroup": "TECHNICAL ELECTIVES",
-					"coursename": "ssw689"
-				},
-				{
-					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
-					"coursename": "cs516"
-				},
-				{
-					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
-					"coursename": "cs521"
-				},
-				{
-					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
-					"coursename": "cs522"
-				},
-				{
-					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
-					"coursename": "cs526"
-				},
-				{
-					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
-					"coursename": "cs537"
-				},
-				{
-					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
-					"coursename": "cs541"
-				},
-				{
-					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
-					"coursename": "cs546"
-				},
-				{
-					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
-					"coursename": "cs549"
-				},
-				{
-					"coursegroup": "SOFTWARE DEVELOPMENT ELECTIVES",
-					"coursename": "cs558"
-				},
-				{
-					"coursegroup": "MATH SCIENCE ELECTIVES",
-					"coursename": "ma221"
-				},
-				{
-					"coursegroup": "MATH SCIENCE ELECTIVES",
-					"coursename": "ma227"
-				},
-				{
-					"coursegroup": "MATH SCIENCE ELECTIVES",
-					"coursename": "ch243"
-				},
-				{
-					"coursegroup": "MATH SCIENCE ELECTIVES",
-					"coursename": "ch244"
-				},
-				{
-					"coursegroup": "FREE ELECTIVES",
-					"coursename": "ma221"
-				},
-				{
-					"coursegroup": "FREE ELECTIVES",
-					"coursename": "ma227"
-				},
-				{
-					"coursegroup": "FREE ELECTIVES",
-					"coursename": "bt100"
-				},
-				{
-					"coursegroup": "FREE ELECTIVES",
-					"coursename": "bt353"
-				},
-				{
-					"coursegroup": "FREE ELECTIVES",
-					"coursename": "bt360"
-				},
-				{
-					"coursegroup": "FREE ELECTIVES",
-					"coursename": " mis201"
-				},
-				{
-					"coursegroup": "FREE ELECTIVES",
-					"coursename": "ch243"
-				},
-				{
-					"coursegroup": "FREE ELECTIVES",
-					"coursename": "ch244"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP A",
-					"coursename": "hum103"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP A",
-					"coursename": "hum104"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP A",
-					"coursename": "hli113"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP A",
-					"coursename": "hli114"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP A",
-					"coursename": "hli117"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP A",
-					"coursename": "hli118"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP A",
-					"coursename": "hmu192"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP A",
-					"coursename": "hmu193"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP A",
-					"coursename": "hpl111"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP A",
-					"coursename": "hpl112"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hum103"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hum104"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hum107"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hum108"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hum288"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "har190"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "har191"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hhs123"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hhs124"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hhs125"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hhs126"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hhs129"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hhs130"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hhs135"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hmu101"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hmu102"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hss121"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hss122"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hss127"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hss128"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hss175"
-				},
-				{
-					"coursegroup": "HUMANITIES GROUP B",
-					"coursename": "hss176"
-				},
-				{
-					"coursegroup": "HUMANITIES UPPER LEVEL",
-					"coursename": "hss371"
-				},
-				{
-					"coursegroup": "HUMANITIES UPPER LEVEL",
-					"coursename": "hss377"
-				},
-				{
-					"coursegroup": "HUMANITIES UPPER LEVEL",
-					"coursename": "hss458"
-				},
-				{
-					"coursegroup": "HUMANITIES UPPER LEVEL",
-					"coursename": "hhs415"
-				},
-				{
-					"coursegroup": "HUMANITIES UPPER LEVEL",
-					"coursename": "hhs476"
-				},
-				{
-					"coursegroup": "HUMANITIES UPPER LEVEL",
-					"coursename": "bt243"
-				},
-				{
-					"coursegroup": "HUMANITIES UPPER LEVEL",
-					"coursename": "bt244"
-				}
-			],
-			"transcript": [
-				"hum103",
-				"hum104"
-			]
-		}';*/
 		
 		$decodedString = $sol;//json_decode($result, true);
+
+    echo "<pre>output:\n\n". json_encode($sol, JSON_NUMERIC_CHECK) ."</pre>";
 		
 		$semesters = $decodedString["semesters"];
 		$transcript = $decodedString["transcript"];
