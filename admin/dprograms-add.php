@@ -124,6 +124,35 @@
 				}
 			}
 			
+			//Make sure number of courses required from group doesn't exceed course group size
+			function checkNumberOfCourses()
+			{
+				var noc = document.getElementById("NumberOfCourses");
+				var cg = document.getElementById("cgroup");
+				
+				var xmlhttp;
+				
+				//Modern browsers
+				if(window.XMLHttpRequest)
+					xmlhttp = new XMLHttpRequest();
+				//IE5 & 6
+				else
+					xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+				
+				xmlhttp.onreadystatechange = function()
+				{
+					if(xmlhttp.readyState == 4 && xmlhttp.status == 200)
+					{
+						var res = xmlhttp.responseText;
+						if(parseInt(noc.value) > parseInt(res))
+							noc.value = res;
+					}
+				}
+				
+				xmlhttp.open("GET", "../includes/dprogram_update.php?cgroup=" + cg.value, true);
+				xmlhttp.send();
+			}
+			
 			$(document).ready(function()
 			{ $('button[name="sort"]').click(function()
 				{
@@ -356,7 +385,7 @@
 					<div id="formLeft" class="span2">
 						<div class="control-group">
 							<div class="controls">
-								<input type="text" id="NumberOfCourses" class="span5" name="NumberOfCourses[]"/>
+								<input type="text" id="NumberOfCourses" class="span5" name="NumberOfCourses[]" onChange="checkNumberOfCourses()"/>
 								  FROM 
 							</div>
 						</div>
@@ -380,7 +409,7 @@
 						<div id="formCenter" class="span4">
 							<div class="control-group">
 									<div class="controls">
-										<select id="cgroup" class="span11" name="cgroup[]">
+										<select id="cgroup" class="span11" name="cgroup[]" onChange="checkNumberOfCourses()">
 										<option value="">Select a Course Group...</option>
 										<?php
 											foreach ($cgroup_arr as $row) 
