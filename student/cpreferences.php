@@ -13,6 +13,7 @@
 				if(course == "")
 				{
 					document.getElementById("group" + groupNum + "Course" + currCourse + "Term").innerHTML = "<option value=\"\">---</option>";
+					toggleTerm(groupNum, currCourse);
 					return;
 				}
 				
@@ -38,15 +39,25 @@
 				xmlhttp.send();
 			}
 			
-			function toggleTerm(checked, groupNum, currCourse)
+			function toggleTerm(groupNum, currCourse)
 			{
-				var x = document.getElementById("group" + groupNum + "Course" + currCourse + "Term");
-				var y = document.getElementById("group" + groupNum + "Course" + currCourse + "Year");
+				var checkbox = document.getElementById("group" + groupNum + "Course" + currCourse + "Checkbox");
+				var term = document.getElementById("group" + groupNum + "Course" + currCourse + "Term");
+				var year = document.getElementById("group" + groupNum + "Course" + currCourse + "Year");
+				var course = document.getElementById("group" + groupNum + "Course" + currCourse);
 				
-				if(checked)
-					x.disabled = y.disabled = true;
+				if(checkbox.checked)
+				{
+					if(course.value == "")
+					{
+						alert("Choose a course before ticking the 'completed' box");
+						checkbox.checked = false;
+					}
+					else
+						term.disabled = year.disabled = true;
+				}
 				else
-					x.disabled = y.disabled = false;
+					term.disabled = year.disabled = false;
 			}
 		</script>
 	</head>
@@ -238,7 +249,7 @@
 							echo "</select></td>";
 						}
 						
-						echo "<td><input type=\"checkbox\" name=\"group[" . $groupNum . "][" . $currCourse . "][]\" id=\"completed\" value=\"completed\" onChange=\"toggleTerm(this.checked, " .$groupNum . ", " . $currCourse . ")\" /></td>";
+						echo "<td><input type=\"checkbox\" name=\"group[" . $groupNum . "][" . $currCourse . "][]\" id=\"group" . $groupNum . "Course" . $currCourse . "Checkbox\" value=\"completed\" onChange=\"toggleTerm(" .$groupNum . ", " . $currCourse . ")\" /></td>";
 						
 						//List term that the course is only available in
 						if($numCourses == count($courses))
