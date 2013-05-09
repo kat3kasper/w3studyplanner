@@ -71,10 +71,19 @@
 			"maxCredits" => $_POST["maxCredits"],
 			"minCredits" => $_POST["minCredits"]
 		)));
+		
+		$step1InfoArray = json_decode(htmlspecialchars_decode($step1Info), true);
+		$department = s_string($step1InfoArray["department"]);
 ?>
+			
 			<h4>Course Preferences: Science Requirements</h4>
 			
 			<form class="form-horizontal" method="post" action="cpreferences.php">
+				
+<?php
+		if($department == "computer")
+		{
+?>
 				<div class="control-group">
 					<label class="control-label">Choose the group that you've taken/wish to take</label>
 					<div class="controls">
@@ -87,6 +96,14 @@
 						</select>
 					</div>
 				</div>
+				
+<?php
+		}
+		else
+		{
+?>
+				<p>Science Requirements are applicable to Computer Science undergraduates only.</p>
+				<p>Please click next to continue:</p>
 				<div class="control-group">
 					<div class="controls">
 						<input type="hidden" name="step1Info" value="<?php echo $step1Info; ?>">
@@ -98,6 +115,7 @@
 			</form>
 			
 <?php
+		}
 	}
 	else if(isset($_POST["step5"]))
 	{
@@ -113,7 +131,10 @@
 		$yearEntered = s_int($step1InfoArray["yearEntered"]);
 		$degreeName = s_string($step1InfoArray["degreeName"]);
 		$yearGraduate = s_int($step2InfoArray["yearGraduate"]);
-		$scReqNum = s_int($_POST["scReq"]);
+		if(isset($_POST["scReq"]))
+			$scReqNum = s_int($_POST["scReq"]);
+		else
+			$scReqNum = 0;
 ?>
 			
 			<h4>Course Preferences</h4>
