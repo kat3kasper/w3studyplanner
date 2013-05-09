@@ -329,7 +329,7 @@
 				
 					<div id="formCenter" class="span3">
 							<div class="control-group">
-								<label class="control-label" for="Year">Year</label>
+								<label class="control-label" for="Year">Year*</label>
 								<div class="controls">
 								<input type="text" name="year" id="Year" class="span3" value="<?php if(isset($year)) echo $year; ?>" />
 							</div>
@@ -340,7 +340,7 @@
 				<div class="row-fluid">
 					<div id="formLeft" class="span3">
 						<div class="control-group">
-							<label class="control-label" for="Department">Department</label>
+							<label class="control-label" for="Department">Department*</label>
 							<div class="controls">
 								<select name="department" id="Department" class="span12">
 									<option value="" <?php if(isset($dept) && $dept == "") echo "selected"; ?>>Select a department..</option>
