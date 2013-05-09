@@ -10,8 +10,6 @@
 					<div class="nav-collapse collapse">
 						<ul class="nav">
 						  <li class="active"><a href="/studyplanner">Home</a></li>
-						  <li><a href="#">About</a></li>
-						  <li><a href="#">Contact</a></li>
 						  <li class="divider-vertical"></li>
 						  <li class="dropdown">
 						  
