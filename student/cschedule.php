@@ -159,13 +159,13 @@
 		include_once('../degclient.php');
 
 
-    echo '<pre> input:\n\n' . $jsonString .'</pre>';
+    //echo '<pre> input:\n\n' . $jsonString .'</pre>';
 
     $input = json_decode($jsonString, true);
 
     $trydeg = new Degree();
 
-    echo "<pre>PROLOG input:\n\nokDegree([";
+    //echo "<pre>PROLOG input:\n\nokDegree([";
 
     // iterate through the list of semesters and add semester information to the degree
     $i = 0;
@@ -176,36 +176,42 @@
       }
 
       $trydeg->addSemester($semester['term'], $semester['year'], $semester['min_credits'], $semester['max_credits'], $sem_prefs);
-      echo "semesterNew('{$semester['term']}', {$semester['year']}, {$semester['min_credits']}, {$semester['max_credits']}, Sem{$i}, ". json_encode($sem_prefs) ."),\n";
+      //echo "semesterNew('{$semester['term']}', {$semester['year']}, {$semester['min_credits']}, {$semester['max_credits']}, Sem{$i}, ". json_encode($sem_prefs) ."),\n";
       $i++;
     }
-    echo "],\n[";
+    //echo "],\n[";
     $i = 0;
     // add statements of degree requirements
     foreach ($input['requirements'] as $req) {
       $trydeg->requires($req['coursegroup'], $req['coursename']);
-      echo "degreeReq('{$req['coursegroup']}', ". (($req['coursename'] == "none") ? "none, C{$i}" : "{$req['coursename']}, []") ."),\n";
+      //echo "degreeReq('{$req['coursegroup']}', ". (($req['coursename'] == "none") ? "none, C{$i}" : "{$req['coursename']}, []") ."),\n";
       $i++;
     }
 
-    echo "],\n[";
+    //echo "],\n[";
     // add courses
     foreach ($input['transcript'] as $course) {
       $trydeg->courseTaken($course);
       echo "'{$course}',\n";
     }
 
-    echo "])\n</pre>";
+    //echo "])\n</pre>";
 
-
+		$sol = array("semesters" => array(), "transcript" => array());
+		try {
     $ecl = new ECLiPSeQuery();
 
     $sol = $ecl->getSolutionJSON($trydeg);
-
+  	}
+  	catch(Exception $e)
+  	{
+  		//echo "<pre>something bad happened</pre>";
+  	}
 		
 		$decodedString = $sol;//json_decode($result, true);
+		//var_dump($sol);
 
-    echo "<pre>output:\n\n". json_encode($sol, JSON_NUMERIC_CHECK) ."</pre>";
+    //echo "<pre>output:\n\n". json_encode($sol, JSON_NUMERIC_CHECK) ."</pre>";
 		
 		$semesters = $decodedString["semesters"];
 		$transcript = $decodedString["transcript"];
@@ -226,7 +232,7 @@
 		$sql = "SELECT * FROM course_prerequisites WHERE parent_course_id = :cid";
 		$sth = $dbh->prepare($sql);
 
-		var_dump($semesters);
+		//var_dump($semesters);
 		
 		if(!empty($semesters))
 		{
@@ -297,6 +303,9 @@
 							<li> Graduation semester </li>
 						</ul></div>';
 		}
+	}
+	else {
+					echo '<div class="alert alert-error">post not set</div>';
 	}
 ?>
 			

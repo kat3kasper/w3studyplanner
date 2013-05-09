@@ -1,7 +1,5 @@
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
+error_reporting(0);
 
 require_once "lib/eclipse_exdr_parser.php";
 require_once "lib/eclipse_socket.php";
@@ -73,8 +71,8 @@ class Degree {
 
 define("PROLOG_HOST", "localhost");
 define("PROLOG_PORT", 9000);
-define("PROLOG_BIN", "eclipseclp/bin/i386_linux/eclipse");
-define("PROLOG_SERVER", "lib/server.pl");
+define("PROLOG_BIN", $_SERVER['DOCUMENT_ROOT'] ."studyplanner/eclipseclp/bin/i386_linux/eclipse");
+define("PROLOG_SERVER", $_SERVER['DOCUMENT_ROOT'] ."studyplanner/lib/server.pl");
 
 class ECLiPSeQuery {
   private $logicSocket;
@@ -94,25 +92,19 @@ class ECLiPSeQuery {
     if(empty($instances))
     {
       // start eclipse server
-      //echo "starting server...\n";
+      //echo "<pre>starting server...</pre>\n";
       exec("nice -19 " . PROLOG_BIN ." -b ". PROLOG_SERVER ." -e listen > /dev/null 2>/dev/null &");
-      sleep(1);
+      sleep(2);
     }
     }
   }
 
   public function submitGoal(Degree $d) {
-    try {
     $goal = $d->buildGoal();
     $goal_result = $this->logicSocket->rpcGoal($goal->toEXDRTerm());
     $result_pred = $goal_result->getTerm()->getObject();
     $solutions = $result_pred->getArgs();
     return $solutions;
-    }
-    catch(Exception $e)
-    {
-      return [[],[],[]];
-    }
   }
 
   public function getSolutionJSON(Degree $d) {
@@ -420,9 +412,17 @@ if (!defined(DEGCLIENT_INCLUDED)) {
           $trydeg->courseTaken($course);
         }
 
+        $sol = array("false");
+
+        try {
         $ecl = new ECLiPSeQuery();
 
         $sol = $ecl->getSolutionJSON($trydeg);
+        }
+        catch (Exception $e)
+        {
+
+        }
 
         echo json_encode($sol);
       }
