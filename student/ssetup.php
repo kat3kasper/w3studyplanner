@@ -32,17 +32,31 @@
 				//Form control b/c of brackets in child names
 				var myForm = document.getElementById("semesterCredits");
 				
+				//Check if at least one semester has credit specified
+				var nonzero = false;
+				
 				for(; yearCurrent <= yearGraduate; yearCurrent++)
 				{
 					var max = myForm["maxCredits[" + yearCurrent + "][]"];
 					var min = myForm["minCredits[" + yearCurrent + "][]"];
 					
 					for(x = 0; x < max.length; x++)
+					{
 						if(parseInt(max[x].value) < parseInt(min[x].value))
 						{
 							alert("Maximum credit values should be equal to or larger than minimum values");
 							return false;
 						}
+						
+						if(parseInt(max[x].value) > 0)
+							nonzero = true;
+					}
+				}
+				
+				if(nonzero == false)
+				{
+					alert("Please fill in at least one semester's credit hour");
+					return false;
 				}
 			}
 		</script>
