@@ -104,6 +104,11 @@
 ?>
 				<p>Science Requirements are applicable to Computer Science undergraduates only.</p>
 				<p>Please click next to continue:</p>
+				
+<?php
+		}
+?>
+				
 				<div class="control-group">
 					<div class="controls">
 						<input type="hidden" name="step1Info" value="<?php echo $step1Info; ?>">
@@ -115,7 +120,6 @@
 			</form>
 			
 <?php
-		}
 	}
 	else if(isset($_POST["step5"]))
 	{
