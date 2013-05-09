@@ -34,7 +34,7 @@ class Degree {
   }
 */
   public function requires($requirement_name, $course_name) {
-    array_push($this->requirements, Degree::degreeReq($requirement_name, $course_name));
+    array_push($this->requirements, Degree::degreeRequirement($requirement_name, $course_name));
   }
 
 /*  // add a semester
@@ -43,7 +43,7 @@ class Degree {
   }*/
 
   public function addSemester($term, $year, $minCredits, $maxCredits, array $prefs) {
-    array_push($this->semesters, Degree::semesterNew($term, $year, $minCredits, $maxCredits, $prefs));
+    array_push($this->semesters, Degree::semester($term, $year, $minCredits, $maxCredits, $prefs));
   }
 
   // add course to transcript
@@ -56,16 +56,16 @@ class Degree {
   }
 
   // the following are named to match the prolog predicate they represent
-  public static function degreeReq($name, $class) {
-  return new Predicate('degreeReq', array(new Predicate($name), new Predicate ($class), ($class == "none") ? null : array()));
+  public static function degreeRequirement($name, $class) {
+  return new Predicate('degreeRequirement', array(new Predicate($name), new Predicate ($class), ($class == "none") ? null : array()));
   }
 
-  public static function semesterNew($term, $year, $minCredits, $maxCredits, $prefs) {
-    return new Predicate('semesterNew', array(new Predicate($term), $year, $minCredits, $maxCredits, null, $prefs));
+  public static function semester($term, $year, $minCredits, $maxCredits, $prefs) {
+    return new Predicate('semester', array(new Predicate($term), $year, $minCredits, $maxCredits, null, $prefs));
   }
 
-  public static function okDegree($semesters, $degreeReqs, $classesTaken) {
-    return new Predicate('okDegree', array($semesters, $degreeReqs, $classesTaken));
+  public static function okDegree($semesters, $degreeRequirements, $classesTaken) {
+    return new Predicate('okDegree', array($semesters, $degreeRequirements, $classesTaken));
   }
 }
 
@@ -396,7 +396,7 @@ if (!defined(DEGCLIENT_INCLUDED)) {
         foreach ($input['semesters'] as $semester) {
           $sem_prefs = array();
           foreach ($semester['preferences'] as $pref) {
-            array_push($sem_prefs, Degree::degreeReq($pref['coursegroup'], $pref['coursename']));
+            array_push($sem_prefs, Degree::degreeRequirement($pref['coursegroup'], $pref['coursename']));
           }
 
           $trydeg->addSemester($semester['term'], $semester['year'], $semester['min_credits'], $semester['max_credits'], $sem_prefs);

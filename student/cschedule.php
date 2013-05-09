@@ -138,10 +138,12 @@
 		{
 			foreach($aGroup as $aCourse)
 			{
-				array_push($requirements, array(
-					"coursegroup" => $groupList[$n],
-					"coursename" => empty($aCourse[0]) ? "none" : $aCourse[0]
-				));
+				if(!in_array($aCourse[0], $transcript)) {
+					array_push($requirements, array(
+						"coursegroup" => $groupList[$n],
+						"coursename" => empty($aCourse[0]) ? "none" : $aCourse[0]
+					));
+				}
 			}
 			$n++;
 		}
@@ -159,13 +161,13 @@
 		include_once('../degclient.php');
 
 
-    //echo '<pre> input:\n\n' . $jsonString .'</pre>';
+    echo '<pre> input:\n\n' . $jsonString .'</pre>';
 
     $input = json_decode($jsonString, true);
 
     $trydeg = new Degree();
 
-    //echo "<pre>PROLOG input:\n\nokDegree([";
+    echo "<pre>PROLOG input:\n\nokDegree([";
 
     // iterate through the list of semesters and add semester information to the degree
     $i = 0;
@@ -176,26 +178,26 @@
       }
 
       $trydeg->addSemester($semester['term'], $semester['year'], $semester['min_credits'], $semester['max_credits'], $sem_prefs);
-      //echo "semesterNew('{$semester['term']}', {$semester['year']}, {$semester['min_credits']}, {$semester['max_credits']}, Sem{$i}, ". json_encode($sem_prefs) ."),\n";
+      echo "semesterNew('{$semester['term']}', {$semester['year']}, {$semester['min_credits']}, {$semester['max_credits']}, Sem{$i}, ". json_encode($sem_prefs) ."),\n";
       $i++;
     }
-    //echo "],\n[";
+    echo "],\n[";
     $i = 0;
     // add statements of degree requirements
     foreach ($input['requirements'] as $req) {
       $trydeg->requires($req['coursegroup'], $req['coursename']);
-      //echo "degreeReq('{$req['coursegroup']}', ". (($req['coursename'] == "none") ? "none, C{$i}" : "{$req['coursename']}, []") ."),\n";
+      echo "degreeReq('{$req['coursegroup']}', ". (($req['coursename'] == "none") ? "none, C{$i}" : "{$req['coursename']}, []") ."),\n";
       $i++;
     }
 
-    //echo "],\n[";
+    echo "],\n[";
     // add courses
     foreach ($input['transcript'] as $course) {
       $trydeg->courseTaken($course);
       echo "'{$course}',\n";
     }
 
-    //echo "])\n</pre>";
+    echo "])\n</pre>";
 
 		$sol = array("semesters" => array(), "transcript" => array());
 		try {
@@ -211,7 +213,7 @@
 		$decodedString = $sol;//json_decode($result, true);
 		//var_dump($sol);
 
-    //echo "<pre>output:\n\n". json_encode($sol, JSON_NUMERIC_CHECK) ."</pre>";
+    echo "<pre>output:\n\n". json_encode($sol, JSON_NUMERIC_CHECK) ."</pre>";
 		
 		$semesters = $decodedString["semesters"];
 		$transcript = $decodedString["transcript"];
@@ -304,9 +306,7 @@
 						</ul></div>';
 		}
 	}
-	else {
-					echo '<div class="alert alert-error">post not set</div>';
-	}
+
 ?>
 			
 			<footer>
