@@ -12,8 +12,8 @@
 			//Validates form inputs
 			function validateForm()
 			{
-				var inputs = ["DegreeName"];//required fields
-				var y = document.getElementById('Year');
+				var inputs = ["DegreeName", "Year", "Department"];//required fields
+				//var y = document.getElementById('Year');
 				var z = document.getElementById("Requirements");
 				
 				for(var i = 0; i < inputs.length; i++)
@@ -26,18 +26,27 @@
 						alert("Please fill in all required fields");
 						return false;
 					}
-					else if(/[^0-9]+/i.test(y.value))
+					else if(inputs[i] == "Year")
+					{
+					if(isNaN(x))
+						{
+							alert("Please fill in the Year with numeric inputs only");
+							return false;
+						}
+					}
+				}
+
+
+					/*if(/[^0-9]+/i.test(y.value))
 					{
 						alert("Please fill in the Year with numeric inputs only");
 						return false;
-					}
-					else
-					{
-						for(var i = 0; i < z.length; i++) 
-							z.options[i].selected = true;
-					}
-				}
+					}*/
+				
+				for(var i = 0; i < z.length; i++) 
+					z.options[i].selected = true;
 			}
+				
 			
 			//Clear text area
 			function clearTextArea()
@@ -289,7 +298,7 @@
 					
 					<div id="formCenter" class="span3">
 							<div class="control-group">
-								<label class="control-label" for="Year">Year</label>
+								<label class="control-label" for="Year">Year*</label>
 								<div class="controls">
 									<input type="text" name="year" id="Year" class="span3"/>
 								</div>
@@ -301,7 +310,7 @@
 				<div class="row-fluid">
 					<div id="formLeft" class="span3">
 						<div class="control-group">
-								<label class="control-label" for="Department">Department</label>
+								<label class="control-label" for="Department">Department*</label>
 								<div class="controls">
 									<select name="department" id="Department" class="span12">
 										<option value="" <?php if(isset($dept) && $dept == "") echo "selected"; ?>>Select a department..</option>
