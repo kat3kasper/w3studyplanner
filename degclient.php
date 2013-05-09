@@ -102,11 +102,17 @@ class ECLiPSeQuery {
   }
 
   public function submitGoal(Degree $d) {
+    try {
     $goal = $d->buildGoal();
     $goal_result = $this->logicSocket->rpcGoal($goal->toEXDRTerm());
     $result_pred = $goal_result->getTerm()->getObject();
     $solutions = $result_pred->getArgs();
     return $solutions;
+    }
+    catch(Exception $e)
+    {
+      return [[],[],[]];
+    }
   }
 
   public function getSolutionJSON(Degree $d) {

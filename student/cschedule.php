@@ -225,63 +225,77 @@
 		//Get prerequisites details
 		$sql = "SELECT * FROM course_prerequisites WHERE parent_course_id = :cid";
 		$sth = $dbh->prepare($sql);
+
+		var_dump($semesters);
 		
-		foreach($semesters as $sem)
+		if(!empty($semesters))
 		{
-			echo "
-			<table class=\"table table-striped table-hover table-bordered\">
-				<thead>
-					<tr>
-						<th colspan=\"2\">" . ucfirst($sem["term"]) . " " . $sem["year"] . " [" . $sem["min_credits"] . "-" . $sem["max_credits"] . " Credit hours]</th>
-					</tr>
-				</thead>
-				<tbody>";
-			
-			foreach($sem["selection"] as $course)
+			foreach($semesters as $sem)
 			{
-				$classes = "";
-				if($course["coursename"] == "none")
+				echo "
+				<table class=\"table table-striped table-hover table-bordered\">
+					<thead>
+						<tr>
+							<th colspan=\"2\">" . ucfirst($sem["term"]) . " " . $sem["year"] . " [" . $sem["min_credits"] . "-" . $sem["max_credits"] . " Credit hours]</th>
+						</tr>
+					</thead>
+					<tbody>";
+				
+				foreach($sem["selection"] as $course)
 				{
-					$courselist = $course["courselist"];
-					$classCount = count($courselist);
-					$k = 1;
-					
-					foreach($courselist as $class)
+					$classes = "";
+					if($course["coursename"] == "none")
 					{
-						//Get each prereq
-						$sth->bindParam(":cid", $class);
-						$sth->execute();
-						$rownum = $sth->rowCount();
+						$courselist = $course["courselist"];
+						$classCount = count($courselist);
+						$k = 1;
 						
-						if($rownum > 0)
+						foreach($courselist as $class)
 						{
-							$courserow = $sth->fetch(PDO::FETCH_ASSOC);
-							$prereq = $courserow["prereq_course_id"];
-             //Parse prereq
-              $prereq = implode(",", unwrap($prereq)); 
+							//Get each prereq
+							$sth->bindParam(":cid", $class);
+							$sth->execute();
+							$rownum = $sth->rowCount();
+							
+							if($rownum > 0)
+							{
+								$courserow = $sth->fetch(PDO::FETCH_ASSOC);
+								$prereq = $courserow["prereq_course_id"];
+	             //Parse prereq
+	              $prereq = implode(",", unwrap($prereq)); 
+							}
+							
+							
+							
+							$classes .= $class . (isset($prereq) ? "(" .  $prereq . ")" : "");
+							if($k++ != $classCount)
+								$classes .= ", ";
 						}
-						
-						
-						
-						$classes .= $class . (isset($prereq) ? "(" .  $prereq . ")" : "");
-						if($k++ != $classCount)
-							$classes .= ", ";
 					}
+					else
+						$classes = $course["coursename"];
+					
+					echo "
+						<tr>
+							<td class=\"span8\">" . $course["coursegroup"] . "</td>
+							<td>" . strtoupper($classes) . "</td>
+						</tr>";
 				}
-				else
-					$classes = $course["coursename"];
 				
 				echo "
-					<tr>
-						<td class=\"span8\">" . $course["coursegroup"] . "</td>
-						<td>" . strtoupper($classes) . "</td>
-					</tr>";
+					</tbody>
+				</table>";
+				
 			}
-			
-			echo "
-				</tbody>
-			</table>";
-			
+		}
+		else {
+			echo '<div class="alert alert-error"><h3>Sorry, a schedule cannot be created.</h3><br>
+						Try again with different:<br>
+						<ul>
+							<li> Course preferences</li>
+							<li> Number of credits per semesters </li>
+							<li> Graduation semester </li>
+						</ul></div>';
 		}
 	}
 ?>

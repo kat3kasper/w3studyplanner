@@ -127,7 +127,7 @@ function coursegroup_prologize()
   file_put_contents('../lib/courseGroup.pl', $filebuf);
 
   // kill eclipse process so that the new files are reloaded
-  exec("ps aux | grep eclipse | grep -v grep | kill `awk '{print $2}'` &> /dev/null");
+  //exec("ps aux | grep eclipse | grep -v grep | kill `awk '{print $2}'` &> /dev/null");
 }
 
 function course_prologize()

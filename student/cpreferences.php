@@ -281,6 +281,7 @@
 						<input type="hidden" name="step3Info" value="<?php echo $step3Info; ?>">
 						<input type="hidden" name="groupList" value="<?php echo $groupList; ?>">
 						<input type="hidden" name="groupCourses" value="<?php echo $groupCourses; ?>">
+						<div class="alert alert-info"><b>Note:</b> Making the right schedule will take about a minute. </div>
 						<button type="submit" name="step6" class="btn btn-primary">Next</button>
 					</div>
 				</div>

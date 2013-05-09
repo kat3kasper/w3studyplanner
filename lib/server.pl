@@ -1,4 +1,5 @@
 % include base constraints and class relations 
+:- lib(timeout).
 :- ensure_loaded(degreeChecker_redesign).
 
 %%%%%%% server functionality %%%%%%%
@@ -10,8 +11,7 @@ listen :-
 % accept loop
 accept_loop(Socket) :-
         accept(Socket, _/_, ConSocket),
-        % read Goal, evaluate it, and write the unified result
-        % Goal is OR'd with true so that it never aborts if there is no solution
-        read_exdr(ConSocket, Goal), write(Goal), nl, Goal, write(Goal), nl,  write_exdr(ConSocket, Goal),
+        % read Goal, evaluate it with a timeout, and write the unified result
+        ensure_loaded('/opt/apache/htdocs/studyplanner/lib/degreeChecker_redesign.pl'),read_exdr(ConSocket, Goal), write(Goal), nl, timeout(Goal, 60, Goal = Goal), write_exdr(ConSocket, Goal), Goal = okDegree([],[],[]),
         close(ConSocket),
         accept_loop(Socket).
