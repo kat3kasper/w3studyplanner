@@ -48,7 +48,7 @@ class Degree {
 
   // add course to transcript
   public function courseTaken($course_name) {
-    array_push($this->transcript, $course_name);
+    array_push($this->transcript, new Predicate($course_name));
   }
 
   public function buildGoal() {
@@ -93,7 +93,7 @@ class ECLiPSeQuery {
     {
       // start eclipse server
       //echo "<pre>starting server...</pre>\n";
-      exec("nice -19 " . PROLOG_BIN ." -b ". PROLOG_SERVER ." -e listen > /dev/null 2>/dev/null &");
+      exec("nice -19 " . PROLOG_BIN ." -b ". PROLOG_SERVER ." -e listen > /dev/null  &");
       sleep(2);
     }
     }
@@ -135,7 +135,6 @@ class ECLiPSeQuery {
         $p['coursename'] = $preference->getArg(1)->getName();
         $p['courselist'] = array();
         foreach ($preference->getArg(2) as $value) {
-          var_dump($value);
           array_push($p['courselist'], $value->getName());
         }
         array_push($s['selection'], $p);
