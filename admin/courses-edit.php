@@ -52,19 +52,22 @@
 					
 					//Check if prefix has numbers
 					else if(inputs[i] == "coursePrefix")
+					{
 						if(x.match(/\d+/g) != null)
 						{
 							alert("Prefix cannot contain numbers");
 							return false;
 						}
-					
+					}
 					//Check numeric inputs
 					else if(inputs[i] == "courseNumber" || inputs[i] == "credits")
-						if(isNaN(x))
+					{
+					if(isNaN(x))
 						{
 							alert("Please fill in Course Number and Credits with numeric inputs only");
 							return false;
 						}
+					}
 				}
 				
 				var ocChecked = false;
