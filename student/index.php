@@ -75,7 +75,7 @@
 					<div class="control-group">
 						<label class="control-label" for="YearEntered">Please select the year you entered school</label>
 						<div class="controls">
-							<select name="yearEntered" id="yearEntered">
+							<select name="yearEntered" id="yearEntered" onChange="updateDegree()">
 								<option value=""> Year Entered </option>
 								<?php					
 									for($year = date("Y"); $year > 2005; $year--)

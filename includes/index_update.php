@@ -22,7 +22,9 @@
 	$sth->bindParam(":dept", $dept);
 	$sth->execute();
 	$rownum = $sth->rowCount();
-			
+	
+	echo "<option value=\"\">Select your degree program</option>";
+	
 	if($rownum)
 	{
 		$rowarray = $sth->fetchAll(PDO::FETCH_ASSOC);
