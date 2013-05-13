@@ -59,6 +59,42 @@
 				else
 					term.disabled = year.disabled = false;
 			}
+			
+			//Ensure both term and year is chosen when one of them is
+			function validateTermYear()
+			{
+				var term;
+				var year;
+				
+				var g;
+				var c;
+				
+				for(g = 0; ; g++)
+				{
+					term = document.getElementById("group" + g + "Course" + 0 + "Term");
+					if(term == null)
+						break;
+					
+					for(c = 0; ; c++)
+					{
+						term = document.getElementById("group" + g + "Course" + c + "Term");
+						year = document.getElementById("group" + g + "Course" + c + "Year");
+						
+						console.log(term);
+						
+						if(term != null || year != null)
+						{
+							if(term.value != "" && year.value == "" || year.value != "" && term.value == "")
+							{
+								alert("Please pick both term and year");
+								return false;
+							}
+						}
+						else
+							break;
+					}
+				}
+			}
 		</script>
 	</head>
 	<body>
@@ -154,7 +190,7 @@
 			
 			<h4>Course Preferences</h4>
 			
-			<form class="form-horizontal" method="post" action="cschedule.php">
+			<form class="form-horizontal" method="post" action="cschedule.php" onSubmit="return validateTermYear()">
 				<table class="table table-hover">
 					<thead>
 						<tr>
